@@ -33,7 +33,30 @@ def assess_risks(
             f"på 2 dagar. Undvik att fatta beslut baserat på kortsiktiga rörelser."
         )
 
-    # Loss aversion reminder (always show when trade is recommended)
+    # VIX-based warning
+    if tech.vix_value and tech.vix_value > 25 and action != "NONE":
+        bias_warnings.append(
+            f"VIX-varning: VIX på {tech.vix_value:.1f} indikerar förhöjd marknadsrädsla. "
+            f"Överväg mindre positionsstorlek och tightare stop-loss."
+        )
+
+    # Low volume warning
+    if tech.volume_ratio < 0.5 and action != "NONE":
+        bias_warnings.append(
+            f"Låg volym ({tech.volume_ratio:.1f}x genomsnitt): "
+            f"Svag övertygelse bakom rörelsen — ökad risk för falskt utbrott."
+        )
+
+    # Multi-timeframe conflict
+    if (tech.price_vs_sma != tech.price_vs_weekly_sma
+            and tech.price_vs_weekly_sma != "unavailable"
+            and action != "NONE"):
+        bias_warnings.append(
+            "Tidsramskonflikt: Daglig och veckovis trend pekar åt olika håll. "
+            "Kortare hållperiod rekommenderas."
+        )
+
+    # Loss aversion reminder
     if action != "NONE":
         bias_warnings.append(
             "Förlustaversion: Håll dig till den förutbestämda exit-planen. "

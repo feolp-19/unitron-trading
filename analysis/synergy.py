@@ -1,3 +1,6 @@
+"""Synergy Engine — fallback decision logic when AI analysis fails.
+Uses trend-following with RSI guard as a simple rule-based engine."""
+
 from dataclasses import dataclass, field
 
 from analysis.technical import TechnicalSignal
@@ -16,29 +19,29 @@ class TradeDecision:
     uncertainty_factors: list[str]
 
 
-def _compute_confidence(tech: TechnicalSignal, sent: SentimentSignal) -> float:
-    """Composite confidence from RSI extremity, SMA distance, and sentiment strength."""
-    # RSI extremity: how far past the 30/70 threshold (0-1 scale)
-    if tech.rsi_value < 30:
-        rsi_score = (30 - tech.rsi_value) / 30
-    elif tech.rsi_value > 70:
-        rsi_score = (tech.rsi_value - 70) / 30
-    else:
-        rsi_score = 0.0
-    rsi_score = min(rsi_score, 1.0)
+def _derive_tech_direction(tech: TechnicalSignal) -> str:
+    """Derive BULL/BEAR/NEUTRAL from raw technical data."""
+    if tech.price_vs_sma == "above" and tech.rsi_value < 65:
+        return "BULL"
+    if tech.price_vs_sma == "below" and tech.rsi_value > 35:
+        return "BEAR"
+    return "NEUTRAL"
 
-    # SMA distance: how far price is from SMA (capped at 10% = 1.0)
-    sma_distance = abs(tech.current_price - tech.sma_value) / tech.sma_value
+
+def _compute_confidence(tech: TechnicalSignal, sent: SentimentSignal) -> float:
+    sma_distance = abs(tech.current_price - tech.sma_200) / tech.sma_200
     sma_score = min(sma_distance / 0.10, 1.0)
 
-    # Sentiment conviction
     sent_score = sent.confidence
 
-    # Data coverage penalty
     coverage_ratio = sent.relevant_count / max(sent.total_count, 1)
     coverage_penalty = max(coverage_ratio, 0.3)
 
-    raw = (rsi_score * 0.3 + sma_score * 0.2 + sent_score * 0.4 + coverage_penalty * 0.1)
+    volume_bonus = 0.1 if tech.volume_ratio > 1.5 else 0.0
+    timeframe_bonus = 0.1 if tech.price_vs_sma == tech.price_vs_weekly_sma else 0.0
+
+    raw = (sma_score * 0.25 + sent_score * 0.35 + coverage_penalty * 0.1
+           + volume_bonus + timeframe_bonus)
     return round(min(raw, 1.0), 2)
 
 
@@ -74,6 +77,16 @@ def _compute_uncertainty_factors(tech: TechnicalSignal, sent: SentimentSignal) -
             f"ökad risk för falska signaler"
         )
 
+    if tech.vix_value and tech.vix_value > 25:
+        factors.append(
+            f"VIX på {tech.vix_value:.1f} — marknadens rädsla är förhöjd"
+        )
+
+    if tech.price_vs_sma != tech.price_vs_weekly_sma and tech.price_vs_weekly_sma != "unavailable":
+        factors.append(
+            "Daglig och veckovis trend pekar åt olika håll — svagare signal"
+        )
+
     return factors
 
 
@@ -84,25 +97,27 @@ def decide(
     week_52_high: float | None = None,
     is_crypto: bool = False,
 ) -> TradeDecision:
-    """Run the Synergy Engine: strict AND gate + filters."""
+    """Fallback rule-based Synergy Engine when AI is unavailable."""
     reasoning = []
     warnings = []
     action = "NONE"
 
-    # --- Strict AND gate ---
-    if tech.direction == "BULL" and sent.direction == "POSITIVE":
+    tech_direction = _derive_tech_direction(tech)
+
+    # --- Trend-following AND gate ---
+    if tech_direction == "BULL" and sent.direction == "POSITIVE":
         action = "BULL"
-        reasoning.append(f"RSI på {tech.rsi_value} indikerar översålt (< 30)")
-        reasoning.append(f"Priset ({tech.current_price}) ligger över 200-dagars SMA ({tech.sma_value})")
+        reasoning.append(f"Priset ({tech.current_price:,.2f}) ligger över SMA ({tech.sma_200:,.2f})")
+        reasoning.append(f"RSI på {tech.rsi_value:.1f} — trend uppåt utan överköpt")
         reasoning.append(f"AI-sentiment är positivt ({sent.confidence:.0%} konfidens)")
-    elif tech.direction == "BEAR" and sent.direction == "NEGATIVE":
+    elif tech_direction == "BEAR" and sent.direction == "NEGATIVE":
         action = "BEAR"
-        reasoning.append(f"RSI på {tech.rsi_value} indikerar överköpt (> 70)")
-        reasoning.append(f"Priset ({tech.current_price}) ligger under 200-dagars SMA ({tech.sma_value})")
+        reasoning.append(f"Priset ({tech.current_price:,.2f}) ligger under SMA ({tech.sma_200:,.2f})")
+        reasoning.append(f"RSI på {tech.rsi_value:.1f} — trend nedåt utan översålt")
         reasoning.append(f"AI-sentiment är negativt ({sent.confidence:.0%} konfidens)")
     else:
         reasoning.append(
-            f"Teknisk signal: {tech.direction} | Sentiment: {sent.direction} — "
+            f"Teknisk signal: {tech_direction} | Sentiment: {sent.direction} — "
             f"signalerna är inte synkroniserade"
         )
 
@@ -116,13 +131,12 @@ def decide(
                 "men sentimentet är negativt — undvik köp"
             )
 
-    # --- Data Quality Gate ---
-    if sent.low_data_quality:
-        if action != "NONE":
-            warnings.append(
-                f"Låg datakvalitet: Endast {sent.relevant_count} relevanta rubriker hittades — "
-                f"sentimentet kan vara opålitligt, men signalen bibehålls"
-            )
+    # --- Data Quality Warning ---
+    if sent.low_data_quality and action != "NONE":
+        warnings.append(
+            f"Låg datakvalitet: Endast {sent.relevant_count} relevanta rubriker hittades — "
+            f"sentimentet kan vara opålitligt, men signalen bibehålls"
+        )
 
     # --- Crypto warning ---
     if is_crypto:
@@ -131,7 +145,6 @@ def decide(
             "signaler är mindre tillförlitliga"
         )
 
-    # --- Compute confidence ---
     confidence = _compute_confidence(tech, sent) if action != "NONE" else 0.0
 
     # --- ATR-based stop-loss & take-profit ---
@@ -146,7 +159,6 @@ def decide(
         stop_loss = 0.0
         take_profit = 0.0
 
-    # --- Uncertainty factors ---
     uncertainty_factors = _compute_uncertainty_factors(tech, sent)
 
     return TradeDecision(

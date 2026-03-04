@@ -36,6 +36,18 @@ T = {
     "price_below_sma": "Priset ligger UNDER 200-dagars SMA",
     "price_at_sma": "Priset ligger NÄRA 200-dagars SMA",
 
+    # Weekly SMA
+    "price_above_weekly": "Över veckotrend",
+    "price_below_weekly": "Under veckotrend",
+    "price_at_weekly": "Nära veckotrend",
+
+    # VIX levels
+    "vix_low_fear": "Lugn marknad",
+    "vix_normal": "Normal",
+    "vix_elevated": "Förhöjd rädsla",
+    "vix_extreme_fear": "Extrem rädsla",
+    "vix_unavailable": "Ej tillgänglig",
+
     # Sentiment section
     "sentiment_title": "Makrosentiment",
     "sentiment_positive": "Positivt",

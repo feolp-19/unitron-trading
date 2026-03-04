@@ -33,7 +33,7 @@ def render_dashboard(asset: Asset):
         st.error(T["no_data"])
         return
 
-    tech = technical_analyze(df)
+    tech = technical_analyze(df, ticker=asset.ticker)
     if tech is None:
         st.error(T["insufficient_data"])
         return
@@ -48,46 +48,64 @@ def render_dashboard(asset: Asset):
     w52_low = week_range[0] if week_range else None
     w52_high = week_range[1] if week_range else None
 
-    decision = decide(
-        tech=tech, sent=sent,
-        week_52_low=w52_low, week_52_high=w52_high,
-        is_crypto=asset.asset_type == "crypto",
-    )
+    # AI is the primary decision maker
+    with st.spinner("Genererar AI-analys..."):
+        ai_analysis = run_full_analysis(
+            asset_name=asset.display_name,
+            price=tech.current_price,
+            sma_200=tech.sma_200,
+            price_vs_sma=tech.price_vs_sma,
+            sma_50w=tech.sma_50w,
+            price_vs_weekly_sma=tech.price_vs_weekly_sma,
+            rsi=tech.rsi_value,
+            atr=tech.atr_value,
+            rsi_trend=tech.rsi_trend_2d,
+            atr_ratio=tech.atr_ratio,
+            volume_ratio=tech.volume_ratio,
+            vix_value=tech.vix_value,
+            vix_level=tech.vix_level,
+            headlines_json=headlines_json,
+        )
+
+    # Determine the action for logging and certificates
+    if ai_analysis:
+        verdict = ai_analysis.get("verdict", "NO_TRADE")
+        if verdict == "BUY_BULL":
+            final_action = "BULL"
+        elif verdict == "BUY_BEAR":
+            final_action = "BEAR"
+        else:
+            final_action = "NONE"
+        final_confidence = ai_analysis.get("confidence", 0)
+    else:
+        decision = decide(
+            tech=tech, sent=sent,
+            week_52_low=w52_low, week_52_high=w52_high,
+            is_crypto=asset.asset_type == "crypto",
+        )
+        final_action = decision.action
+        final_confidence = decision.confidence_score
 
     risk = assess_risks(
         tech=tech, sent=sent,
-        action=decision.action,
+        action=final_action,
         is_crypto=asset.asset_type == "crypto",
     )
 
     macro_warnings = check_macro_events_today()
 
-    # Full AI analysis
-    with st.spinner("Genererar AI-analys..."):
-        ai_analysis = run_full_analysis(
-            asset_name=asset.display_name,
-            price=tech.current_price,
-            sma=tech.sma_value,
-            price_vs_sma=tech.price_vs_sma,
-            rsi=tech.rsi_value,
-            atr=tech.atr_value,
-            rsi_trend=tech.rsi_trend_2d,
-            atr_ratio=tech.atr_ratio,
-            headlines_json=headlines_json,
-        )
-
     save_recommendation(
         ticker=asset.ticker,
         asset_name=asset.display_name,
-        action=decision.action,
-        confidence=decision.confidence_score,
-        entry_price=decision.current_price,
-        stop_loss=decision.stop_loss_price,
-        take_profit=decision.take_profit_price,
-        reasoning=decision.reasoning,
+        action=final_action,
+        confidence=final_confidence,
+        entry_price=tech.current_price,
+        stop_loss=risk.exit_plan.get("stop_loss", 0),
+        take_profit=risk.exit_plan.get("take_profit", 0),
+        reasoning=ai_analysis.get("key_factors", []) if ai_analysis else [],
     )
 
-    # === 1. AI ANALYSIS (the star of the show) ===
+    # === 1. AI ANALYSIS (the primary decision maker) ===
     if ai_analysis:
         verdict = ai_analysis.get("verdict", "NO_TRADE")
         if verdict == "BUY_BULL":
@@ -132,14 +150,27 @@ def render_dashboard(asset: Asset):
             unsafe_allow_html=True,
         )
 
+        if ai_analysis.get("key_factors"):
+            st.markdown("**Avgörande faktorer:**")
+            for f in ai_analysis["key_factors"]:
+                st.markdown(f"- {f}")
+
         if ai_analysis.get("risks"):
             st.markdown("**Risker att bevaka:**")
             for r in ai_analysis["risks"]:
                 st.caption(f"⚠️ {r}")
 
+        if ai_analysis.get("stop_loss_reasoning"):
+            st.info(f"**Stop-loss:** {ai_analysis['stop_loss_reasoning']}")
+
         if ai_analysis.get("outlook"):
             st.info(f"**Utsikt:** {ai_analysis['outlook']}")
     else:
+        decision = decide(
+            tech=tech, sent=sent,
+            week_52_low=w52_low, week_52_high=w52_high,
+            is_crypto=asset.asset_type == "crypto",
+        )
         render_traffic_light(decision.action, decision.confidence_score)
         if decision.action != "NONE":
             render_confidence_bar(decision.confidence_score)
@@ -157,9 +188,25 @@ def render_dashboard(asset: Asset):
             st.metric(T["rsi_label"], f"{tech.rsi_value:.1f}", delta=rsi_delta)
         with col3:
             sma_delta = T[f"price_{tech.price_vs_sma}_sma"]
-            st.metric(T["sma_label"], f"{tech.sma_value:,.2f}", delta=sma_delta)
+            st.metric(T["sma_label"], f"{tech.sma_200:,.2f}", delta=sma_delta)
         with col4:
             st.metric(T["atr_label"], f"{tech.atr_value:,.2f}")
+
+        # New data row: VIX, Volume, Weekly SMA
+        col5, col6, col7 = st.columns(3)
+        with col5:
+            vix_display = f"{tech.vix_value:.1f}" if tech.vix_value else "N/A"
+            vix_delta = T.get(f"vix_{tech.vix_level}", tech.vix_level)
+            st.metric("VIX (Fear & Greed)", vix_display, delta=vix_delta)
+        with col6:
+            vol_delta = "Hög" if tech.volume_ratio > 1.5 else ("Låg" if tech.volume_ratio < 0.7 else "Normal")
+            st.metric("Volym vs 20d snitt", f"{tech.volume_ratio:.1f}x", delta=vol_delta)
+        with col7:
+            if tech.sma_50w:
+                w_delta = T.get(f"price_{tech.price_vs_weekly_sma}_weekly", tech.price_vs_weekly_sma)
+                st.metric("50-veckors SMA", f"{tech.sma_50w:,.2f}", delta=w_delta)
+            else:
+                st.metric("50-veckors SMA", "N/A")
 
         render_price_chart(df, asset.display_name)
 
@@ -181,7 +228,7 @@ def render_dashboard(asset: Asset):
         render_headline_table(sent.headline_details)
 
     # === 4. Risk Management ===
-    if decision.action != "NONE":
+    if final_action != "NONE":
         with st.expander(T["risk_title"], expanded=True):
             r_col1, r_col2, r_col3, r_col4 = st.columns(4)
             with r_col1:
@@ -196,9 +243,9 @@ def render_dashboard(asset: Asset):
             st.markdown(f"**{T['exit_strategy_label']}:** {risk.exit_plan['strategy']}")
 
     # === 5. Avanza Certificates ===
-    if decision.action in ("BULL", "BEAR"):
+    if final_action in ("BULL", "BEAR"):
         with st.expander(T["avanza_title"], expanded=True):
-            certs = search_certificates(asset.ticker, decision.action)
+            certs = search_certificates(asset.ticker, final_action)
             if certs:
                 for cert in certs:
                     col_a, col_b = st.columns([3, 1])
@@ -214,7 +261,7 @@ def render_dashboard(asset: Asset):
                 st.info(T["avanza_no_certs"])
 
     # === 6. Warnings ===
-    all_warnings = decision.warnings + macro_warnings
+    all_warnings = macro_warnings[:]
     if risk.bias_warnings:
         all_warnings.extend(risk.bias_warnings)
     if all_warnings:

@@ -1,4 +1,4 @@
-"""Dagens Rekommendationer -- auto-scan all assets and show today's best trades."""
+"""Dagens Rekommendationer -- auto-scan all assets with AI as primary decision maker."""
 
 import json
 from datetime import datetime
@@ -9,7 +9,7 @@ from config import ALL_ASSETS_FLAT, Asset
 from data.market_data import fetch_ohlc, get_52_week_range
 from data.news_data import get_news_for_asset
 from analysis.technical import analyze as technical_analyze
-from analysis.sentiment import analyze_sentiment, dict_to_signal
+from analysis.sentiment import analyze_sentiment, dict_to_signal, run_full_analysis
 from analysis.synergy import decide
 from avanza.certificates import search_certificates
 from storage.history import save_recommendation
@@ -52,10 +52,12 @@ def render_daily_picks():
                 "name": asset.display_name,
                 "ticker": asset.ticker,
                 "status": "?",
-                "tech_direction": "-",
                 "rsi": "-",
+                "vix": "-",
+                "volume": "-",
                 "sentiment": "-",
                 "action": "-",
+                "ai_verdict": "-",
                 "reason": "",
             }
 
@@ -67,7 +69,7 @@ def render_daily_picks():
                     scan_data["report"].append(entry)
                     continue
 
-                tech = technical_analyze(df)
+                tech = technical_analyze(df, ticker=asset.ticker)
                 if tech is None:
                     entry["status"] = "For lite data"
                     entry["reason"] = f"Bara {len(df)} dagar"
@@ -75,53 +77,97 @@ def render_daily_picks():
                     continue
 
                 entry["rsi"] = f"{tech.rsi_value:.1f}"
-                entry["tech_direction"] = tech.direction
+                entry["vix"] = f"{tech.vix_value:.1f}" if tech.vix_value else "-"
+                entry["volume"] = f"{tech.volume_ratio:.1f}x"
 
                 headlines = get_news_for_asset(asset)
-                sent_dict = analyze_sentiment(asset.display_name, json.dumps(headlines))
+                headlines_json = json.dumps(headlines)
+                sent_dict = analyze_sentiment(asset.display_name, headlines_json)
                 sent = dict_to_signal(sent_dict.copy())
 
                 entry["sentiment"] = f"{sent.direction} ({sent.confidence:.0%})"
 
-                week_range = get_52_week_range(df)
-                w52_low = week_range[0] if week_range else None
-
-                decision = decide(
-                    tech=tech,
-                    sent=sent,
-                    week_52_low=w52_low,
-                    is_crypto=asset.asset_type == "crypto",
+                # AI is the primary decision maker
+                ai_result = run_full_analysis(
+                    asset_name=asset.display_name,
+                    price=tech.current_price,
+                    sma_200=tech.sma_200,
+                    price_vs_sma=tech.price_vs_sma,
+                    sma_50w=tech.sma_50w,
+                    price_vs_weekly_sma=tech.price_vs_weekly_sma,
+                    rsi=tech.rsi_value,
+                    atr=tech.atr_value,
+                    rsi_trend=tech.rsi_trend_2d,
+                    atr_ratio=tech.atr_ratio,
+                    volume_ratio=tech.volume_ratio,
+                    vix_value=tech.vix_value,
+                    vix_level=tech.vix_level,
+                    headlines_json=headlines_json,
                 )
 
-                entry["action"] = decision.action
+                if ai_result:
+                    verdict = ai_result.get("verdict", "NO_TRADE")
+                    confidence = ai_result.get("confidence", 0)
+                    entry["ai_verdict"] = verdict
 
-                if decision.action != "NONE":
-                    entry["status"] = "SIGNAL"
-                    entry["reason"] = decision.reasoning[0] if decision.reasoning else ""
+                    if verdict == "BUY_BULL":
+                        action = "BULL"
+                    elif verdict == "BUY_BEAR":
+                        action = "BEAR"
+                    else:
+                        action = "NONE"
 
-                    save_recommendation(
-                        ticker=asset.ticker,
-                        asset_name=asset.display_name,
-                        action=decision.action,
-                        confidence=decision.confidence_score,
-                        entry_price=decision.current_price,
-                        stop_loss=decision.stop_loss_price,
-                        take_profit=decision.take_profit_price,
-                        reasoning=decision.reasoning,
-                    )
+                    entry["action"] = action
 
-                    scan_data["results"].append({
-                        "asset": asset,
-                        "decision": decision,
-                        "tech": tech,
-                        "sent": sent,
-                    })
+                    if action != "NONE":
+                        entry["status"] = "SIGNAL"
+                        entry["reason"] = ai_result.get("analysis", "")[:120]
+
+                        save_recommendation(
+                            ticker=asset.ticker,
+                            asset_name=asset.display_name,
+                            action=action,
+                            confidence=confidence,
+                            entry_price=tech.current_price,
+                            stop_loss=0,
+                            take_profit=0,
+                            reasoning=ai_result.get("key_factors", []),
+                        )
+
+                        scan_data["results"].append({
+                            "asset": asset,
+                            "ai_result": ai_result,
+                            "tech": tech,
+                            "sent": sent,
+                        })
+                    else:
+                        entry["status"] = "Ingen signal"
+                        entry["reason"] = ai_result.get("analysis", "")[:120]
                 else:
-                    entry["status"] = "Ingen signal"
-                    if decision.reasoning:
-                        entry["reason"] = decision.reasoning[0]
-                    if decision.warnings:
-                        entry["reason"] += f" | {decision.warnings[0]}"
+                    # Fallback to rule-based engine
+                    week_range = get_52_week_range(df)
+                    w52_low = week_range[0] if week_range else None
+                    decision = decide(
+                        tech=tech, sent=sent,
+                        week_52_low=w52_low,
+                        is_crypto=asset.asset_type == "crypto",
+                    )
+                    entry["action"] = decision.action
+                    entry["ai_verdict"] = "fallback"
+
+                    if decision.action != "NONE":
+                        entry["status"] = "SIGNAL"
+                        entry["reason"] = decision.reasoning[0] if decision.reasoning else ""
+                        scan_data["results"].append({
+                            "asset": asset,
+                            "ai_result": None,
+                            "tech": tech,
+                            "sent": sent,
+                            "decision": decision,
+                        })
+                    else:
+                        entry["status"] = "Ingen signal"
+                        entry["reason"] = decision.reasoning[0] if decision.reasoning else ""
 
             except Exception as e:
                 entry["status"] = "Fel"
@@ -129,7 +175,11 @@ def render_daily_picks():
 
             scan_data["report"].append(entry)
 
-        scan_data["results"].sort(key=lambda x: x["decision"].confidence_score, reverse=True)
+        scan_data["results"].sort(
+            key=lambda x: x.get("ai_result", {}).get("confidence", 0)
+                          if x.get("ai_result") else x.get("decision", {}).get("confidence_score", 0) if isinstance(x.get("decision"), dict) else 0,
+            reverse=True,
+        )
         st.session_state["scan_data"] = scan_data
         progress_bar.empty()
         progress_text.empty()
@@ -143,7 +193,39 @@ def render_daily_picks():
     total = len(report)
     signals = len([r for r in report if r["status"] == "SIGNAL"])
     no_signal = len([r for r in report if r["status"] == "Ingen signal"])
-    failed = len([r for r in report if r["status"] in ("Ingen data", "För lite data", "Fel")])
+    failed = len([r for r in report if r["status"] in ("Ingen data", "For lite data", "Fel")])
+
+    # VIX banner
+    vix_entries = [r for r in report if r.get("vix", "-") != "-"]
+    if vix_entries:
+        vix_val = float(vix_entries[0]["vix"])
+        if vix_val > 30:
+            vix_color, vix_text = "#FF1744", "EXTREM RADSLA"
+        elif vix_val > 25:
+            vix_color, vix_text = "#FF9100", "Forhojd radsla"
+        elif vix_val > 20:
+            vix_color, vix_text = "#FFD600", "Forsiktighet"
+        elif vix_val > 15:
+            vix_color, vix_text = "#888", "Normal"
+        else:
+            vix_color, vix_text = "#00C853", "Lugn marknad"
+
+        st.markdown(
+            f"""
+            <div style="
+                background: {vix_color}15;
+                border: 1px solid {vix_color}44;
+                border-radius: 8px;
+                padding: 8px 16px;
+                margin-bottom: 12px;
+                text-align: center;
+                font-size: 14px;
+            ">
+                <strong>VIX:</strong> {vix_val:.1f} — {vix_text}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     st.markdown(
         f"""
@@ -191,7 +273,7 @@ def render_daily_picks():
                 margin-bottom: 24px;
             ">
                 <span style="font-size: 18px;">
-                    Motorn hittade <strong>{len(results)}</strong> handelsmöjlighet{'er' if len(results) > 1 else ''} idag
+                    AI-motorn hittade <strong>{len(results)}</strong> handelsmöjlighet{'er' if len(results) > 1 else ''} idag
                 </span>
             </div>
             """,
@@ -214,8 +296,8 @@ def render_daily_picks():
                 <div style="font-size: 64px; margin-bottom: 16px;">😴</div>
                 <h2 style="color: #888;">Inga handelsmöjligheter idag</h2>
                 <p style="color: #666; font-size: 16px;">
-                    Synergy Engine hittade ingen tillgång där teknisk analys
-                    och makrosentiment är synkroniserade.<br>
+                    AI-motorn hittade ingen tillgång där alla faktorer
+                    (trend, momentum, volym, sentiment) pekar åt samma håll.<br>
                     Bäst att stå utanför marknaden idag.
                 </p>
             </div>
@@ -226,14 +308,16 @@ def render_daily_picks():
     # --- Detailed scan report ---
     with st.expander(f"📋 Skanningsrapport — {total} tillgångar analyserade", expanded=False):
         import pandas as pd
-        df = pd.DataFrame(report)
-        df = df.rename(columns={
+        report_df = pd.DataFrame(report)
+        report_df = report_df.rename(columns={
             "name": "Tillgång",
             "ticker": "Ticker",
             "status": "Status",
-            "tech_direction": "Teknisk",
             "rsi": "RSI",
+            "vix": "VIX",
+            "volume": "Volym",
             "sentiment": "Sentiment",
+            "ai_verdict": "AI Beslut",
             "action": "Signal",
             "reason": "Detaljer",
         })
@@ -243,33 +327,53 @@ def render_daily_picks():
                 return "background-color: #00C85333; color: #00C853"
             elif val == "Ingen signal":
                 return "color: #888"
-            elif val in ("Ingen data", "För lite data", "Fel"):
+            elif val in ("Ingen data", "For lite data", "Fel"):
                 return "background-color: #FF174433; color: #FF1744"
             return ""
 
-        styled = df.style.map(_color_status, subset=["Status"])
+        styled = report_df.style.map(_color_status, subset=["Status"])
         st.dataframe(styled, hide_index=True, use_container_width=True)
 
 
 def _render_pick_card(result: dict, rank: int):
     """Render a single daily pick as a prominent card."""
     asset = result["asset"]
-    decision = result["decision"]
     tech = result["tech"]
     sent = result["sent"]
+    ai_result = result.get("ai_result")
 
-    if decision.action == "BULL":
+    if ai_result:
+        verdict = ai_result.get("verdict", "NO_TRADE")
+        confidence = ai_result.get("confidence", 0)
+        analysis_text = ai_result.get("analysis", "")
+        key_factors = ai_result.get("key_factors", [])
+        risks = ai_result.get("risks", [])
+        provider = ai_result.get("provider", "")
+    else:
+        decision = result.get("decision")
+        verdict = f"BUY_{decision.action}" if decision and decision.action != "NONE" else "NO_TRADE"
+        confidence = decision.confidence_score if decision else 0
+        analysis_text = "; ".join(decision.reasoning) if decision else ""
+        key_factors = []
+        risks = []
+        provider = "regelbaserad"
+
+    if verdict == "BUY_BULL":
         color = "#00C853"
         icon = "📈"
         action_text = "KÖP BULL-CERTIFIKAT"
         direction_sv = "uppgång"
-    else:
+        action = "BULL"
+    elif verdict == "BUY_BEAR":
         color = "#FF1744"
         icon = "📉"
         action_text = "KÖP BEAR-CERTIFIKAT"
         direction_sv = "nedgång"
+        action = "BEAR"
+    else:
+        return
 
-    confidence_pct = f"{decision.confidence_score:.0%}"
+    confidence_pct = f"{confidence:.0%}"
 
     st.markdown(
         f"""
@@ -287,7 +391,7 @@ def _render_pick_card(result: dict, rank: int):
                         #{rank} {asset.display_name}
                     </div>
                     <div style="font-size: 14px; color: #888;">
-                        {asset.ticker} — {asset.category}
+                        {asset.ticker} — {asset.category} — via {provider}
                     </div>
                 </div>
                 <div style="margin-left: auto; text-align: right;">
@@ -305,36 +409,40 @@ def _render_pick_card(result: dict, rank: int):
                 <strong>Konfidens:</strong> {confidence_pct} —
                 <strong>Pris:</strong> {tech.current_price:,.2f} —
                 <strong>RSI:</strong> {tech.rsi_value:.1f} —
-                <strong>Sentiment:</strong> {sent.direction}
+                <strong>Volym:</strong> {tech.volume_ratio:.1f}x —
+                <strong>VIX:</strong> {tech.vix_value if tech.vix_value else 'N/A'}
+            </div>
+            <div style="font-size: 14px; color: #aaa; line-height: 1.5;">
+                {analysis_text}
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    with st.expander(f"Varför {direction_sv} på {asset.display_name}?"):
-        for reason in decision.reasoning:
-            st.markdown(f"- {reason}")
+    with st.expander(f"Detaljer — {asset.display_name}"):
+        if key_factors:
+            st.markdown("**Avgörande faktorer:**")
+            for f in key_factors:
+                st.markdown(f"- {f}")
 
-        if decision.uncertainty_factors:
-            st.markdown("**Osäkerhetsfaktorer:**")
-            for uf in decision.uncertainty_factors:
-                st.caption(f"⚠️ {uf}")
-
-        if decision.warnings:
-            st.markdown("**Varningar:**")
-            for w in decision.warnings:
-                st.warning(w)
+        if risks:
+            st.markdown("**Risker:**")
+            for r in risks:
+                st.caption(f"⚠️ {r}")
 
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric(T["entry_label"], f"{decision.current_price:,.2f}")
+            st.metric(T["price_label"], f"{tech.current_price:,.2f}")
         with col2:
-            st.metric(T["stop_loss_label"], f"{decision.stop_loss_price:,.2f}")
+            st.metric(T["sma_label"], f"{tech.sma_200:,.2f}")
         with col3:
-            st.metric(T["take_profit_label"], f"{decision.take_profit_price:,.2f}")
+            if tech.sma_50w:
+                st.metric("50v SMA", f"{tech.sma_50w:,.2f}")
+            else:
+                st.metric("50v SMA", "N/A")
 
-        certs = search_certificates(asset.ticker, decision.action)
+        certs = search_certificates(asset.ticker, action)
         if certs:
             st.markdown(f"**{T['avanza_title']}:**")
             for cert in certs[:3]:

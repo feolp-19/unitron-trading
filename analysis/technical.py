@@ -1,18 +1,23 @@
 from dataclasses import dataclass
-
 import pandas as pd
+import streamlit as st
+import yfinance as yf
 
 
 @dataclass
 class TechnicalSignal:
-    direction: str          # BULL, BEAR, NEUTRAL
-    rsi_value: float
-    sma_value: float
-    atr_value: float
     current_price: float
-    price_vs_sma: str       # above, below, at
-    rsi_trend_2d: float     # RSI change over last 2 days (for recency bias detection)
-    atr_ratio: float        # current ATR / 30-day avg ATR (volatility spike detection)
+    rsi_value: float
+    sma_200: float
+    sma_50w: float | None       # 50-week SMA (multi-timeframe)
+    atr_value: float
+    price_vs_sma: str           # above, below, at
+    price_vs_weekly_sma: str    # above, below, at, unavailable
+    rsi_trend_2d: float
+    atr_ratio: float            # current ATR vs 30-day avg
+    volume_ratio: float         # current volume vs 20-day avg
+    vix_value: float | None     # VIX fear/greed
+    vix_level: str              # low_fear, normal, elevated, extreme_fear
 
 
 def compute_rsi(series: pd.Series, period: int = 14) -> pd.Series:
@@ -42,21 +47,61 @@ def compute_atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
     return tr.rolling(window=period).mean()
 
 
-def analyze(df: pd.DataFrame) -> TechnicalSignal | None:
-    """Run full technical analysis on OHLC DataFrame. Returns None if insufficient data."""
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_vix() -> float | None:
+    """Fetch current VIX value."""
+    try:
+        df = yf.download("^VIX", period="5d", progress=False, auto_adjust=True)
+        if df.empty:
+            return None
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        return float(df["Close"].iloc[-1])
+    except Exception:
+        return None
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_weekly_sma(ticker: str) -> float | None:
+    """Fetch 50-week SMA for multi-timeframe analysis."""
+    try:
+        df = yf.download(ticker, period="2y", interval="1wk", progress=False, auto_adjust=True)
+        if df.empty or len(df) < 20:
+            return None
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        sma = df["Close"].rolling(window=min(50, len(df) - 1), min_periods=1).mean()
+        return float(sma.iloc[-1])
+    except Exception:
+        return None
+
+
+def _classify_vix(vix: float | None) -> str:
+    if vix is None:
+        return "unavailable"
+    if vix < 15:
+        return "low_fear"
+    if vix < 20:
+        return "normal"
+    if vix < 30:
+        return "elevated"
+    return "extreme_fear"
+
+
+def analyze(df: pd.DataFrame, ticker: str = "") -> TechnicalSignal | None:
+    """Run full technical analysis including VIX, volume, and multi-timeframe."""
     if df.empty or len(df) < 50:
         return None
 
     close = df["Close"]
-    sma_period = min(200, len(close) - 1)
 
     rsi_series = compute_rsi(close)
-    sma_series = compute_sma(close, sma_period)
+    sma_series = compute_sma(close, min(200, len(close) - 1))
     atr_series = compute_atr(df)
 
     current_price = float(close.iloc[-1])
     rsi_value = float(rsi_series.iloc[-1])
-    sma_value = float(sma_series.iloc[-1])
+    sma_200 = float(sma_series.iloc[-1])
     atr_value = float(atr_series.iloc[-1])
 
     rsi_2d_ago = float(rsi_series.iloc[-3]) if len(rsi_series) >= 3 else rsi_value
@@ -65,7 +110,16 @@ def analyze(df: pd.DataFrame) -> TechnicalSignal | None:
     atr_30d_avg = float(atr_series.tail(30).mean())
     atr_ratio = atr_value / atr_30d_avg if atr_30d_avg > 0 else 1.0
 
-    sma_distance_pct = ((current_price - sma_value) / sma_value) * 100
+    # Volume analysis
+    if "Volume" in df.columns and df["Volume"].sum() > 0:
+        current_vol = float(df["Volume"].iloc[-1])
+        avg_vol = float(df["Volume"].tail(20).mean())
+        volume_ratio = current_vol / avg_vol if avg_vol > 0 else 1.0
+    else:
+        volume_ratio = 1.0
+
+    # Price vs 200-day SMA
+    sma_distance_pct = ((current_price - sma_200) / sma_200) * 100
     if sma_distance_pct > 1:
         price_vs_sma = "above"
     elif sma_distance_pct < -1:
@@ -73,24 +127,34 @@ def analyze(df: pd.DataFrame) -> TechnicalSignal | None:
     else:
         price_vs_sma = "at"
 
-    # Direction logic: trend-following with RSI guard
-    # BULL: price in uptrend (above SMA) and not overbought (RSI < 65)
-    # BEAR: price in downtrend (below SMA) and not oversold (RSI > 35)
-    # NEUTRAL: price near SMA (no clear trend) or RSI at extremes against trend
-    if price_vs_sma == "above" and rsi_value < 65:
-        direction = "BULL"
-    elif price_vs_sma == "below" and rsi_value > 35:
-        direction = "BEAR"
+    # VIX
+    vix_value = fetch_vix()
+    vix_level = _classify_vix(vix_value)
+
+    # Weekly SMA (multi-timeframe)
+    sma_50w = fetch_weekly_sma(ticker) if ticker else None
+    if sma_50w is not None:
+        w_distance = ((current_price - sma_50w) / sma_50w) * 100
+        if w_distance > 1:
+            price_vs_weekly_sma = "above"
+        elif w_distance < -1:
+            price_vs_weekly_sma = "below"
+        else:
+            price_vs_weekly_sma = "at"
     else:
-        direction = "NEUTRAL"
+        price_vs_weekly_sma = "unavailable"
 
     return TechnicalSignal(
-        direction=direction,
-        rsi_value=round(rsi_value, 2),
-        sma_value=round(sma_value, 2),
-        atr_value=round(atr_value, 2),
         current_price=round(current_price, 2),
+        rsi_value=round(rsi_value, 2),
+        sma_200=round(sma_200, 2),
+        sma_50w=round(sma_50w, 2) if sma_50w else None,
+        atr_value=round(atr_value, 2),
         price_vs_sma=price_vs_sma,
+        price_vs_weekly_sma=price_vs_weekly_sma,
         rsi_trend_2d=round(rsi_trend_2d, 2),
         atr_ratio=round(atr_ratio, 2),
+        volume_ratio=round(volume_ratio, 2),
+        vix_value=round(vix_value, 2) if vix_value else None,
+        vix_level=vix_level,
     )
