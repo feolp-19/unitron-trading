@@ -109,7 +109,7 @@ def render_daily_picks():
 
             def _update_log(log_lines, container):
                 container.markdown(
-                    "\n".join(log_lines[-12:]),
+                    "\n".join(log_lines),
                     unsafe_allow_html=False,
                 )
 
