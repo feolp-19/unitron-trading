@@ -1,30 +1,34 @@
+"""AI sentiment analysis with automatic provider fallback chain:
+Groq -> Gemini -> keyword fallback."""
+
 import json
 import os
 from dataclasses import dataclass, field
 
 import streamlit as st
 
-from config import AI_PROVIDER, AI_CONFIGS, get_secret
+from config import AI_CONFIGS, get_secret
 
 
 @dataclass
 class HeadlineSentiment:
     headline: str
-    sentiment: str       # positive, negative, neutral
-    relevance: float     # 0.0-1.0
+    sentiment: str
+    relevance: float
     reasoning: str
 
 
 @dataclass
 class SentimentSignal:
-    direction: str                  # POSITIVE, NEGATIVE, NEUTRAL
-    confidence: float               # 0.0-1.0
+    direction: str
+    confidence: float
     relevant_count: int
     total_count: int
     low_data_quality: bool
     summary: str
     headline_details: list[HeadlineSentiment] = field(default_factory=list)
-    herd_ratio: float = 0.0        # % of headlines with dominant sentiment
+    herd_ratio: float = 0.0
+    ai_provider_used: str = ""
 
 
 SENTIMENT_PROMPT = """You are a financial sentiment analyst. Analyze these news headlines for their impact on the given asset.
@@ -56,149 +60,159 @@ Headlines:
 {headlines_text}"""
 
 
-def _build_prompt(asset_name: str, headlines: list[dict]) -> str:
-    headlines_text = "\n".join(
-        f"{i+1}. {h['headline']}" for i, h in enumerate(headlines)
-    )
-    return SENTIMENT_PROMPT.format(
-        asset_name=asset_name,
-        headlines_text=headlines_text,
-    )
+FULL_ANALYSIS_PROMPT = """You are an expert financial analyst. Provide a comprehensive trading analysis for {asset_name}.
+
+TECHNICAL DATA:
+- Current price: {price}
+- 200-day SMA: {sma} (price is {price_vs_sma} the SMA)
+- RSI (14): {rsi}
+- ATR (14): {atr}
+- RSI 2-day trend: {rsi_trend}
+- Volatility ratio: {atr_ratio}x normal
+
+NEWS HEADLINES:
+{headlines_text}
+
+Based on ALL of this data, provide your analysis in this JSON format:
+{{
+  "verdict": "BUY_BULL" or "BUY_BEAR" or "NO_TRADE",
+  "confidence": 0.0 to 1.0,
+  "analysis": "2-3 sentences explaining your reasoning, combining technicals and news",
+  "risks": ["risk 1", "risk 2"],
+  "outlook": "1 sentence on what to watch next"
+}}
+
+Return ONLY valid JSON."""
 
 
 def _call_groq(prompt: str) -> str | None:
     try:
         from groq import Groq
-        cfg = AI_CONFIGS["groq"]
-        client = Groq(api_key=get_secret(cfg["api_key_env"]))
+        api_key = get_secret("GROQ_API_KEY")
+        if not api_key:
+            return None
+        client = Groq(api_key=api_key)
         response = client.chat.completions.create(
-            model=cfg["model"],
+            model=AI_CONFIGS["groq"]["model"],
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1,
             max_tokens=2000,
         )
         return response.choices[0].message.content
-    except Exception as e:
-        st.warning(f"Groq API-fel: {e}")
-        return None
-
-
-def _call_grok(prompt: str) -> str | None:
-    try:
-        from openai import OpenAI
-        cfg = AI_CONFIGS["grok"]
-        client = OpenAI(
-            api_key=get_secret(cfg["api_key_env"]),
-            base_url=cfg["base_url"],
-        )
-        response = client.chat.completions.create(
-            model=cfg["model"],
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1,
-            max_tokens=2000,
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        st.warning(f"Grok API-fel: {e}")
+    except Exception:
         return None
 
 
 def _call_gemini(prompt: str) -> str | None:
     try:
         from google import genai
-        cfg = AI_CONFIGS["gemini"]
-        client = genai.Client(api_key=get_secret(cfg["api_key_env"]))
+        api_key = get_secret("GOOGLE_API_KEY")
+        if not api_key:
+            return None
+        client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model=cfg["model"],
+            model=AI_CONFIGS["gemini"]["model"],
             contents=prompt,
         )
         return response.text
-    except Exception as e:
-        st.warning(f"Gemini API-fel: {e}")
+    except Exception:
         return None
 
 
-def _call_ai(prompt: str) -> str | None:
-    providers = {
-        "groq": _call_groq,
-        "grok": _call_grok,
-        "gemini": _call_gemini,
-    }
-    call_fn = providers.get(AI_PROVIDER, _call_groq)
-    return call_fn(prompt)
+def _call_grok(prompt: str) -> str | None:
+    try:
+        from openai import OpenAI
+        api_key = get_secret("XAI_API_KEY")
+        if not api_key:
+            return None
+        client = OpenAI(api_key=api_key, base_url=AI_CONFIGS["grok"]["base_url"])
+        response = client.chat.completions.create(
+            model=AI_CONFIGS["grok"]["model"],
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1,
+            max_tokens=2000,
+        )
+        return response.choices[0].message.content
+    except Exception:
+        return None
+
+
+def _call_ai_with_fallback(prompt: str) -> tuple[str | None, str]:
+    """Try AI providers in order: Groq -> Gemini -> Grok. Returns (response, provider_name)."""
+    providers = [
+        ("Groq", _call_groq),
+        ("Gemini", _call_gemini),
+        ("Grok", _call_grok),
+    ]
+    for name, fn in providers:
+        result = fn(prompt)
+        if result:
+            return result, name
+    return None, "none"
 
 
 def _keyword_fallback(headlines: list[dict]) -> SentimentSignal:
-    """Basic keyword-based sentiment when AI is unavailable."""
-    positive_words = {"surge", "rally", "gain", "rise", "up", "bull", "growth", "profit", "beat", "record", "high", "boost", "strong"}
-    negative_words = {"crash", "fall", "drop", "decline", "loss", "bear", "recession", "fear", "crisis", "down", "weak", "miss", "cut", "sell"}
+    """Basic keyword-based sentiment when all AI providers fail."""
+    positive_words = {"surge", "rally", "gain", "rise", "up", "bull", "growth", "profit",
+                      "beat", "record", "high", "boost", "strong", "positive", "recovery"}
+    negative_words = {"crash", "fall", "drop", "decline", "loss", "bear", "recession", "fear",
+                      "crisis", "down", "weak", "miss", "cut", "sell", "tariff", "war", "risk"}
 
-    pos_count = 0
-    neg_count = 0
+    pos_count = neg_count = 0
     details = []
 
     for h in headlines:
         text = h["headline"].lower()
         p = sum(1 for w in positive_words if w in text)
         n = sum(1 for w in negative_words if w in text)
-        if p > n:
-            sentiment = "positive"
+        sentiment = "positive" if p > n else ("negative" if n > p else "neutral")
+        if sentiment == "positive":
             pos_count += 1
-        elif n > p:
-            sentiment = "negative"
+        elif sentiment == "negative":
             neg_count += 1
-        else:
-            sentiment = "neutral"
         details.append(HeadlineSentiment(
-            headline=h["headline"],
-            sentiment=sentiment,
-            relevance=0.5,
-            reasoning="Nyckelordsbaserad analys (AI ej tillgänglig)",
+            headline=h["headline"], sentiment=sentiment,
+            relevance=0.5, reasoning="Nyckelordsanalys (AI ej tillganglig)",
         ))
 
     total = len(headlines)
     if pos_count > neg_count:
-        direction = "POSITIVE"
-        confidence = pos_count / total if total else 0
+        direction, confidence = "POSITIVE", pos_count / total if total else 0
     elif neg_count > pos_count:
-        direction = "NEGATIVE"
-        confidence = neg_count / total if total else 0
+        direction, confidence = "NEGATIVE", neg_count / total if total else 0
     else:
-        direction = "NEUTRAL"
-        confidence = 0.3
+        direction, confidence = "NEUTRAL", 0.3
 
     dominant = max(pos_count, neg_count)
-    herd_ratio = dominant / total if total else 0
 
     return SentimentSignal(
         direction=direction,
         confidence=round(confidence, 2),
         relevant_count=total,
         total_count=total,
-        low_data_quality=total < 5,
-        summary="Nyckelordsbaserad analys — AI-leverantör ej tillgänglig",
+        low_data_quality=total < 3,
+        summary="Nyckelordsbaserad analys — AI ej tillganglig",
         headline_details=details,
-        herd_ratio=round(herd_ratio, 2),
+        herd_ratio=round(dominant / total, 2) if total else 0,
+        ai_provider_used="keyword_fallback",
     )
 
 
-def _parse_ai_response(raw: str, headlines: list[dict]) -> SentimentSignal | None:
-    """Parse the JSON response from the AI model."""
+def _parse_ai_response(raw: str, headlines: list[dict], provider: str) -> SentimentSignal | None:
     try:
         cleaned = raw.strip()
-        if cleaned.startswith("```"):
-            cleaned = cleaned.split("\n", 1)[1]
-            cleaned = cleaned.rsplit("```", 1)[0]
+        if "```" in cleaned:
+            cleaned = cleaned.split("```")[1]
+            if cleaned.startswith("json"):
+                cleaned = cleaned[4:]
+            cleaned = cleaned.strip()
 
         data = json.loads(cleaned)
 
         details = []
-        relevant_count = 0
-        pos_count = 0
-        neg_count = 0
+        relevant_count = pos_count = neg_count = 0
 
-        ai_headlines = data.get("headlines", [])
-        for i, item in enumerate(ai_headlines):
+        for i, item in enumerate(data.get("headlines", [])):
             headline_text = headlines[i]["headline"] if i < len(headlines) else ""
             hs = HeadlineSentiment(
                 headline=headline_text,
@@ -207,7 +221,7 @@ def _parse_ai_response(raw: str, headlines: list[dict]) -> SentimentSignal | Non
                 reasoning=item.get("reasoning", ""),
             )
             details.append(hs)
-            if hs.relevance > 0.5:
+            if hs.relevance > 0.3:
                 relevant_count += 1
                 if hs.sentiment == "positive":
                     pos_count += 1
@@ -215,58 +229,92 @@ def _parse_ai_response(raw: str, headlines: list[dict]) -> SentimentSignal | Non
                     neg_count += 1
 
         overall = data.get("overall_sentiment", "neutral").upper()
-        if overall == "POSITIVE":
-            direction = "POSITIVE"
-        elif overall == "NEGATIVE":
-            direction = "NEGATIVE"
-        else:
-            direction = "NEUTRAL"
+        direction = "POSITIVE" if overall == "POSITIVE" else ("NEGATIVE" if overall == "NEGATIVE" else "NEUTRAL")
 
         dominant = max(pos_count, neg_count)
-        herd_ratio = dominant / relevant_count if relevant_count else 0
 
         return SentimentSignal(
             direction=direction,
             confidence=round(float(data.get("confidence", 0.5)), 2),
             relevant_count=relevant_count,
             total_count=len(headlines),
-            low_data_quality=relevant_count < 5,
+            low_data_quality=relevant_count < 3,
             summary=data.get("summary", ""),
             headline_details=details,
-            herd_ratio=round(herd_ratio, 2),
+            herd_ratio=round(dominant / relevant_count, 2) if relevant_count else 0,
+            ai_provider_used=provider,
         )
-    except (json.JSONDecodeError, KeyError, IndexError):
+    except Exception:
         return None
 
 
 @st.cache_data(ttl=86400, show_spinner=False)
 def analyze_sentiment(asset_name: str, headlines_json: str) -> dict:
-    """Analyze sentiment. Accepts JSON string for caching compatibility.
-    Returns dict representation of SentimentSignal."""
+    """Analyze sentiment with automatic AI fallback. Returns dict for caching."""
     headlines = json.loads(headlines_json)
 
     if not headlines:
         return SentimentSignal(
-            direction="NEUTRAL",
-            confidence=0.0,
-            relevant_count=0,
-            total_count=0,
-            low_data_quality=True,
-            summary="Inga nyhetsrubriker hittades",
-            headline_details=[],
-            herd_ratio=0.0,
+            direction="NEUTRAL", confidence=0.0,
+            relevant_count=0, total_count=0,
+            low_data_quality=True, summary="Inga nyhetsrubriker hittades",
+            ai_provider_used="none",
         ).__dict__
 
-    prompt = _build_prompt(asset_name, headlines)
-    raw_response = _call_ai(prompt)
+    prompt = SENTIMENT_PROMPT.format(
+        asset_name=asset_name,
+        headlines_text="\n".join(f"{i+1}. {h['headline']}" for i, h in enumerate(headlines)),
+    )
+
+    raw_response, provider = _call_ai_with_fallback(prompt)
 
     if raw_response:
-        result = _parse_ai_response(raw_response, headlines)
+        result = _parse_ai_response(raw_response, headlines, provider)
         if result:
             return result.__dict__
 
-    fallback = _keyword_fallback(headlines)
-    return fallback.__dict__
+    return _keyword_fallback(headlines).__dict__
+
+
+@st.cache_data(ttl=86400, show_spinner=False)
+def run_full_analysis(asset_name: str, price: float, sma: float, price_vs_sma: str,
+                       rsi: float, atr: float, rsi_trend: float, atr_ratio: float,
+                       headlines_json: str) -> dict | None:
+    """Run comprehensive AI analysis combining technicals and news."""
+    headlines = json.loads(headlines_json)
+    headlines_text = "\n".join(
+        f"{i+1}. {h['headline']}" for i, h in enumerate(headlines)
+    ) if headlines else "No recent headlines available."
+
+    prompt = FULL_ANALYSIS_PROMPT.format(
+        asset_name=asset_name,
+        price=f"{price:,.2f}",
+        sma=f"{sma:,.2f}",
+        price_vs_sma=price_vs_sma,
+        rsi=f"{rsi:.1f}",
+        atr=f"{atr:,.2f}",
+        rsi_trend=f"{rsi_trend:+.1f}",
+        atr_ratio=f"{atr_ratio:.1f}",
+        headlines_text=headlines_text,
+    )
+
+    raw, provider = _call_ai_with_fallback(prompt)
+    if not raw:
+        return None
+
+    try:
+        cleaned = raw.strip()
+        if "```" in cleaned:
+            cleaned = cleaned.split("```")[1]
+            if cleaned.startswith("json"):
+                cleaned = cleaned[4:]
+            cleaned = cleaned.strip()
+
+        data = json.loads(cleaned)
+        data["provider"] = provider
+        return data
+    except Exception:
+        return None
 
 
 def dict_to_signal(d: dict) -> SentimentSignal:
