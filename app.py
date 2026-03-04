@@ -63,7 +63,84 @@ def check_password() -> bool:
 
 check_password()
 
-tab_today, tab_analyze = st.tabs(["Idag", "Analysera"])
+tab_today, tab_analyze, tab_diag = st.tabs(["Idag", "Analysera", "Status"])
+
+with tab_diag:
+    st.header("API-status")
+    st.caption("Visar vilka API-nycklar som hittades och om de fungerar.")
+
+    from config import get_secret
+
+    keys_to_check = [
+        ("GROQ_API_KEY", "Groq"),
+        ("GOOGLE_API_KEY", "Gemini"),
+        ("XAI_API_KEY", "Grok"),
+        ("TAVILY_API_KEY", "Tavily"),
+        ("FINNHUB_API_KEY", "Finnhub"),
+    ]
+
+    for key_name, label in keys_to_check:
+        val = get_secret(key_name)
+        if val:
+            masked = val[:6] + "..." + val[-4:] if len(val) > 10 else "***"
+            st.success(f"**{label}** — Nyckel hittad ({masked})")
+        else:
+            st.error(f"**{label}** — Nyckel SAKNAS")
+
+    st.divider()
+    st.subheader("API-test")
+    if st.button("Testa alla API:er", type="primary"):
+        with st.spinner("Testar..."):
+            # Test Groq
+            try:
+                from groq import Groq
+                groq_key = get_secret("GROQ_API_KEY")
+                if groq_key:
+                    client = Groq(api_key=groq_key)
+                    resp = client.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": "Say OK"}],
+                        max_tokens=5,
+                    )
+                    st.success(f"**Groq** — Fungerar! Svar: {resp.choices[0].message.content}")
+                else:
+                    st.error("**Groq** — Ingen nyckel")
+            except Exception as e:
+                st.error(f"**Groq** — FEL: {e}")
+
+            # Test Gemini
+            try:
+                from google import genai
+                gem_key = get_secret("GOOGLE_API_KEY")
+                if gem_key:
+                    client = genai.Client(api_key=gem_key)
+                    resp = client.models.generate_content(
+                        model="gemini-2.5-flash", contents="Say OK",
+                    )
+                    st.success(f"**Gemini** — Fungerar! Svar: {resp.text[:50]}")
+                else:
+                    st.error("**Gemini** — Ingen nyckel")
+            except Exception as e:
+                st.error(f"**Gemini** — FEL: {e}")
+
+            # Test Tavily
+            try:
+                import requests
+                tav_key = get_secret("TAVILY_API_KEY")
+                if tav_key:
+                    r = requests.post(
+                        "https://api.tavily.com/search",
+                        json={"api_key": tav_key, "query": "test", "max_results": 1},
+                        timeout=10,
+                    )
+                    if r.status_code == 200:
+                        st.success(f"**Tavily** — Fungerar!")
+                    else:
+                        st.error(f"**Tavily** — HTTP {r.status_code}: {r.text[:100]}")
+                else:
+                    st.error("**Tavily** — Ingen nyckel")
+            except Exception as e:
+                st.error(f"**Tavily** — FEL: {e}")
 
 with tab_today:
     render_daily_picks()
