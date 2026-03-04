@@ -35,30 +35,22 @@ CURATED_ASSETS: dict[str, list[Asset]] = {
         Asset("^GSPC", "S&P 500", ["S&P 500", "US economy", "Wall Street"], "index", "Index"),
         Asset("^IXIC", "Nasdaq", ["Nasdaq", "tech stocks", "US technology"], "index", "Index"),
         Asset("^FTSE", "FTSE 100", ["FTSE", "UK economy", "London Stock Exchange"], "index", "Index"),
+        Asset("^N225", "Nikkei 225", ["Nikkei", "Japan economy", "Tokyo Stock Exchange"], "index", "Index"),
+        Asset("^HSI", "Hang Seng", ["Hang Seng", "Hong Kong", "China economy"], "index", "Index"),
     ],
     "Råvaror": [
         Asset("GC=F", "Guld", ["gold price", "gold market", "precious metals"], "commodity", "Råvaror"),
         Asset("SI=F", "Silver", ["silver price", "silver market", "precious metals"], "commodity", "Råvaror"),
         Asset("CL=F", "Olja (WTI)", ["oil price", "crude oil", "WTI", "OPEC"], "commodity", "Råvaror"),
         Asset("NG=F", "Naturgas", ["natural gas price", "energy market"], "commodity", "Råvaror"),
-    ],
-    "Svenska aktier": [
-        Asset("ERIC-B.ST", "Ericsson B", ["Ericsson", "telecom", "5G"], "stock", "Svenska aktier"),
-        Asset("VOLV-B.ST", "Volvo B", ["Volvo", "trucks", "automotive"], "stock", "Svenska aktier"),
-        Asset("HM-B.ST", "H&M B", ["H&M", "Hennes Mauritz", "fashion retail"], "stock", "Svenska aktier"),
-        Asset("SEB-A.ST", "SEB A", ["SEB", "Swedish bank", "banking"], "stock", "Svenska aktier"),
-        Asset("INVE-B.ST", "Investor B", ["Investor AB", "Wallenberg", "investment"], "stock", "Svenska aktier"),
-    ],
-    "Amerikanska aktier": [
-        Asset("AAPL", "Apple", ["Apple", "iPhone", "tech earnings"], "stock", "Amerikanska aktier"),
-        Asset("TSLA", "Tesla", ["Tesla", "EV", "Elon Musk"], "stock", "Amerikanska aktier"),
-        Asset("MSFT", "Microsoft", ["Microsoft", "Azure", "AI"], "stock", "Amerikanska aktier"),
-        Asset("NVDA", "Nvidia", ["Nvidia", "GPU", "AI chips"], "stock", "Amerikanska aktier"),
-        Asset("AMZN", "Amazon", ["Amazon", "AWS", "e-commerce"], "stock", "Amerikanska aktier"),
+        Asset("PL=F", "Platina", ["platinum price", "platinum market"], "commodity", "Råvaror"),
+        Asset("HG=F", "Koppar", ["copper price", "copper market", "industrial metals"], "commodity", "Råvaror"),
     ],
     "Krypto": [
         Asset("BTC-USD", "Bitcoin", ["Bitcoin", "BTC", "cryptocurrency"], "crypto", "Krypto"),
         Asset("ETH-USD", "Ethereum", ["Ethereum", "ETH", "smart contracts"], "crypto", "Krypto"),
+        Asset("SOL-USD", "Solana", ["Solana", "SOL", "crypto"], "crypto", "Krypto"),
+        Asset("XRP-USD", "XRP", ["XRP", "Ripple", "crypto"], "crypto", "Krypto"),
     ],
 }
 
