@@ -30,6 +30,9 @@ def fetch_tavily(query: str, max_results: int = 10) -> list[dict]:
         resp.raise_for_status()
         data = resp.json()
 
+        from storage.usage_tracker import track_call
+        track_call("tavily")
+
         headlines = []
         for result in data.get("results", []):
             headlines.append({

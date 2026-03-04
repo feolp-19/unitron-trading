@@ -155,6 +155,7 @@ Return ONLY valid JSON:
 def _call_groq(prompt: str) -> str | None:
     try:
         from groq import Groq
+        from storage.usage_tracker import track_call
         api_key = get_secret("GROQ_API_KEY")
         if not api_key:
             return None
@@ -165,6 +166,7 @@ def _call_groq(prompt: str) -> str | None:
             temperature=0.1,
             max_tokens=2000,
         )
+        track_call("groq")
         return response.choices[0].message.content
     except Exception:
         return None
@@ -173,6 +175,7 @@ def _call_groq(prompt: str) -> str | None:
 def _call_gemini(prompt: str) -> str | None:
     try:
         from google import genai
+        from storage.usage_tracker import track_call
         api_key = get_secret("GOOGLE_API_KEY")
         if not api_key:
             return None
@@ -181,6 +184,7 @@ def _call_gemini(prompt: str) -> str | None:
             model=AI_CONFIGS["gemini"]["model"],
             contents=prompt,
         )
+        track_call("gemini")
         return response.text
     except Exception:
         return None
@@ -189,6 +193,7 @@ def _call_gemini(prompt: str) -> str | None:
 def _call_grok(prompt: str) -> str | None:
     try:
         from openai import OpenAI
+        from storage.usage_tracker import track_call
         api_key = get_secret("XAI_API_KEY")
         if not api_key:
             return None
@@ -199,6 +204,7 @@ def _call_grok(prompt: str) -> str | None:
             temperature=0.1,
             max_tokens=2000,
         )
+        track_call("grok")
         return response.choices[0].message.content
     except Exception:
         return None

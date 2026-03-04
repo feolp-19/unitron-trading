@@ -21,31 +21,48 @@ from storage.history import save_recommendation
 from ui.translations import T
 
 
-MAX_DAILY_SCANS = 5
+from storage.usage_tracker import get_usage, get_scan_count, can_scan, track_scan
 
 
-def _get_scan_count() -> tuple[int, str]:
-    """Get today's scan count and the date key."""
-    today_key = datetime.now().strftime("%Y-%m-%d")
-    scan_tracker = st.session_state.get("scan_tracker", {})
-    if scan_tracker.get("date") != today_key:
-        scan_tracker = {"date": today_key, "count": 0}
-        st.session_state["scan_tracker"] = scan_tracker
-    return scan_tracker["count"], today_key
+def _render_usage_bar(usage: dict):
+    """Show live API credit usage as a compact bar."""
+    providers = [
+        ("Groq", "groq", "#F55036"),
+        ("Gemini", "gemini", "#4285F4"),
+        ("Grok", "grok", "#000"),
+        ("Tavily", "tavily", "#7C3AED"),
+    ]
 
+    bars_html = ""
+    for label, key, color in providers:
+        u = usage[key]
+        pct = u["pct"]
+        bar_color = color if pct < 80 else ("#FF9100" if pct < 95 else "#FF1744")
+        bars_html += f"""
+        <div style="flex: 1; min-width: 100px;">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-bottom: 2px;">
+                <span>{label}</span>
+                <span>{u['used']}/{u['limit']}</span>
+            </div>
+            <div style="background: #333; border-radius: 4px; height: 6px; overflow: hidden;">
+                <div style="background: {bar_color}; width: {pct}%; height: 100%; border-radius: 4px;"></div>
+            </div>
+        </div>"""
 
-def _increment_scan_count():
-    today_key = datetime.now().strftime("%Y-%m-%d")
-    scan_tracker = st.session_state.get("scan_tracker", {"date": today_key, "count": 0})
-    scan_tracker["count"] += 1
-    st.session_state["scan_tracker"] = scan_tracker
+    st.markdown(
+        f"""<div style="display: flex; gap: 16px; padding: 8px 0 16px 0; flex-wrap: wrap;">
+            {bars_html}
+        </div>""",
+        unsafe_allow_html=True,
+    )
 
 
 def render_daily_picks():
     """Render the auto-scan daily picks view."""
     today_str = datetime.now().strftime("%A %d %B %Y")
-    scan_count, _ = _get_scan_count()
-    scans_left = MAX_DAILY_SCANS - scan_count
+    usage = get_usage()
+    scan_count = usage["scans"]["used"]
+    scans_left = usage["scans"]["remaining"]
 
     col_title, col_btn = st.columns([4, 1])
     with col_title:
@@ -55,7 +72,7 @@ def render_daily_picks():
                 <h1 style="margin-bottom: 0;">Unitron Handelsanalys</h1>
                 <p style="color: #888; font-size: 18px;">
                     {today_str} &nbsp;·&nbsp;
-                    Skanningar idag: {scan_count}/{MAX_DAILY_SCANS}
+                    Skanningar: {scan_count}/{usage['scans']['limit']}
                 </p>
             </div>
             """,
@@ -74,6 +91,9 @@ def render_daily_picks():
                 type="secondary", use_container_width=True, disabled=True,
             )
             rescan = False
+
+    # Live API usage dashboard
+    _render_usage_bar(usage)
 
     if rescan:
         st.cache_data.clear()
@@ -417,7 +437,7 @@ def render_daily_picks():
         _update_log(scan_data["log"], live_log)
 
         st.session_state["scan_data"] = scan_data
-        _increment_scan_count()
+        track_scan()
         progress_bar.empty()
         progress_text.empty()
 
