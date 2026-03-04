@@ -41,6 +41,9 @@ def render_daily_picks():
         st.session_state.pop("scan_data", None)
 
     if "scan_data" not in st.session_state:
+        MIN_CONFIDENCE = 0.55
+        MIN_RR_RATIO = 1.5
+
         progress_text = st.empty()
         progress_bar = st.progress(0)
         scan_data = {"results": [], "report": []}
@@ -127,7 +130,6 @@ def render_daily_picks():
                         action = "NONE"
 
                     # Quality gate: reject weak signals
-                    MIN_CONFIDENCE = 0.55
                     if action != "NONE" and confidence < MIN_CONFIDENCE:
                         entry["action"] = "NONE"
                         entry["status"] = "Svag signal"
@@ -146,7 +148,7 @@ def render_daily_picks():
                         if trading_plan:
                             rr_val = (trading_plan.reward_amount / trading_plan.risk_amount
                                       if trading_plan.risk_amount > 0 else 0)
-                            if rr_val < 1.5:
+                            if rr_val < MIN_RR_RATIO:
                                 entry["action"] = "NONE"
                                 entry["status"] = "Svag signal"
                                 entry["reason"] = (
@@ -195,13 +197,8 @@ def render_daily_picks():
                     entry["ai_verdict"] = "fallback"
 
                     if decision.action != "NONE" and decision.confidence_score < MIN_CONFIDENCE:
-                        decision = decision.__class__(
-                            action="NONE", confidence_score=decision.confidence_score,
-                            current_price=decision.current_price,
-                            stop_loss_price=0, take_profit_price=0,
-                            reasoning=[f"Konfidens ({decision.confidence_score:.0%}) under minimum"],
-                            warnings=[], uncertainty_factors=[],
-                        )
+                        decision.action = "NONE"
+                        decision.reasoning = [f"Konfidens ({decision.confidence_score:.0%}) under minimum"]
 
                     fallback_plan = None
                     if decision.action != "NONE":
@@ -209,14 +206,9 @@ def render_daily_picks():
                         if fallback_plan:
                             fb_rr = (fallback_plan.reward_amount / fallback_plan.risk_amount
                                      if fallback_plan.risk_amount > 0 else 0)
-                            if fb_rr < 1.5:
-                                decision = decision.__class__(
-                                    action="NONE", confidence_score=decision.confidence_score,
-                                    current_price=decision.current_price,
-                                    stop_loss_price=0, take_profit_price=0,
-                                    reasoning=[f"Risk/reward ({fallback_plan.risk_reward_ratio}) under minimum"],
-                                    warnings=[], uncertainty_factors=[],
-                                )
+                            if fb_rr < MIN_RR_RATIO:
+                                decision.action = "NONE"
+                                decision.reasoning = [f"Risk/reward ({fallback_plan.risk_reward_ratio}) under minimum"]
                                 fallback_plan = None
 
                     entry["action"] = decision.action
