@@ -46,9 +46,11 @@ def render_daily_picks():
         MIN_CONFIDENCE = 0.55
         MIN_RR_RATIO = 1.5
 
+        st.markdown("#### ⚙️ Steg 1 — AI-screening av alla tillgångar")
         progress_text = st.empty()
         progress_bar = st.progress(0)
-        scan_data = {"results": [], "report": []}
+        live_log = st.empty()
+        scan_data = {"results": [], "report": [], "log": []}
         total = len(ALL_ASSETS_FLAT)
 
         for i, asset in enumerate(ALL_ASSETS_FLAT):
@@ -68,12 +70,20 @@ def render_daily_picks():
                 "reason": "",
             }
 
+            def _update_log(log_lines, container):
+                container.markdown(
+                    "\n".join(log_lines[-12:]),
+                    unsafe_allow_html=False,
+                )
+
             try:
                 df = fetch_ohlc(asset.ticker)
                 if df.empty:
                     entry["status"] = "Ingen data"
                     entry["reason"] = "yfinance returnerade ingen data"
                     scan_data["report"].append(entry)
+                    scan_data["log"].append(f"❌ {asset.display_name} — Ingen data")
+                    _update_log(scan_data["log"], live_log)
                     continue
 
                 tech = technical_analyze(df, ticker=asset.ticker)
@@ -81,6 +91,8 @@ def render_daily_picks():
                     entry["status"] = "For lite data"
                     entry["reason"] = f"Bara {len(df)} dagar"
                     scan_data["report"].append(entry)
+                    scan_data["log"].append(f"❌ {asset.display_name} — För lite data")
+                    _update_log(scan_data["log"], live_log)
                     continue
 
                 sr = tech.support_resistance
@@ -140,6 +152,10 @@ def render_daily_picks():
                             f"under minimum ({MIN_CONFIDENCE:.0%})"
                         )
                         scan_data["report"].append(entry)
+                        scan_data["log"].append(
+                            f"🟡 {asset.display_name} — {verdict} avvisad (konfidens {confidence:.0%} < 55%)"
+                        )
+                        _update_log(scan_data["log"], live_log)
                         continue
 
                     trading_plan = None
@@ -158,6 +174,10 @@ def render_daily_picks():
                                     f"under minimum (1:1.5)"
                                 )
                                 scan_data["report"].append(entry)
+                                scan_data["log"].append(
+                                    f"🟡 {asset.display_name} — {verdict} avvisad (R/R {trading_plan.risk_reward_ratio} < 1:1.5)"
+                                )
+                                _update_log(scan_data["log"], live_log)
                                 continue
 
                     entry["action"] = action
@@ -185,9 +205,15 @@ def render_daily_picks():
                             "trading_plan": trading_plan,
                             "headlines": headlines,
                         })
+                        scan_data["log"].append(
+                            f"🟢 {asset.display_name} — **{verdict}** ({confidence:.0%}) ✅ KANDIDAT"
+                        )
                     else:
                         entry["status"] = "Ingen signal"
                         entry["reason"] = ai_result.get("analysis", "")[:120]
+                        scan_data["log"].append(
+                            f"⚪ {asset.display_name} — NO_TRADE (AI: ingen edge)"
+                        )
                 else:
                     # Fallback to rule-based engine with same quality gates
                     week_range = get_52_week_range(df)
@@ -228,15 +254,25 @@ def render_daily_picks():
                             "trading_plan": fallback_plan,
                             "headlines": headlines,
                         })
+                        scan_data["log"].append(
+                            f"🟢 {asset.display_name} — **{decision.action}** ({decision.confidence_score:.0%}) ✅ KANDIDAT (fallback)"
+                        )
                     else:
                         entry["status"] = "Ingen signal"
                         entry["reason"] = decision.reasoning[0] if decision.reasoning else ""
+                        scan_data["log"].append(
+                            f"⚪ {asset.display_name} — Ingen signal (fallback)"
+                        )
 
             except Exception as e:
                 entry["status"] = "Fel"
                 entry["reason"] = str(e)[:80]
+                scan_data["log"].append(
+                    f"🔴 {asset.display_name} — FEL: {str(e)[:50]}"
+                )
 
             scan_data["report"].append(entry)
+            _update_log(scan_data["log"], live_log)
 
         scan_data["results"].sort(
             key=lambda x: x.get("ai_result", {}).get("confidence", 0)
@@ -246,6 +282,11 @@ def render_daily_picks():
 
         # --- Stage 2: Verify candidates ---
         if scan_data["results"]:
+            n_candidates = len(scan_data["results"])
+            scan_data["log"].append("")
+            scan_data["log"].append(f"#### ⚙️ Steg 2 — Verifierar {n_candidates} kandidat{'er' if n_candidates > 1 else ''}")
+            _update_log(scan_data["log"], live_log)
+
             progress_text.caption("Steg 2: Verifierar kandidater med andra AI-modellen...")
             progress_bar.progress(0)
 
@@ -259,9 +300,11 @@ def render_daily_picks():
                 verdict = ai_result.get("verdict", "BUY_BULL") if ai_result else "BUY_BULL"
 
                 progress_text.caption(
-                    f"Verifierar {asset.display_name} ({idx+1}/{len(scan_data['results'])})..."
+                    f"Verifierar {asset.display_name} ({idx+1}/{n_candidates})..."
                 )
-                progress_bar.progress((idx + 1) / len(scan_data["results"]))
+                progress_bar.progress((idx + 1) / n_candidates)
+                scan_data["log"].append(f"🔍 Verifierar {asset.display_name}...")
+                _update_log(scan_data["log"], live_log)
 
                 sr = tech.support_resistance
                 sr_text = _format_sr_text(
@@ -294,13 +337,42 @@ def render_daily_picks():
 
                 if verification and verification.verified:
                     verified_results.append(result)
+                    scan_data["log"].append(
+                        f"   ✅ {asset.display_name} — VERIFIERAD "
+                        f"(AI #2: {'håller med' if verification.second_ai_agrees else 'håller inte med'}, "
+                        f"risk: {verification.devils_advocate_risk})"
+                    )
                 elif verification and not verification.verified:
                     result["rejected_reason"] = "verification_failed"
                     verified_results.append(result)
+                    scan_data["log"].append(
+                        f"   ⚠️ {asset.display_name} — EJ VERIFIERAD "
+                        f"(AI #2: {'håller med' if verification.second_ai_agrees else 'AVVISAR'}, "
+                        f"risk: {verification.devils_advocate_risk})"
+                    )
                 else:
                     verified_results.append(result)
+                    scan_data["log"].append(
+                        f"   🔄 {asset.display_name} — Verifiering misslyckades"
+                    )
+
+                _update_log(scan_data["log"], live_log)
 
             scan_data["results"] = verified_results
+        else:
+            scan_data["log"].append("")
+            scan_data["log"].append("ℹ️ Inga kandidater att verifiera — steg 2 hoppades över")
+
+        # Final summary
+        n_signals = len([r for r in scan_data["results"] if r.get("verification") and r["verification"].verified])
+        n_unverified = len([r for r in scan_data["results"] if r.get("verification") and not r["verification"].verified])
+        scan_data["log"].append("")
+        scan_data["log"].append(
+            f"**Klart!** {total} tillgångar screenade → "
+            f"{len(scan_data['results'])} kandidater → "
+            f"{n_signals} verifierade, {n_unverified} ej verifierade"
+        )
+        _update_log(scan_data["log"], live_log)
 
         st.session_state["scan_data"] = scan_data
         progress_bar.empty()
