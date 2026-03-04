@@ -1,0 +1,21 @@
+name: Daily Market Scan
+
+on:
+  schedule:
+    # 07:00 CET (06:00 UTC) on weekdays only
+    - cron: '0 6 * * 1-5'
+  workflow_dispatch: # manual trigger
+
+jobs:
+  wake-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake up Streamlit app and trigger scan
+        run: |
+          echo "Pinging Streamlit app to trigger daily scan..."
+          curl -s -o /dev/null -w "HTTP %{http_code}" \
+            --max-time 120 \
+            "https://unitron-trading-8uacg3uh9fst87iyqka2tx.streamlit.app/" \
+            || echo "App may need manual wake-up"
+          echo ""
+          echo "Scan triggered at $(date -u '+%Y-%m-%d %H:%M UTC')"
