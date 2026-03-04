@@ -1,5 +1,6 @@
 """Dagens Rekommendationer -- auto-scan all assets with AI as primary decision maker."""
 
+import html
 import json
 from datetime import datetime
 
@@ -465,10 +466,10 @@ def _render_pick_card(result: dict, rank: int):
                 <span style="font-size: 36px;">{icon}</span>
                 <div>
                     <div style="font-size: 24px; font-weight: 700; color: {color};">
-                        #{rank} {asset.display_name}
+                        #{rank} {html.escape(asset.display_name)}
                     </div>
                     <div style="font-size: 14px; color: #888;">
-                        {asset.ticker} — {asset.category} — via {provider}
+                        {html.escape(asset.ticker)} — {html.escape(asset.category)} — via {html.escape(provider)}
                     </div>
                 </div>
                 <div style="margin-left: auto; text-align: right;">
@@ -490,7 +491,7 @@ def _render_pick_card(result: dict, rank: int):
                 <strong>VIX:</strong> {tech.vix_value if tech.vix_value else 'N/A'}
             </div>
             <div style="font-size: 14px; color: #aaa; line-height: 1.5; margin-bottom: 8px;">
-                {analysis_text}
+                {html.escape(analysis_text)}
             </div>
             {"<div style='font-size: 14px; color: #ccc; border-top: 1px solid #444; padding-top: 10px; margin-top: 4px; display: flex; gap: 24px; flex-wrap: wrap;'><div><span style=\"color: #888;\">Ingång:</span> <strong>" + f"{trading_plan.entry_price:,.2f}" + "</strong></div><div><span style=\"color: #888;\">Stop-Loss:</span> <strong style=\"color: #FF6B6B;\">" + f"{trading_plan.stop_loss:,.2f}" + "</strong> <span style=\"font-size:11px;color:#666;\">(" + trading_plan.stop_loss_method + ")</span></div><div><span style=\"color: #888;\">Målkurs:</span> <strong style=\"color: #69F0AE;\">" + f"{trading_plan.take_profit:,.2f}" + "</strong> <span style=\"font-size:11px;color:#666;\">(" + trading_plan.take_profit_method + ")</span></div><div><span style=\"color: #888;\">R/R:</span> <strong>" + trading_plan.risk_reward_ratio + "</strong></div></div>" if trading_plan else ""}
         </div>
@@ -498,7 +499,7 @@ def _render_pick_card(result: dict, rank: int):
         unsafe_allow_html=True,
     )
 
-    with st.expander(f"Detaljer & Handelsplan — {asset.display_name}"):
+    with st.expander(f"Detaljer & Handelsplan — {html.escape(asset.display_name)}"):
         if key_factors:
             st.markdown("**Avgörande faktorer:**")
             for f in key_factors:

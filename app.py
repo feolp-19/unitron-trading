@@ -1,3 +1,6 @@
+import hmac
+import time
+
 import streamlit as st
 
 from config import search_asset, AI_PROVIDER
@@ -11,24 +14,44 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+MAX_LOGIN_ATTEMPTS = 5
+LOCKOUT_SECONDS = 60
+
 
 def check_password() -> bool:
     try:
         correct_pw = st.secrets["passwords"]["app_password"]
     except (KeyError, FileNotFoundError):
-        return True
+        st.error("⚠️ Lösenord ej konfigurerat. Kontakta administratören.")
+        return False
 
     if st.session_state.get("authenticated"):
         return True
 
+    attempts = st.session_state.get("login_attempts", 0)
+    locked_until = st.session_state.get("locked_until", 0)
+
+    if time.time() < locked_until:
+        remaining = int(locked_until - time.time())
+        st.error(f"🔒 För många misslyckade försök. Vänta {remaining} sekunder.")
+        return False
+
     st.title("🔒 Unitron Handelsanalys")
     pw = st.text_input("Lösenord", type="password")
     if st.button("Logga in", type="primary"):
-        if pw == correct_pw:
+        if hmac.compare_digest(pw.encode(), correct_pw.encode()):
             st.session_state["authenticated"] = True
+            st.session_state["login_attempts"] = 0
             st.rerun()
         else:
-            st.error("Fel lösenord")
+            attempts += 1
+            st.session_state["login_attempts"] = attempts
+            if attempts >= MAX_LOGIN_ATTEMPTS:
+                st.session_state["locked_until"] = time.time() + LOCKOUT_SECONDS
+                st.error(f"🔒 För många försök. Låst i {LOCKOUT_SECONDS} sekunder.")
+            else:
+                remaining = MAX_LOGIN_ATTEMPTS - attempts
+                st.error(f"Fel lösenord ({remaining} försök kvar)")
     return False
 
 

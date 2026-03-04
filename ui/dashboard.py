@@ -1,3 +1,4 @@
+import html
 import json
 
 import streamlit as st
@@ -161,7 +162,7 @@ def render_dashboard(asset: Asset):
                     </div>
                 </div>
                 <div style="font-size: 16px; color: #ddd; line-height: 1.6;">
-                    {ai_analysis.get('analysis', '')}
+                    {html.escape(ai_analysis.get('analysis', ''))}
                 </div>
             </div>
             """,
