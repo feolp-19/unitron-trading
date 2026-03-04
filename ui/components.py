@@ -75,7 +75,7 @@ def render_confidence_bar(confidence: float):
 
 def render_price_chart(df: pd.DataFrame, asset_name: str):
     """Render candlestick chart with SMA overlay and RSI subplot."""
-    if df.empty or len(df) < 200:
+    if df.empty or len(df) < 50:
         st.warning(T["insufficient_data"])
         return
 
@@ -128,9 +128,10 @@ def render_price_chart(df: pd.DataFrame, asset_name: str):
         row=2, col=1,
     )
 
-    # RSI threshold lines
-    fig.add_hline(y=70, line_dash="dash", line_color="#FF1744", opacity=0.5, row=2, col=1)
-    fig.add_hline(y=30, line_dash="dash", line_color="#00C853", opacity=0.5, row=2, col=1)
+    fig.add_hline(y=70, line_dash="dash", line_color="#FF1744", opacity=0.3, row=2, col=1)
+    fig.add_hline(y=55, line_dash="dot", line_color="#FF1744", opacity=0.5, row=2, col=1)
+    fig.add_hline(y=45, line_dash="dot", line_color="#00C853", opacity=0.5, row=2, col=1)
+    fig.add_hline(y=30, line_dash="dash", line_color="#00C853", opacity=0.3, row=2, col=1)
 
     fig.update_layout(
         height=600,

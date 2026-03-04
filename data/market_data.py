@@ -1,32 +1,27 @@
-from datetime import datetime, timedelta
-
 import pandas as pd
 import streamlit as st
 import yfinance as yf
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
-def fetch_ohlc(ticker: str, days: int = 300) -> pd.DataFrame:
+def fetch_ohlc(ticker: str, period: str = "2y") -> pd.DataFrame:
     """Fetch daily OHLC data from yfinance. Returns empty DataFrame on failure."""
     try:
-        end = datetime.now()
-        start = end - timedelta(days=days)
-        df = yf.download(
-            ticker,
-            start=start.strftime("%Y-%m-%d"),
-            end=end.strftime("%Y-%m-%d"),
-            progress=False,
-            auto_adjust=True,
-        )
+        df = yf.download(ticker, period=period, progress=False, auto_adjust=True)
         if df.empty:
             return pd.DataFrame()
 
-        # Flatten multi-level columns if present (yfinance >= 0.2.40)
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
 
-        df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
+        required = ["Open", "High", "Low", "Close", "Volume"]
+        missing = [c for c in required if c not in df.columns]
+        if missing:
+            return pd.DataFrame()
+
+        df = df[required].copy()
         df.index.name = "Date"
+        df = df.dropna(subset=["Close"])
         return df
     except Exception:
         return pd.DataFrame()

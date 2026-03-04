@@ -26,7 +26,8 @@ def compute_rsi(series: pd.Series, period: int = 14) -> pd.Series:
 
 
 def compute_sma(series: pd.Series, period: int = 200) -> pd.Series:
-    return series.rolling(window=period).mean()
+    effective_period = min(period, len(series) - 1)
+    return series.rolling(window=effective_period, min_periods=1).mean()
 
 
 def compute_atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
@@ -43,12 +44,14 @@ def compute_atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
 
 def analyze(df: pd.DataFrame) -> TechnicalSignal | None:
     """Run full technical analysis on OHLC DataFrame. Returns None if insufficient data."""
-    if df.empty or len(df) < 200:
+    if df.empty or len(df) < 50:
         return None
 
     close = df["Close"]
+    sma_period = min(200, len(close) - 1)
+
     rsi_series = compute_rsi(close)
-    sma_series = compute_sma(close)
+    sma_series = compute_sma(close, sma_period)
     atr_series = compute_atr(df)
 
     current_price = float(close.iloc[-1])
@@ -70,10 +73,13 @@ def analyze(df: pd.DataFrame) -> TechnicalSignal | None:
     else:
         price_vs_sma = "at"
 
-    # Direction logic
-    if rsi_value < 30 and price_vs_sma == "above":
+    # Direction logic (relaxed thresholds for actionable signals)
+    # BULL: RSI < 45 (leaning oversold) AND price above SMA (uptrend intact)
+    # BEAR: RSI > 55 (leaning overbought) AND price below SMA (downtrend intact)
+    # Strong signals use stricter thresholds (< 30 / > 70) for confidence scoring
+    if rsi_value < 45 and price_vs_sma == "above":
         direction = "BULL"
-    elif rsi_value > 70 and price_vs_sma == "below":
+    elif rsi_value > 55 and price_vs_sma == "below":
         direction = "BEAR"
     else:
         direction = "NEUTRAL"
