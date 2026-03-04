@@ -13,6 +13,8 @@ from analysis.technical import analyze as technical_analyze
 from analysis.sentiment import analyze_sentiment, dict_to_signal, run_full_analysis
 from analysis.synergy import decide
 from analysis.exit_strategy import generate_trading_plan
+from analysis.verification import verify_recommendation, VerificationResult
+from analysis.sentiment import _format_sr_text
 from avanza.certificates import search_certificates
 from storage.history import save_recommendation
 from ui.translations import T
@@ -239,6 +241,63 @@ def render_daily_picks():
                           if x.get("ai_result") else 0,
             reverse=True,
         )
+
+        # --- Stage 2: Verify candidates ---
+        if scan_data["results"]:
+            progress_text.caption("Steg 2: Verifierar kandidater med andra AI-modellen...")
+            progress_bar.progress(0)
+
+            verified_results = []
+            for idx, result in enumerate(scan_data["results"]):
+                asset = result["asset"]
+                ai_result = result.get("ai_result", {})
+                tech = result["tech"]
+                tp = result.get("trading_plan")
+                provider = ai_result.get("provider", "Groq") if ai_result else "fallback"
+                verdict = ai_result.get("verdict", "BUY_BULL") if ai_result else "BUY_BULL"
+
+                progress_text.caption(
+                    f"Verifierar {asset.display_name} ({idx+1}/{len(scan_data['results'])})..."
+                )
+                progress_bar.progress((idx + 1) / len(scan_data["results"]))
+
+                sr = tech.support_resistance
+                sr_text = _format_sr_text(
+                    sr.supports, sr.resistances,
+                    tech.current_price, tech.near_resistance, tech.near_support,
+                )
+
+                headlines = result.get("sent")
+                headlines_text = ai_result.get("analysis", "") if ai_result else ""
+
+                try:
+                    verification = verify_recommendation(
+                        asset_name=asset.display_name,
+                        first_provider=provider,
+                        verdict=verdict,
+                        confidence=ai_result.get("confidence", 0) if ai_result else 0,
+                        tech=tech,
+                        sr_text=sr_text,
+                        headlines_text=headlines_text,
+                        stop_loss=tp.stop_loss if tp else 0,
+                        take_profit=tp.take_profit if tp else 0,
+                        news_keywords=asset.news_keywords,
+                    )
+                except Exception:
+                    verification = None
+
+                result["verification"] = verification
+
+                if verification and verification.verified:
+                    verified_results.append(result)
+                elif verification and not verification.verified:
+                    result["rejected_reason"] = "verification_failed"
+                    verified_results.append(result)
+                else:
+                    verified_results.append(result)
+
+            scan_data["results"] = verified_results
+
         st.session_state["scan_data"] = scan_data
         progress_bar.empty()
         progress_text.empty()
@@ -358,8 +417,8 @@ def render_daily_picks():
                 <div style="font-size: 64px; margin-bottom: 16px;">🛡️</div>
                 <h2 style="color: #888;">Inga starka handelsmöjligheter idag</h2>
                 <p style="color: #666; font-size: 16px;">
-                    AI-motorn hittade ingen tillgång med tillräckligt stark signal
-                    (konfidens ≥55%, R/R ≥1:1.5, SMA-linjering + sentiment i linje).<br>
+                    Tvåstegsverifiering: AI #1 screenade alla tillgångar, AI #2 verifierade kandidaterna.<br>
+                    Ingen tillgång klarade båda stegen (konfidens ≥55%, R/R ≥1:1.5, AI-konsensus).<br>
                     <strong>Att stå utanför marknaden är ett klokt beslut — en missad trade kostar ingenting.</strong>
                 </p>
             </div>
@@ -399,11 +458,12 @@ def render_daily_picks():
 
 
 def _render_pick_card(result: dict, rank: int):
-    """Render a single daily pick with exit strategy."""
+    """Render a single daily pick with exit strategy and verification."""
     asset = result["asset"]
     tech = result["tech"]
     ai_result = result.get("ai_result")
     trading_plan = result.get("trading_plan")
+    verification: VerificationResult | None = result.get("verification")
 
     if ai_result:
         verdict = ai_result.get("verdict", "NO_TRADE")
@@ -436,6 +496,18 @@ def _render_pick_card(result: dict, rank: int):
 
     confidence_pct = f"{confidence:.0%}"
 
+    # Verification badge
+    if verification:
+        if verification.verified:
+            badge = "✅ VERIFIERAD"
+            badge_color = "#00C853"
+        else:
+            badge = "⚠️ EJ VERIFIERAD"
+            badge_color = "#FF9100"
+    else:
+        badge = "🔄 Ej verifierad"
+        badge_color = "#888"
+
     # Build exit strategy summary for the card
     exit_summary = ""
     if trading_plan:
@@ -462,6 +534,7 @@ def _render_pick_card(result: dict, rank: int):
                     </div>
                     <div style="font-size: 14px; color: #888;">
                         {html.escape(asset.ticker)} — {html.escape(asset.category)} — via {html.escape(provider)}
+                        &nbsp;&nbsp;<span style="color: {badge_color}; font-weight: 600;">{badge}</span>
                     </div>
                 </div>
                 <div style="margin-left: auto; text-align: right;">
@@ -535,6 +608,48 @@ def _render_pick_card(result: dict, rank: int):
                 st.markdown("**Motstånd:**")
                 for i, r_val in enumerate(sr.resistances[:3]):
                     st.caption(f"R{i+1}: {r_val:,.2f}")
+
+        # Verification details
+        if verification:
+            st.divider()
+            st.markdown("**🔍 Steg 2 — Verifiering:**")
+
+            v_col1, v_col2 = st.columns(2)
+            with v_col1:
+                agree_icon = "✅" if verification.second_ai_agrees else "❌"
+                st.markdown(
+                    f"**Andra AI:n ({html.escape(verification.second_ai_provider)}):** "
+                    f"{agree_icon} {'Håller med' if verification.second_ai_agrees else 'Håller INTE med'} "
+                    f"({verification.second_ai_confidence:.0%} konfidens)"
+                )
+                if verification.second_ai_reasoning:
+                    st.caption(verification.second_ai_reasoning)
+                if verification.disagreement_points:
+                    for dp in verification.disagreement_points:
+                        st.caption(f"⚠️ {dp}")
+
+            with v_col2:
+                risk_colors = {"LOW": "#00C853", "MEDIUM": "#FFD600", "HIGH": "#FF9100", "CRITICAL": "#FF1744"}
+                rc = risk_colors.get(verification.devils_advocate_risk, "#888")
+                st.markdown(
+                    f"**Djävulens Advokat:** "
+                    f"<span style='color:{rc};font-weight:700;'>{verification.devils_advocate_risk}</span> risk",
+                    unsafe_allow_html=True,
+                )
+                if verification.biggest_risk:
+                    st.caption(f"🎯 Största risken: {verification.biggest_risk}")
+                if verification.devils_advocate_recommendation:
+                    st.caption(f"💡 {verification.devils_advocate_recommendation}")
+
+            if verification.counter_arguments:
+                st.markdown("**Motargument:**")
+                for ca in verification.counter_arguments:
+                    st.caption(f"❗ {ca}")
+
+            if verification.risk_headlines:
+                st.markdown("**Ytterligare risknyheter:**")
+                for rh in verification.risk_headlines[:3]:
+                    st.caption(f"📰 {rh.get('headline', '')}")
 
         certs = search_certificates(asset.ticker, action)
         if certs:

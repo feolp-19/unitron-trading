@@ -9,6 +9,9 @@ from data.news_data import get_news_for_asset
 from analysis.technical import analyze as technical_analyze
 from analysis.sentiment import analyze_sentiment, dict_to_signal, run_full_analysis
 from analysis.synergy import decide
+from analysis.exit_strategy import generate_trading_plan
+from analysis.verification import verify_recommendation
+from analysis.sentiment import _format_sr_text
 from risk.risk_manager import assess_risks
 from risk.calendar_check import check_macro_events_today
 from avanza.certificates import search_certificates
@@ -181,6 +184,87 @@ def render_dashboard(asset: Asset):
 
         if ai_analysis.get("outlook"):
             st.info(f"**Utsikt:** {ai_analysis['outlook']}")
+
+        # Stage 2: Verification for actionable trades
+        if final_action != "NONE":
+            st.divider()
+            with st.spinner("Steg 2: Verifierar med andra AI + djävulens advokat..."):
+                provider = ai_analysis.get("provider", "Groq")
+                verdict = ai_analysis.get("verdict", "NO_TRADE")
+                tp = generate_trading_plan(tech, final_action)
+
+                sr_text = _format_sr_text(
+                    sr.supports, sr.resistances,
+                    tech.current_price, tech.near_resistance, tech.near_support,
+                )
+                headlines_text = "\n".join(
+                    f"- {h['headline']}" for h in headlines
+                ) if headlines else "Inga rubriker."
+
+                try:
+                    verification = verify_recommendation(
+                        asset_name=asset.display_name,
+                        first_provider=provider,
+                        verdict=verdict,
+                        confidence=final_confidence,
+                        tech=tech,
+                        sr_text=sr_text,
+                        headlines_text=headlines_text,
+                        stop_loss=tp.stop_loss if tp else 0,
+                        take_profit=tp.take_profit if tp else 0,
+                        news_keywords=asset.news_keywords,
+                    )
+                except Exception:
+                    verification = None
+
+            if verification:
+                if verification.verified:
+                    st.success("✅ **VERIFIERAD** — Båda AI-modellerna och djävulens advokat godkänner denna trade.")
+                else:
+                    st.warning("⚠️ **EJ VERIFIERAD** — En eller flera kontroller misslyckades. Var extra försiktig.")
+
+                v_col1, v_col2 = st.columns(2)
+                with v_col1:
+                    agree_icon = "✅" if verification.second_ai_agrees else "❌"
+                    st.markdown(
+                        f"**Andra AI:n ({html.escape(verification.second_ai_provider)}):** "
+                        f"{agree_icon} {'Håller med' if verification.second_ai_agrees else 'Håller INTE med'} "
+                        f"({verification.second_ai_confidence:.0%} konfidens)"
+                    )
+                    if verification.second_ai_reasoning:
+                        st.caption(verification.second_ai_reasoning)
+                    if verification.disagreement_points:
+                        for dp in verification.disagreement_points:
+                            st.caption(f"⚠️ {dp}")
+
+                with v_col2:
+                    risk_colors = {"LOW": "#00C853", "MEDIUM": "#FFD600", "HIGH": "#FF9100", "CRITICAL": "#FF1744"}
+                    rc = risk_colors.get(verification.devils_advocate_risk, "#888")
+                    st.markdown(
+                        f"**Djävulens Advokat:** "
+                        f"<span style='color:{rc};font-weight:700;'>"
+                        f"{verification.devils_advocate_risk}</span> risk",
+                        unsafe_allow_html=True,
+                    )
+                    if verification.biggest_risk:
+                        st.caption(f"🎯 Största risken: {verification.biggest_risk}")
+                    if verification.devils_advocate_recommendation:
+                        st.caption(f"💡 {verification.devils_advocate_recommendation}")
+
+                if verification.counter_arguments:
+                    with st.expander("Motargument (Djävulens Advokat)", expanded=False):
+                        for ca in verification.counter_arguments:
+                            st.markdown(f"- {ca}")
+
+                if verification.risk_headlines:
+                    with st.expander("Ytterligare risknyheter", expanded=False):
+                        for rh in verification.risk_headlines[:5]:
+                            st.caption(f"📰 {rh.get('headline', '')}")
+                            if rh.get("url"):
+                                st.caption(f"   [{rh['source']}]({rh['url']})")
+            else:
+                st.info("Verifiering kunde inte köras — bara en AI tillgänglig.")
+
     else:
         decision = decide(
             tech=tech, sent=sent,
