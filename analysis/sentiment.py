@@ -105,7 +105,28 @@ Your job is to synthesize ALL the data below and make ONE clear trading decision
 4. VOLUME: Volume > 1.5x average confirms the current move. Low volume means weak conviction.
 5. VIX: High VIX (>25) = fear/uncertainty, be cautious. Low VIX (<15) = complacency.
 6. NEWS: Headlines must support the technical direction. Contradicting news weakens the signal.
-7. CONFIDENCE: Only > 0.7 if MULTIPLE factors align (trend + momentum + volume + news + no S/R obstacles).
+
+=== CONFIDENCE SCORING RUBRIC (you MUST follow this) ===
+Start at 0.50 and adjust:
++0.10 if SMA alignment is bullish_stack (for BULL) or bearish_stack (for BEAR)
++0.05 if SMA alignment is mixed but price is on the right side of SMA200
++0.10 if daily AND weekly timeframes are aligned (same direction)
+-0.10 if daily and weekly timeframes CONFLICT
++0.05 if RSI supports the direction (RSI < 50 for BEAR, RSI > 50 for BULL)
++0.05 if RSI is in extreme zone favoring the trade (< 30 for bounce BULL, > 70 for reversal BEAR)
+-0.10 if RSI contradicts (e.g. RSI > 65 for BULL = overbought risk)
++0.10 if volume > 1.5x average (strong conviction)
+-0.05 if volume < 0.7x average (weak conviction)
++0.10 if news sentiment clearly supports the direction
+-0.10 if news sentiment contradicts the direction
++0.05 if no S/R obstacle within 3% of current price in the trade direction
+-0.10 if price is within 2% of a major resistance (for BULL) or support (for BEAR)
+-0.05 if VIX > 25 (elevated fear)
+-0.10 if VIX > 30 (extreme fear)
+
+Final confidence MUST be between 0.30 and 0.95. Round to 2 decimals.
+Each asset WILL score differently — do NOT default to the same number.
+Show your math in the analysis field (e.g. "Base 0.50 + SMA aligned +0.10 + volume confirms +0.10 - near resistance -0.10 = 0.60").
 
 Return ONLY valid JSON:
 {{
