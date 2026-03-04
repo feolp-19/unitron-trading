@@ -183,6 +183,7 @@ def render_daily_picks():
                             "tech": tech,
                             "sent": sent,
                             "trading_plan": trading_plan,
+                            "headlines": headlines,
                         })
                     else:
                         entry["status"] = "Ingen signal"
@@ -225,6 +226,7 @@ def render_daily_picks():
                             "sent": sent,
                             "decision": decision,
                             "trading_plan": fallback_plan,
+                            "headlines": headlines,
                         })
                     else:
                         entry["status"] = "Ingen signal"
@@ -267,8 +269,10 @@ def render_daily_picks():
                     tech.current_price, tech.near_resistance, tech.near_support,
                 )
 
-                headlines = result.get("sent")
-                headlines_text = ai_result.get("analysis", "") if ai_result else ""
+                raw_headlines = result.get("headlines", [])
+                headlines_text = "\n".join(
+                    f"- {h.get('headline', '')}" for h in raw_headlines
+                ) if raw_headlines else "Inga rubriker tillgängliga."
 
                 try:
                     verification = verify_recommendation(
