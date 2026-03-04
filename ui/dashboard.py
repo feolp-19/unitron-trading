@@ -19,7 +19,17 @@ from ui.components import (
     render_price_chart,
     render_headline_table,
     render_warning_box,
+    render_trading_plan,
 )
+
+
+def _sma_alignment_sv(alignment: str) -> str:
+    labels = {
+        "bullish_stack": "Hausse-linjering (Pris > SMA20 > SMA50 > SMA200)",
+        "bearish_stack": "Baisse-linjering (Pris < SMA20 < SMA50 < SMA200)",
+        "mixed": "Blandad (ingen tydlig ordning)",
+    }
+    return labels.get(alignment, alignment)
 
 
 def render_dashboard(asset: Asset):
@@ -38,6 +48,8 @@ def render_dashboard(asset: Asset):
         st.error(T["insufficient_data"])
         return
 
+    sr = tech.support_resistance
+
     with st.spinner("Analyserar nyheter och sentiment..."):
         headlines = get_news_for_asset(asset)
         headlines_json = json.dumps(headlines)
@@ -53,10 +65,13 @@ def render_dashboard(asset: Asset):
         ai_analysis = run_full_analysis(
             asset_name=asset.display_name,
             price=tech.current_price,
+            sma_20=tech.sma_20,
+            sma_50=tech.sma_50,
             sma_200=tech.sma_200,
             price_vs_sma=tech.price_vs_sma,
             sma_50w=tech.sma_50w,
             price_vs_weekly_sma=tech.price_vs_weekly_sma,
+            sma_alignment=tech.sma_alignment,
             rsi=tech.rsi_value,
             atr=tech.atr_value,
             rsi_trend=tech.rsi_trend_2d,
@@ -64,10 +79,13 @@ def render_dashboard(asset: Asset):
             volume_ratio=tech.volume_ratio,
             vix_value=tech.vix_value,
             vix_level=tech.vix_level,
+            supports_json=json.dumps(sr.supports),
+            resistances_json=json.dumps(sr.resistances),
+            near_resistance=tech.near_resistance,
+            near_support=tech.near_support,
             headlines_json=headlines_json,
         )
 
-    # Determine the action for logging and certificates
     if ai_analysis:
         verdict = ai_analysis.get("verdict", "NO_TRADE")
         if verdict == "BUY_BULL":
@@ -160,9 +178,6 @@ def render_dashboard(asset: Asset):
             for r in ai_analysis["risks"]:
                 st.caption(f"⚠️ {r}")
 
-        if ai_analysis.get("stop_loss_reasoning"):
-            st.info(f"**Stop-loss:** {ai_analysis['stop_loss_reasoning']}")
-
         if ai_analysis.get("outlook"):
             st.info(f"**Utsikt:** {ai_analysis['outlook']}")
     else:
@@ -178,8 +193,11 @@ def render_dashboard(asset: Asset):
             for reason in decision.reasoning:
                 st.markdown(f"- {reason}")
 
-    # === 2. Technical Analysis ===
-    with st.expander(T["tech_title"], expanded=True):
+    # === 2. Teknisk Granskning & Handelsplan ===
+    with st.expander("Teknisk Granskning & Handelsplan", expanded=True):
+
+        # --- Indikatorer ---
+        st.subheader("Indikatorer")
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric(T["price_label"], f"{tech.current_price:,.2f}")
@@ -187,28 +205,90 @@ def render_dashboard(asset: Asset):
             rsi_delta = "Oversalt" if tech.rsi_value < 30 else ("Overkopt" if tech.rsi_value > 70 else "Neutral")
             st.metric(T["rsi_label"], f"{tech.rsi_value:.1f}", delta=rsi_delta)
         with col3:
-            sma_delta = T[f"price_{tech.price_vs_sma}_sma"]
-            st.metric(T["sma_label"], f"{tech.sma_200:,.2f}", delta=sma_delta)
+            st.metric(T["atr_label"], f"{tech.atr_value:,.2f}",
+                       delta=f"{tech.atr_ratio:.1f}x" if tech.atr_ratio != 1.0 else None)
         with col4:
-            st.metric(T["atr_label"], f"{tech.atr_value:,.2f}")
-
-        # New data row: VIX, Volume, Weekly SMA
-        col5, col6, col7 = st.columns(3)
-        with col5:
             vix_display = f"{tech.vix_value:.1f}" if tech.vix_value else "N/A"
             vix_delta = T.get(f"vix_{tech.vix_level}", tech.vix_level)
-            st.metric("VIX (Fear & Greed)", vix_display, delta=vix_delta)
-        with col6:
-            vol_delta = "Hög" if tech.volume_ratio > 1.5 else ("Låg" if tech.volume_ratio < 0.7 else "Normal")
-            st.metric("Volym vs 20d snitt", f"{tech.volume_ratio:.1f}x", delta=vol_delta)
-        with col7:
+            st.metric("VIX", vix_display, delta=vix_delta)
+
+        # SMA status row
+        st.markdown("**SMA-status:**")
+        sma_col1, sma_col2, sma_col3, sma_col4 = st.columns(4)
+        with sma_col1:
+            st.metric("SMA 20", f"{tech.sma_20:,.2f}",
+                       delta="Pris over" if tech.current_price > tech.sma_20 else "Pris under")
+        with sma_col2:
+            st.metric("SMA 50", f"{tech.sma_50:,.2f}",
+                       delta="Pris over" if tech.current_price > tech.sma_50 else "Pris under")
+        with sma_col3:
+            sma_delta = T[f"price_{tech.price_vs_sma}_sma"]
+            st.metric("SMA 200", f"{tech.sma_200:,.2f}", delta=sma_delta)
+        with sma_col4:
             if tech.sma_50w:
                 w_delta = T.get(f"price_{tech.price_vs_weekly_sma}_weekly", tech.price_vs_weekly_sma)
-                st.metric("50-veckors SMA", f"{tech.sma_50w:,.2f}", delta=w_delta)
+                st.metric("50v SMA", f"{tech.sma_50w:,.2f}", delta=w_delta)
             else:
-                st.metric("50-veckors SMA", "N/A")
+                st.metric("50v SMA", "N/A")
 
-        render_price_chart(df, asset.display_name)
+        st.caption(f"SMA-linjering: {_sma_alignment_sv(tech.sma_alignment)}")
+
+        # Volume
+        vol_col1, vol_col2 = st.columns(2)
+        with vol_col1:
+            vol_delta = "Hog" if tech.volume_ratio > 1.5 else ("Lag" if tech.volume_ratio < 0.7 else "Normal")
+            st.metric("Volym vs 20d snitt", f"{tech.volume_ratio:.1f}x", delta=vol_delta)
+
+        st.divider()
+
+        # --- Stöd & Motstånd ---
+        st.subheader("Stöd & Motstånd")
+        sr_col1, sr_col2 = st.columns(2)
+        with sr_col1:
+            st.markdown("**Stödnivåer (Support):**")
+            if sr.supports:
+                for i, s in enumerate(sr.supports):
+                    dist_pct = ((s - tech.current_price) / tech.current_price) * 100
+                    st.markdown(f"S{i+1}: **{s:,.2f}** ({dist_pct:+.1f}%)")
+            else:
+                st.caption("Inga tydliga stödnivåer identifierade")
+        with sr_col2:
+            st.markdown("**Motståndsnivåer (Resistance):**")
+            if sr.resistances:
+                for i, r in enumerate(sr.resistances):
+                    dist_pct = ((r - tech.current_price) / tech.current_price) * 100
+                    st.markdown(f"R{i+1}: **{r:,.2f}** ({dist_pct:+.1f}%)")
+            else:
+                st.caption("Inga tydliga motståndsnivåer identifierade")
+
+        if tech.near_resistance:
+            st.warning(
+                f"Ankrings-bias: Priset ligger nära motstånd ({sr.resistances[0]:,.2f}). "
+                f"Risk för avvisning — överväg att vänta på bekräftat utbrott."
+            )
+        if tech.near_support:
+            st.info(
+                f"Priset ligger nära stöd ({sr.supports[0]:,.2f}). "
+                f"Potentiell studszon — bekräftelse krävs."
+            )
+
+        st.divider()
+
+        # --- Chart with S/R ---
+        render_price_chart(
+            df, asset.display_name,
+            supports=sr.supports,
+            resistances=sr.resistances,
+        )
+
+        st.divider()
+
+        # --- EXIT-STRATEGI (Handelsplan) ---
+        if final_action != "NONE" and risk.trading_plan:
+            st.subheader("EXIT-STRATEGI")
+            render_trading_plan(risk.trading_plan, final_action)
+        elif final_action == "NONE":
+            st.info("Ingen aktiv handelsplan — motorn rekommenderar att avvakta.")
 
     # === 3. News & Sentiment ===
     with st.expander(T["sentiment_title"], expanded=False):
@@ -227,22 +307,7 @@ def render_dashboard(asset: Asset):
 
         render_headline_table(sent.headline_details)
 
-    # === 4. Risk Management ===
-    if final_action != "NONE":
-        with st.expander(T["risk_title"], expanded=True):
-            r_col1, r_col2, r_col3, r_col4 = st.columns(4)
-            with r_col1:
-                st.metric(T["entry_label"], f"{risk.exit_plan['entry']:,.2f}")
-            with r_col2:
-                st.metric(T["stop_loss_label"], f"{risk.exit_plan['stop_loss']:,.2f}")
-            with r_col3:
-                st.metric(T["take_profit_label"], f"{risk.exit_plan['take_profit']:,.2f}")
-            with r_col4:
-                st.metric(T["risk_reward_label"], risk.exit_plan["risk_reward"])
-
-            st.markdown(f"**{T['exit_strategy_label']}:** {risk.exit_plan['strategy']}")
-
-    # === 5. Avanza Certificates ===
+    # === 4. Avanza Certificates ===
     if final_action in ("BULL", "BEAR"):
         with st.expander(T["avanza_title"], expanded=True):
             certs = search_certificates(asset.ticker, final_action)
@@ -260,7 +325,7 @@ def render_dashboard(asset: Asset):
             else:
                 st.info(T["avanza_no_certs"])
 
-    # === 6. Warnings ===
+    # === 5. Warnings ===
     all_warnings = macro_warnings[:]
     if risk.bias_warnings:
         all_warnings.extend(risk.bias_warnings)

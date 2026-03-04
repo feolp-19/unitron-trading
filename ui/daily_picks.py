@@ -11,6 +11,7 @@ from data.news_data import get_news_for_asset
 from analysis.technical import analyze as technical_analyze
 from analysis.sentiment import analyze_sentiment, dict_to_signal, run_full_analysis
 from analysis.synergy import decide
+from analysis.exit_strategy import generate_trading_plan
 from avanza.certificates import search_certificates
 from storage.history import save_recommendation
 from ui.translations import T
@@ -76,6 +77,7 @@ def render_daily_picks():
                     scan_data["report"].append(entry)
                     continue
 
+                sr = tech.support_resistance
                 entry["rsi"] = f"{tech.rsi_value:.1f}"
                 entry["vix"] = f"{tech.vix_value:.1f}" if tech.vix_value else "-"
                 entry["volume"] = f"{tech.volume_ratio:.1f}x"
@@ -87,14 +89,16 @@ def render_daily_picks():
 
                 entry["sentiment"] = f"{sent.direction} ({sent.confidence:.0%})"
 
-                # AI is the primary decision maker
                 ai_result = run_full_analysis(
                     asset_name=asset.display_name,
                     price=tech.current_price,
+                    sma_20=tech.sma_20,
+                    sma_50=tech.sma_50,
                     sma_200=tech.sma_200,
                     price_vs_sma=tech.price_vs_sma,
                     sma_50w=tech.sma_50w,
                     price_vs_weekly_sma=tech.price_vs_weekly_sma,
+                    sma_alignment=tech.sma_alignment,
                     rsi=tech.rsi_value,
                     atr=tech.atr_value,
                     rsi_trend=tech.rsi_trend_2d,
@@ -102,6 +106,10 @@ def render_daily_picks():
                     volume_ratio=tech.volume_ratio,
                     vix_value=tech.vix_value,
                     vix_level=tech.vix_level,
+                    supports_json=json.dumps(sr.supports),
+                    resistances_json=json.dumps(sr.resistances),
+                    near_resistance=tech.near_resistance,
+                    near_support=tech.near_support,
                     headlines_json=headlines_json,
                 )
 
@@ -123,14 +131,16 @@ def render_daily_picks():
                         entry["status"] = "SIGNAL"
                         entry["reason"] = ai_result.get("analysis", "")[:120]
 
+                        trading_plan = generate_trading_plan(tech, action)
+
                         save_recommendation(
                             ticker=asset.ticker,
                             asset_name=asset.display_name,
                             action=action,
                             confidence=confidence,
                             entry_price=tech.current_price,
-                            stop_loss=0,
-                            take_profit=0,
+                            stop_loss=trading_plan.stop_loss if trading_plan else 0,
+                            take_profit=trading_plan.take_profit if trading_plan else 0,
                             reasoning=ai_result.get("key_factors", []),
                         )
 
@@ -139,12 +149,12 @@ def render_daily_picks():
                             "ai_result": ai_result,
                             "tech": tech,
                             "sent": sent,
+                            "trading_plan": trading_plan,
                         })
                     else:
                         entry["status"] = "Ingen signal"
                         entry["reason"] = ai_result.get("analysis", "")[:120]
                 else:
-                    # Fallback to rule-based engine
                     week_range = get_52_week_range(df)
                     w52_low = week_range[0] if week_range else None
                     decision = decide(
@@ -164,6 +174,7 @@ def render_daily_picks():
                             "tech": tech,
                             "sent": sent,
                             "decision": decision,
+                            "trading_plan": generate_trading_plan(tech, decision.action),
                         })
                     else:
                         entry["status"] = "Ingen signal"
@@ -177,7 +188,7 @@ def render_daily_picks():
 
         scan_data["results"].sort(
             key=lambda x: x.get("ai_result", {}).get("confidence", 0)
-                          if x.get("ai_result") else x.get("decision", {}).get("confidence_score", 0) if isinstance(x.get("decision"), dict) else 0,
+                          if x.get("ai_result") else 0,
             reverse=True,
         )
         st.session_state["scan_data"] = scan_data
@@ -189,7 +200,6 @@ def render_daily_picks():
     results = scan_data["results"]
     report = scan_data["report"]
 
-    # --- Scan summary stats ---
     total = len(report)
     signals = len([r for r in report if r["status"] == "SIGNAL"])
     no_signal = len([r for r in report if r["status"] == "Ingen signal"])
@@ -260,7 +270,6 @@ def render_daily_picks():
         unsafe_allow_html=True,
     )
 
-    # --- Results ---
     if results:
         st.markdown(
             f"""
@@ -297,7 +306,7 @@ def render_daily_picks():
                 <h2 style="color: #888;">Inga handelsmöjligheter idag</h2>
                 <p style="color: #666; font-size: 16px;">
                     AI-motorn hittade ingen tillgång där alla faktorer
-                    (trend, momentum, volym, sentiment) pekar åt samma håll.<br>
+                    (trend, momentum, volym, sentiment, stöd/motstånd) pekar åt samma håll.<br>
                     Bäst att stå utanför marknaden idag.
                 </p>
             </div>
@@ -305,7 +314,6 @@ def render_daily_picks():
             unsafe_allow_html=True,
         )
 
-    # --- Detailed scan report ---
     with st.expander(f"📋 Skanningsrapport — {total} tillgångar analyserade", expanded=False):
         import pandas as pd
         report_df = pd.DataFrame(report)
@@ -336,11 +344,11 @@ def render_daily_picks():
 
 
 def _render_pick_card(result: dict, rank: int):
-    """Render a single daily pick as a prominent card."""
+    """Render a single daily pick with exit strategy."""
     asset = result["asset"]
     tech = result["tech"]
-    sent = result["sent"]
     ai_result = result.get("ai_result")
+    trading_plan = result.get("trading_plan")
 
     if ai_result:
         verdict = ai_result.get("verdict", "NO_TRADE")
@@ -362,18 +370,25 @@ def _render_pick_card(result: dict, rank: int):
         color = "#00C853"
         icon = "📈"
         action_text = "KÖP BULL-CERTIFIKAT"
-        direction_sv = "uppgång"
         action = "BULL"
     elif verdict == "BUY_BEAR":
         color = "#FF1744"
         icon = "📉"
         action_text = "KÖP BEAR-CERTIFIKAT"
-        direction_sv = "nedgång"
         action = "BEAR"
     else:
         return
 
     confidence_pct = f"{confidence:.0%}"
+
+    # Build exit strategy summary for the card
+    exit_summary = ""
+    if trading_plan:
+        exit_summary = (
+            f"<strong>SL:</strong> {trading_plan.stop_loss:,.2f} — "
+            f"<strong>TP:</strong> {trading_plan.take_profit:,.2f} — "
+            f"<strong>R/R:</strong> {trading_plan.risk_reward_ratio}"
+        )
 
     st.markdown(
         f"""
@@ -412,15 +427,16 @@ def _render_pick_card(result: dict, rank: int):
                 <strong>Volym:</strong> {tech.volume_ratio:.1f}x —
                 <strong>VIX:</strong> {tech.vix_value if tech.vix_value else 'N/A'}
             </div>
-            <div style="font-size: 14px; color: #aaa; line-height: 1.5;">
+            <div style="font-size: 14px; color: #aaa; line-height: 1.5; margin-bottom: 8px;">
                 {analysis_text}
             </div>
+            {"<div style='font-size: 13px; color: #999; border-top: 1px solid #333; padding-top: 8px;'>" + exit_summary + "</div>" if exit_summary else ""}
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    with st.expander(f"Detaljer — {asset.display_name}"):
+    with st.expander(f"Detaljer & Handelsplan — {asset.display_name}"):
         if key_factors:
             st.markdown("**Avgörande faktorer:**")
             for f in key_factors:
@@ -431,19 +447,43 @@ def _render_pick_card(result: dict, rank: int):
             for r in risks:
                 st.caption(f"⚠️ {r}")
 
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric(T["price_label"], f"{tech.current_price:,.2f}")
-        with col2:
-            st.metric(T["sma_label"], f"{tech.sma_200:,.2f}")
-        with col3:
-            if tech.sma_50w:
-                st.metric("50v SMA", f"{tech.sma_50w:,.2f}")
-            else:
-                st.metric("50v SMA", "N/A")
+        # Exit strategy details
+        if trading_plan:
+            st.divider()
+            st.markdown("**Handelsplan (Exit-strategi):**")
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Ingång", f"{trading_plan.entry_price:,.2f}")
+            with col2:
+                st.metric(f"Stop-Loss ({trading_plan.stop_loss_method})",
+                           f"{trading_plan.stop_loss:,.2f}")
+            with col3:
+                st.metric(f"Målkurs ({trading_plan.take_profit_method})",
+                           f"{trading_plan.take_profit:,.2f}")
+            with col4:
+                st.metric("Risk/Reward", trading_plan.risk_reward_ratio)
+
+            st.caption(f"Stop-Loss: {trading_plan.stop_loss_reasoning}")
+            st.caption(f"Målkurs: {trading_plan.take_profit_reasoning}")
+            st.caption(f"Trailing Stop: {trading_plan.trailing_stop_reasoning}")
+
+        # S/R levels
+        sr = tech.support_resistance
+        if sr.supports or sr.resistances:
+            st.divider()
+            sr_col1, sr_col2 = st.columns(2)
+            with sr_col1:
+                st.markdown("**Stöd:**")
+                for i, s in enumerate(sr.supports[:3]):
+                    st.caption(f"S{i+1}: {s:,.2f}")
+            with sr_col2:
+                st.markdown("**Motstånd:**")
+                for i, r_val in enumerate(sr.resistances[:3]):
+                    st.caption(f"R{i+1}: {r_val:,.2f}")
 
         certs = search_certificates(asset.ticker, action)
         if certs:
+            st.divider()
             st.markdown(f"**{T['avanza_title']}:**")
             for cert in certs[:3]:
                 if cert["url"]:

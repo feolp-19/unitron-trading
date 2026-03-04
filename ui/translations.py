@@ -41,12 +41,42 @@ T = {
     "price_below_weekly": "Under veckotrend",
     "price_at_weekly": "Nära veckotrend",
 
+    # SMA alignment
+    "sma_bullish_stack": "Hausse-linjering",
+    "sma_bearish_stack": "Baisse-linjering",
+    "sma_mixed": "Blandad",
+
     # VIX levels
     "vix_low_fear": "Lugn marknad",
     "vix_normal": "Normal",
     "vix_elevated": "Förhöjd rädsla",
     "vix_extreme_fear": "Extrem rädsla",
     "vix_unavailable": "Ej tillgänglig",
+
+    # Support & Resistance
+    "sr_title": "Stöd & Motstånd",
+    "support_label": "Stödnivåer",
+    "resistance_label": "Motståndsnivåer",
+    "no_sr_levels": "Inga tydliga nivåer identifierade",
+    "anchoring_resistance_warning": (
+        "Ankrings-bias: Priset ligger nära en motståndsnivå. "
+        "Undvik att ankra till gamla prisnivåer — motstånd kan orsaka vändning."
+    ),
+    "anchoring_support_warning": (
+        "Ankrings-bias: Priset ligger nära en stödnivå. "
+        "Stöd kan orsaka en studs — bekräftelse krävs."
+    ),
+
+    # Exit Strategy / Trading Plan
+    "trading_plan_title": "Teknisk Granskning & Handelsplan",
+    "exit_strategy_title": "EXIT-STRATEGI",
+    "sl_atr_method": "ATR-baserad",
+    "sl_support_method": "Stöd-baserad",
+    "tp_resistance_method": "Motstånd-baserad",
+    "tp_rr_method": "Risk/Reward-baserad",
+    "sl_reasoning_protect": "Skyddar kapital vid oväntad nedgång",
+    "tp_reasoning_historical": "Historiskt motstånd/vinstmål",
+    "trailing_stop_label": "Trailing Stop",
 
     # Sentiment section
     "sentiment_title": "Makrosentiment",

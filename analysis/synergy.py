@@ -1,7 +1,7 @@
 """Synergy Engine — fallback decision logic when AI analysis fails.
-Uses trend-following with RSI guard as a simple rule-based engine."""
+Uses trend-following with RSI guard, S/R awareness, and bias filters."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from analysis.technical import TechnicalSignal
 from analysis.sentiment import SentimentSignal
@@ -20,7 +20,6 @@ class TradeDecision:
 
 
 def _derive_tech_direction(tech: TechnicalSignal) -> str:
-    """Derive BULL/BEAR/NEUTRAL from raw technical data."""
     if tech.price_vs_sma == "above" and tech.rsi_value < 65:
         return "BULL"
     if tech.price_vs_sma == "below" and tech.rsi_value > 35:
@@ -39,9 +38,10 @@ def _compute_confidence(tech: TechnicalSignal, sent: SentimentSignal) -> float:
 
     volume_bonus = 0.1 if tech.volume_ratio > 1.5 else 0.0
     timeframe_bonus = 0.1 if tech.price_vs_sma == tech.price_vs_weekly_sma else 0.0
+    alignment_bonus = 0.1 if tech.sma_alignment in ("bullish_stack", "bearish_stack") else 0.0
 
-    raw = (sma_score * 0.25 + sent_score * 0.35 + coverage_penalty * 0.1
-           + volume_bonus + timeframe_bonus)
+    raw = (sma_score * 0.2 + sent_score * 0.3 + coverage_penalty * 0.1
+           + volume_bonus + timeframe_bonus + alignment_bonus)
     return round(min(raw, 1.0), 2)
 
 
@@ -87,6 +87,11 @@ def _compute_uncertainty_factors(tech: TechnicalSignal, sent: SentimentSignal) -
             "Daglig och veckovis trend pekar åt olika håll — svagare signal"
         )
 
+    if tech.sma_alignment == "mixed":
+        factors.append(
+            "SMA-linjering saknas (20/50/200 inte i ordning) — trendstyrkan är osäker"
+        )
+
     return factors
 
 
@@ -110,11 +115,15 @@ def decide(
         reasoning.append(f"Priset ({tech.current_price:,.2f}) ligger över SMA ({tech.sma_200:,.2f})")
         reasoning.append(f"RSI på {tech.rsi_value:.1f} — trend uppåt utan överköpt")
         reasoning.append(f"AI-sentiment är positivt ({sent.confidence:.0%} konfidens)")
+        if tech.sma_alignment == "bullish_stack":
+            reasoning.append("SMA-linjering: Pris > SMA20 > SMA50 > SMA200 (stark upptrend)")
     elif tech_direction == "BEAR" and sent.direction == "NEGATIVE":
         action = "BEAR"
         reasoning.append(f"Priset ({tech.current_price:,.2f}) ligger under SMA ({tech.sma_200:,.2f})")
         reasoning.append(f"RSI på {tech.rsi_value:.1f} — trend nedåt utan översålt")
         reasoning.append(f"AI-sentiment är negativt ({sent.confidence:.0%} konfidens)")
+        if tech.sma_alignment == "bearish_stack":
+            reasoning.append("SMA-linjering: Pris < SMA20 < SMA50 < SMA200 (stark nedtrend)")
     else:
         reasoning.append(
             f"Teknisk signal: {tech_direction} | Sentiment: {sent.direction} — "
@@ -130,6 +139,24 @@ def decide(
                 "Värdefälla-varning: Priset ligger nära 52-veckorslägsta "
                 "men sentimentet är negativt — undvik köp"
             )
+
+    # --- Anchoring Bias: near resistance ---
+    if action == "BULL" and tech.near_resistance:
+        sr = tech.support_resistance
+        res_val = sr.resistances[0] if sr.resistances else 0
+        warnings.append(
+            f"Ankrings-bias: Priset ligger nära motstånd ({res_val:,.2f}). "
+            f"Risk att priset vänder — överväg att vänta på bekräftat utbrott."
+        )
+
+    # --- Anchoring Bias: near support on BEAR ---
+    if action == "BEAR" and tech.near_support:
+        sr = tech.support_resistance
+        sup_val = sr.supports[0] if sr.supports else 0
+        warnings.append(
+            f"Ankrings-bias: Priset ligger nära stöd ({sup_val:,.2f}). "
+            f"Risk att priset studsar — överväg att vänta på bekräftat genombrott."
+        )
 
     # --- Data Quality Warning ---
     if sent.low_data_quality and action != "NONE":
@@ -149,12 +176,25 @@ def decide(
 
     # --- ATR-based stop-loss & take-profit ---
     atr = tech.atr_value
+    sr = tech.support_resistance
     if action == "BULL":
-        stop_loss = round(tech.current_price - 2 * atr, 2)
-        take_profit = round(tech.current_price + 3 * atr, 2)
+        if sr.supports:
+            stop_loss = round(sr.supports[0] - 0.5 * atr, 2)
+        else:
+            stop_loss = round(tech.current_price - 2 * atr, 2)
+        if sr.resistances:
+            take_profit = round(sr.resistances[0], 2)
+        else:
+            take_profit = round(tech.current_price + 3 * atr, 2)
     elif action == "BEAR":
-        stop_loss = round(tech.current_price + 2 * atr, 2)
-        take_profit = round(tech.current_price - 3 * atr, 2)
+        if sr.resistances:
+            stop_loss = round(sr.resistances[0] + 0.5 * atr, 2)
+        else:
+            stop_loss = round(tech.current_price + 2 * atr, 2)
+        if sr.supports:
+            take_profit = round(sr.supports[0], 2)
+        else:
+            take_profit = round(tech.current_price - 3 * atr, 2)
     else:
         stop_loss = 0.0
         take_profit = 0.0

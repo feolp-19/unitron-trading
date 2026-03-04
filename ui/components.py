@@ -8,7 +8,6 @@ from ui.translations import T
 
 
 def render_traffic_light(action: str, confidence: float):
-    """Render the main signal as a large traffic-light indicator."""
     if action == "BULL":
         color = "#00C853"
         icon = "🟢"
@@ -43,7 +42,6 @@ def render_traffic_light(action: str, confidence: float):
 
 
 def render_confidence_bar(confidence: float):
-    """Render a horizontal confidence bar."""
     pct = int(confidence * 100)
     if pct >= 70:
         color = "#00C853"
@@ -73,18 +71,24 @@ def render_confidence_bar(confidence: float):
     )
 
 
-def render_price_chart(df: pd.DataFrame, asset_name: str):
-    """Render candlestick chart with SMA overlay and RSI subplot."""
+def render_price_chart(
+    df: pd.DataFrame,
+    asset_name: str,
+    supports: list[float] | None = None,
+    resistances: list[float] | None = None,
+):
+    """Render candlestick chart with SMA 20/50/200, RSI, and S/R lines."""
     if df.empty or len(df) < 50:
         st.warning(T["insufficient_data"])
         return
 
     display_df = df.tail(120).copy()
-    rsi_full = compute_rsi(df["Close"])
-    sma_full = compute_sma(df["Close"])
+    close_full = df["Close"]
 
-    rsi_display = rsi_full.tail(120)
-    sma_display = sma_full.tail(120)
+    rsi_display = compute_rsi(close_full).tail(120)
+    sma_20_display = compute_sma(close_full, 20).tail(120)
+    sma_50_display = compute_sma(close_full, 50).tail(120)
+    sma_200_display = compute_sma(close_full).tail(120)
 
     fig = make_subplots(
         rows=2, cols=1,
@@ -110,31 +114,61 @@ def render_price_chart(df: pd.DataFrame, asset_name: str):
 
     fig.add_trace(
         go.Scatter(
-            x=sma_display.index,
-            y=sma_display,
-            name="200 SMA",
-            line=dict(color="#2196F3", width=2),
+            x=sma_20_display.index, y=sma_20_display,
+            name="SMA 20", line=dict(color="#FFD600", width=1, dash="dot"),
+        ),
+        row=1, col=1,
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=sma_50_display.index, y=sma_50_display,
+            name="SMA 50", line=dict(color="#FF9100", width=1.5),
+        ),
+        row=1, col=1,
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=sma_200_display.index, y=sma_200_display,
+            name="SMA 200", line=dict(color="#2196F3", width=2),
         ),
         row=1, col=1,
     )
 
+    # Support & Resistance lines
+    if supports:
+        for i, s in enumerate(supports[:3]):
+            fig.add_hline(
+                y=s, line_dash="dash", line_color="#00C853", opacity=0.6,
+                annotation_text=f"S{i+1}: {s:,.2f}",
+                annotation_position="bottom right",
+                annotation_font_color="#00C853",
+                row=1, col=1,
+            )
+    if resistances:
+        for i, r in enumerate(resistances[:3]):
+            fig.add_hline(
+                y=r, line_dash="dash", line_color="#FF1744", opacity=0.6,
+                annotation_text=f"R{i+1}: {r:,.2f}",
+                annotation_position="top right",
+                annotation_font_color="#FF1744",
+                row=1, col=1,
+            )
+
+    # RSI
     fig.add_trace(
         go.Scatter(
-            x=rsi_display.index,
-            y=rsi_display,
-            name="RSI",
-            line=dict(color="#AB47BC", width=2),
+            x=rsi_display.index, y=rsi_display,
+            name="RSI", line=dict(color="#AB47BC", width=2),
         ),
         row=2, col=1,
     )
 
     fig.add_hline(y=70, line_dash="dash", line_color="#FF1744", opacity=0.3, row=2, col=1)
-    fig.add_hline(y=55, line_dash="dot", line_color="#FF1744", opacity=0.5, row=2, col=1)
-    fig.add_hline(y=45, line_dash="dot", line_color="#00C853", opacity=0.5, row=2, col=1)
     fig.add_hline(y=30, line_dash="dash", line_color="#00C853", opacity=0.3, row=2, col=1)
+    fig.add_hline(y=50, line_dash="dot", line_color="#666", opacity=0.3, row=2, col=1)
 
     fig.update_layout(
-        height=600,
+        height=650,
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
@@ -150,7 +184,6 @@ def render_price_chart(df: pd.DataFrame, asset_name: str):
 
 
 def render_headline_table(headline_details: list):
-    """Render color-coded headline sentiment table."""
     if not headline_details:
         return
 
@@ -189,7 +222,6 @@ def render_headline_table(headline_details: list):
 
 
 def render_warning_box(warnings: list[str], title: str | None = None):
-    """Render a styled warning box."""
     if not warnings:
         return
 
@@ -200,7 +232,47 @@ def render_warning_box(warnings: list[str], title: str | None = None):
         st.warning(warning)
 
 
-def render_info_metric(label: str, value, delta: str | None = None):
-    """Render a single metric."""
-    if value is not None:
-        st.metric(label, value, delta=delta)
+def render_trading_plan(trading_plan, action: str):
+    """Render the full Handelsplan (Trading Plan) as a styled container."""
+    if trading_plan is None:
+        return
+
+    if action == "BULL":
+        color = "#00C853"
+        direction = "BULL"
+    else:
+        color = "#FF1744"
+        direction = "BEAR"
+
+    st.markdown(
+        f"""
+        <div style="
+            background: linear-gradient(135deg, {color}10, {color}05);
+            border: 1px solid {color}33;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        ">
+            <h4 style="color: {color}; margin-bottom: 16px;">
+                EXIT-STRATEGI ({direction})
+            </h4>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Ingångspris", f"{trading_plan.entry_price:,.2f}")
+    with col2:
+        st.metric("Stop-Loss", f"{trading_plan.stop_loss:,.2f}",
+                   delta=f"-{trading_plan.risk_amount:,.2f}" if action == "BULL" else f"+{trading_plan.risk_amount:,.2f}")
+    with col3:
+        st.metric("Målkurs", f"{trading_plan.take_profit:,.2f}",
+                   delta=f"+{trading_plan.reward_amount:,.2f}" if action == "BULL" else f"-{trading_plan.reward_amount:,.2f}")
+    with col4:
+        st.metric("Risk/Reward", trading_plan.risk_reward_ratio)
+
+    st.markdown(f"**Stop-Loss ({trading_plan.stop_loss_method}):** {trading_plan.stop_loss_reasoning}")
+    st.markdown(f"**Målkurs ({trading_plan.take_profit_method}):** {trading_plan.take_profit_reasoning}")
+    st.markdown(f"**Trailing Stop:** {trading_plan.trailing_stop_reasoning}")

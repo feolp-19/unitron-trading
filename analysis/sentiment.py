@@ -1,8 +1,8 @@
 """AI sentiment analysis with automatic provider fallback chain:
 Groq -> Gemini -> Grok -> keyword fallback.
 
-Tier 1 upgrade: AI is now the sole decision maker via FULL_ANALYSIS_PROMPT,
-receiving ALL data (technicals, VIX, volume, weekly SMA, news)."""
+AI is the sole decision maker via FULL_ANALYSIS_PROMPT,
+receiving ALL data (technicals, VIX, volume, SMAs, S/R, news)."""
 
 import json
 from dataclasses import dataclass, field
@@ -69,11 +69,17 @@ Your job is to synthesize ALL the data below and make ONE clear trading decision
 === ASSET ===
 {asset_name}
 
-=== PRICE & TREND ===
+=== PRICE & TREND (SMAs) ===
 - Current price: {price}
+- 20-day SMA: {sma_20} (short-term trend)
+- 50-day SMA: {sma_50} (medium-term trend)
 - 200-day SMA: {sma_200} → price is {price_vs_sma} the 200-day SMA
 - 50-week SMA: {sma_50w} → price is {price_vs_weekly_sma} the weekly trend
-- Multi-timeframe alignment: {timeframe_alignment}
+- SMA alignment: {sma_alignment}
+- Multi-timeframe: {timeframe_alignment}
+
+=== SUPPORT & RESISTANCE ===
+{sr_text}
 
 === MOMENTUM ===
 - RSI (14): {rsi} {rsi_interpretation}
@@ -93,21 +99,23 @@ Your job is to synthesize ALL the data below and make ONE clear trading decision
 {headlines_text}
 
 === DECISION RULES ===
-1. TREND: If price is above BOTH daily and weekly SMAs, the trend favors BULL. If below both, favors BEAR. Mixed = weaker signal.
-2. MOMENTUM: RSI 30-70 is normal. Below 30 = oversold (potential bounce up). Above 70 = overbought (potential pullback).
-3. VOLUME: Volume > 1.5x average confirms the current move. Low volume means weak conviction.
-4. VIX: High VIX (>25) means fear/uncertainty — be more cautious. Low VIX (<15) means complacency — watch for reversals.
-5. NEWS: Headlines must support the technical direction. If news contradicts technicals, reduce confidence or NO_TRADE.
-6. CONFIDENCE: Only give confidence > 0.7 if MULTIPLE factors align (trend + momentum + volume + news).
+1. SMA ALIGNMENT: If Price > SMA20 > SMA50 > SMA200 = "bullish stack" (strong BULL). If reversed = "bearish stack" (strong BEAR). Mixed = weaker signal.
+2. SUPPORT/RESISTANCE: If price is near a major resistance, be cautious about BULL entries (risk of rejection). If near support, be cautious about BEAR entries. USE these levels for stop-loss and take-profit reasoning.
+3. MOMENTUM: RSI 30-70 is normal. Below 30 = oversold (potential bounce). Above 70 = overbought (potential pullback).
+4. VOLUME: Volume > 1.5x average confirms the current move. Low volume means weak conviction.
+5. VIX: High VIX (>25) = fear/uncertainty, be cautious. Low VIX (<15) = complacency.
+6. NEWS: Headlines must support the technical direction. Contradicting news weakens the signal.
+7. CONFIDENCE: Only > 0.7 if MULTIPLE factors align (trend + momentum + volume + news + no S/R obstacles).
 
 Return ONLY valid JSON:
 {{
   "verdict": "BUY_BULL" or "BUY_BEAR" or "NO_TRADE",
   "confidence": 0.0 to 1.0,
-  "analysis": "2-4 sentences: explain WHY you made this decision, referencing specific data points",
-  "key_factors": ["factor 1 that drove the decision", "factor 2", "factor 3"],
+  "analysis": "2-4 sentences: explain WHY, referencing specific data points including S/R levels",
+  "key_factors": ["factor 1", "factor 2", "factor 3"],
   "risks": ["specific risk 1", "specific risk 2"],
-  "stop_loss_reasoning": "1 sentence: where to place stop-loss and why",
+  "stop_loss_reasoning": "1 sentence: where to place stop-loss and why (reference S/R or ATR)",
+  "take_profit_reasoning": "1 sentence: where to take profit and why (reference S/R levels)",
   "outlook": "1 sentence: what event or level to watch next"
 }}"""
 
@@ -165,7 +173,7 @@ def _call_grok(prompt: str) -> str | None:
 
 
 def _call_ai_with_fallback(prompt: str) -> tuple[str | None, str]:
-    """Try AI providers in order: Groq -> Gemini -> Grok. Returns (response, provider_name)."""
+    """Try AI providers in order: Groq -> Gemini -> Grok."""
     providers = [
         ("Groq", _call_groq),
         ("Gemini", _call_gemini),
@@ -179,7 +187,6 @@ def _call_ai_with_fallback(prompt: str) -> tuple[str | None, str]:
 
 
 def _keyword_fallback(headlines: list[dict]) -> SentimentSignal:
-    """Basic keyword-based sentiment when all AI providers fail."""
     positive_words = {"surge", "rally", "gain", "rise", "up", "bull", "growth", "profit",
                       "beat", "record", "high", "boost", "strong", "positive", "recovery"}
     negative_words = {"crash", "fall", "drop", "decline", "loss", "bear", "recession", "fear",
@@ -329,10 +336,10 @@ def _interpret_vix(vix: float | None, level: str) -> str:
     if vix is None:
         return "VIX data unavailable"
     labels = {
-        "low_fear": f"{vix:.1f} — Low fear/complacency. Markets calm, watch for sudden spikes.",
+        "low_fear": f"{vix:.1f} — Low fear/complacency. Markets calm.",
         "normal": f"{vix:.1f} — Normal market conditions.",
-        "elevated": f"{vix:.1f} — Elevated fear. Markets uncertain, use tighter stops.",
-        "extreme_fear": f"{vix:.1f} — EXTREME FEAR. Very high risk environment, be extra cautious.",
+        "elevated": f"{vix:.1f} — Elevated fear. Use tighter stops.",
+        "extreme_fear": f"{vix:.1f} — EXTREME FEAR. Very high risk.",
     }
     return labels.get(level, f"{vix:.1f}")
 
@@ -347,14 +354,53 @@ def _interpret_volatility(atr_ratio: float) -> str:
     return "very low volatility — potential breakout coming"
 
 
+def _interpret_sma_alignment(alignment: str) -> str:
+    labels = {
+        "bullish_stack": "BULLISH STACK (Price > SMA20 > SMA50 > SMA200) — strong uptrend",
+        "bearish_stack": "BEARISH STACK (Price < SMA20 < SMA50 < SMA200) — strong downtrend",
+        "mixed": "MIXED — no clear trend alignment, be cautious",
+    }
+    return labels.get(alignment, alignment)
+
+
+def _format_sr_text(
+    supports: list[float], resistances: list[float],
+    price: float, near_resistance: bool, near_support: bool,
+) -> str:
+    lines = []
+    if resistances:
+        for i, r in enumerate(resistances):
+            dist_pct = ((r - price) / price) * 100
+            lines.append(f"- Resistance {i+1}: {r:,.2f} ({dist_pct:+.1f}% from current price)")
+    else:
+        lines.append("- No significant resistance levels identified above current price")
+
+    if supports:
+        for i, s in enumerate(supports):
+            dist_pct = ((s - price) / price) * 100
+            lines.append(f"- Support {i+1}: {s:,.2f} ({dist_pct:+.1f}% from current price)")
+    else:
+        lines.append("- No significant support levels identified below current price")
+
+    if near_resistance:
+        lines.append("- ⚠️ WARNING: Price is within 2% of nearest resistance — risk of rejection!")
+    if near_support:
+        lines.append("- ⚠️ NOTE: Price is within 2% of nearest support — potential bounce zone")
+
+    return "\n".join(lines)
+
+
 @st.cache_data(ttl=86400, show_spinner=False)
 def run_full_analysis(
     asset_name: str,
     price: float,
+    sma_20: float,
+    sma_50: float,
     sma_200: float,
     price_vs_sma: str,
     sma_50w: float | None,
     price_vs_weekly_sma: str,
+    sma_alignment: str,
     rsi: float,
     atr: float,
     rsi_trend: float,
@@ -362,32 +408,44 @@ def run_full_analysis(
     volume_ratio: float,
     vix_value: float | None,
     vix_level: str,
+    supports_json: str,
+    resistances_json: str,
+    near_resistance: bool,
+    near_support: bool,
     headlines_json: str,
 ) -> dict | None:
-    """Run comprehensive AI analysis — this is the primary decision maker."""
+    """Run comprehensive AI analysis — the primary decision maker."""
     headlines = json.loads(headlines_json)
+    supports = json.loads(supports_json)
+    resistances = json.loads(resistances_json)
     headlines_text = "\n".join(
         f"{i+1}. {h['headline']}" for i, h in enumerate(headlines)
     ) if headlines else "No recent headlines available."
 
     # Multi-timeframe alignment
     if price_vs_sma == price_vs_weekly_sma and price_vs_sma != "at":
-        timeframe_alignment = f"ALIGNED — price is {price_vs_sma} both daily and weekly trends (strong signal)"
+        timeframe_alignment = f"ALIGNED — price is {price_vs_sma} both daily and weekly trends (strong)"
     elif price_vs_weekly_sma == "unavailable":
         timeframe_alignment = "Weekly data unavailable — rely on daily trend only"
     elif price_vs_sma == "at" or price_vs_weekly_sma == "at":
         timeframe_alignment = "One timeframe is neutral — signal is moderate"
     else:
-        timeframe_alignment = f"CONFLICTING — daily says {price_vs_sma}, weekly says {price_vs_weekly_sma} (weaker signal)"
+        timeframe_alignment = f"CONFLICTING — daily: {price_vs_sma}, weekly: {price_vs_weekly_sma} (weak)"
+
+    sr_text = _format_sr_text(supports, resistances, price, near_resistance, near_support)
 
     prompt = FULL_ANALYSIS_PROMPT.format(
         asset_name=asset_name,
         price=f"{price:,.2f}",
+        sma_20=f"{sma_20:,.2f}",
+        sma_50=f"{sma_50:,.2f}",
         sma_200=f"{sma_200:,.2f}",
         price_vs_sma=price_vs_sma,
         sma_50w=f"{sma_50w:,.2f}" if sma_50w else "unavailable",
-        price_vs_weekly_sma=price_vs_weekly_sma if price_vs_weekly_sma != "unavailable" else "N/A (data unavailable)",
+        price_vs_weekly_sma=price_vs_weekly_sma if price_vs_weekly_sma != "unavailable" else "N/A",
+        sma_alignment=_interpret_sma_alignment(sma_alignment),
         timeframe_alignment=timeframe_alignment,
+        sr_text=sr_text,
         rsi=f"{rsi:.1f}",
         rsi_interpretation=_interpret_rsi(rsi),
         rsi_trend=f"{rsi_trend:+.1f}",
