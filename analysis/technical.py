@@ -73,13 +73,13 @@ def analyze(df: pd.DataFrame) -> TechnicalSignal | None:
     else:
         price_vs_sma = "at"
 
-    # Direction logic (relaxed thresholds for actionable signals)
-    # BULL: RSI < 45 (leaning oversold) AND price above SMA (uptrend intact)
-    # BEAR: RSI > 55 (leaning overbought) AND price below SMA (downtrend intact)
-    # Strong signals use stricter thresholds (< 30 / > 70) for confidence scoring
-    if rsi_value < 45 and price_vs_sma == "above":
+    # Direction logic: trend-following with RSI guard
+    # BULL: price in uptrend (above SMA) and not overbought (RSI < 65)
+    # BEAR: price in downtrend (below SMA) and not oversold (RSI > 35)
+    # NEUTRAL: price near SMA (no clear trend) or RSI at extremes against trend
+    if price_vs_sma == "above" and rsi_value < 65:
         direction = "BULL"
-    elif rsi_value > 55 and price_vs_sma == "below":
+    elif price_vs_sma == "below" and rsi_value > 35:
         direction = "BEAR"
     else:
         direction = "NEUTRAL"

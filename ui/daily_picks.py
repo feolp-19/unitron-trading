@@ -16,7 +16,6 @@ from storage.history import save_recommendation
 from ui.translations import T
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
 def _run_daily_scan() -> dict:
     """Scan ALL curated assets. Returns both results and scan report."""
     results = []
@@ -44,8 +43,8 @@ def _run_daily_scan() -> dict:
 
             tech = technical_analyze(df)
             if tech is None:
-                entry["status"] = "För lite data"
-                entry["reason"] = f"Bara {len(df)} dagar (behöver 50+)"
+                entry["status"] = "For lite data"
+                entry["reason"] = f"Bara {len(df)} dagar (behover 50+)"
                 report.append(entry)
                 continue
 
@@ -126,11 +125,14 @@ def render_daily_picks():
     with col_btn:
         st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
         if st.button("🔄 Skanna nu", type="primary", use_container_width=True):
-            _run_daily_scan.clear()
+            st.session_state.pop("scan_data", None)
             st.rerun()
 
-    with st.spinner("Skannar alla marknader..."):
-        scan_data = _run_daily_scan()
+    if "scan_data" not in st.session_state:
+        with st.spinner("Skannar alla marknader..."):
+            st.session_state["scan_data"] = _run_daily_scan()
+
+    scan_data = st.session_state["scan_data"]
 
     results = scan_data["results"]
     report = scan_data["report"]
