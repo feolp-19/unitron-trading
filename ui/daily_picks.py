@@ -74,15 +74,22 @@ def render_daily_picks():
     """Render the auto-scan daily picks view."""
     today_str = datetime.now().strftime("%A %d %B %Y")
 
-    st.markdown(
-        f"""
-        <div style="text-align: center; padding: 16px 0 8px 0;">
-            <h1 style="margin-bottom: 0;">Unitron Handelsanalys</h1>
-            <p style="color: #888; font-size: 18px;">{today_str}</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    col_title, col_btn = st.columns([4, 1])
+    with col_title:
+        st.markdown(
+            f"""
+            <div style="padding: 16px 0 8px 0;">
+                <h1 style="margin-bottom: 0;">Unitron Handelsanalys</h1>
+                <p style="color: #888; font-size: 18px;">{today_str}</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col_btn:
+        st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
+        if st.button("🔄 Skanna nu", type="primary", use_container_width=True):
+            _run_daily_scan.clear()
+            st.rerun()
 
     with st.spinner("Skannar alla marknader..."):
         results = _run_daily_scan()
