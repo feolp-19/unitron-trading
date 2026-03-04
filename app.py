@@ -1,3 +1,5 @@
+import hashlib
+import pandas as pd
 import streamlit as st
 
 from config import CURATED_ASSETS, get_asset_by_ticker, create_custom_asset, AI_PROVIDER
@@ -7,8 +9,6 @@ from ui.dashboard import render_dashboard
 from ui.scanner_view import render_scanner
 from storage.history import load_history
 
-import pandas as pd
-
 st.set_page_config(
     page_title=T["app_title"],
     page_icon="📊",
@@ -17,17 +17,24 @@ st.set_page_config(
 )
 
 
+def _make_token(password: str) -> str:
+    return hashlib.sha256(f"unitron-{password}".encode()).hexdigest()[:16]
+
+
 def check_password() -> bool:
-    """Password gate for private access. Returns True if authenticated."""
+    """Password gate that persists via URL token so reloads don't require re-login."""
     try:
         correct_pw = st.secrets["passwords"]["app_password"]
     except (KeyError, FileNotFoundError):
         return True
 
-    if "authenticated" not in st.session_state:
-        st.session_state["authenticated"] = False
+    expected_token = _make_token(correct_pw)
 
-    if st.session_state["authenticated"]:
+    params = st.query_params
+    if params.get("token") == expected_token:
+        return True
+
+    if st.session_state.get("authenticated"):
         return True
 
     st.title("🔒 Unitron Handelsanalys")
@@ -35,6 +42,7 @@ def check_password() -> bool:
     if st.button("Logga in", type="primary"):
         if pw == correct_pw:
             st.session_state["authenticated"] = True
+            st.query_params["token"] = expected_token
             st.rerun()
         else:
             st.error("Fel lösenord")
