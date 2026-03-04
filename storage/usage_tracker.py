@@ -8,7 +8,7 @@ USAGE_FILE = os.path.join(os.path.dirname(__file__), "usage.json")
 
 DAILY_LIMITS = {
     "groq": 14400,
-    "gemini": 250,
+    "gemini": 1000,
     "grok": 1000,
     "tavily": 33,
     "scans": 5,

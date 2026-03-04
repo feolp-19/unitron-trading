@@ -115,7 +115,7 @@ with tab_diag:
                 if gem_key:
                     client = genai.Client(api_key=gem_key)
                     resp = client.models.generate_content(
-                        model="gemini-2.5-flash", contents="Say OK",
+                        model="gemini-2.5-flash-lite", contents="Say OK",
                     )
                     st.success(f"**Gemini** — Fungerar! Svar: {resp.text[:50]}")
                 else:

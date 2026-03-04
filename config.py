@@ -117,7 +117,7 @@ AI_CONFIGS = {
     "gemini": {
         "api_key_env": "GOOGLE_API_KEY",
         "base_url": None,
-        "model": "gemini-2.5-flash",
+        "model": "gemini-2.5-flash-lite",
     },
 }
 
