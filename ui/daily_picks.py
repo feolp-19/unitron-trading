@@ -313,7 +313,7 @@ def render_daily_picks():
 
             scan_data["report"].append(entry)
             _update_log(scan_data["log"], live_log)
-            time.sleep(3)
+            time.sleep(5)
 
         scan_data["results"].sort(
             key=lambda x: x.get("ai_result", {}).get("confidence", 0)
