@@ -29,7 +29,6 @@ def _render_usage_bar(usage: dict):
     providers = [
         ("Groq", "groq", "#F55036"),
         ("Gemini", "gemini", "#4285F4"),
-        ("Grok", "grok", "#000"),
         ("Tavily", "tavily", "#7C3AED"),
     ]
 
