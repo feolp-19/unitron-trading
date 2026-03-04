@@ -16,97 +16,6 @@ from storage.history import save_recommendation
 from ui.translations import T
 
 
-def _run_daily_scan() -> dict:
-    """Scan ALL curated assets. Returns both results and scan report."""
-    results = []
-    report = []
-
-    for asset in ALL_ASSETS_FLAT:
-        entry = {
-            "name": asset.display_name,
-            "ticker": asset.ticker,
-            "status": "?",
-            "tech_direction": "-",
-            "rsi": "-",
-            "sentiment": "-",
-            "action": "-",
-            "reason": "",
-        }
-
-        try:
-            df = fetch_ohlc(asset.ticker)
-            if df.empty:
-                entry["status"] = "Ingen data"
-                entry["reason"] = "yfinance returnerade ingen data"
-                report.append(entry)
-                continue
-
-            tech = technical_analyze(df)
-            if tech is None:
-                entry["status"] = "For lite data"
-                entry["reason"] = f"Bara {len(df)} dagar (behover 50+)"
-                report.append(entry)
-                continue
-
-            entry["rsi"] = f"{tech.rsi_value:.1f}"
-            entry["tech_direction"] = tech.direction
-
-            headlines = get_news_for_asset(asset)
-            sent_dict = analyze_sentiment(asset.display_name, json.dumps(headlines))
-            sent = dict_to_signal(sent_dict.copy())
-
-            entry["sentiment"] = f"{sent.direction} ({sent.confidence:.0%})"
-
-            week_range = get_52_week_range(df)
-            w52_low = week_range[0] if week_range else None
-
-            decision = decide(
-                tech=tech,
-                sent=sent,
-                week_52_low=w52_low,
-                is_crypto=asset.asset_type == "crypto",
-            )
-
-            entry["action"] = decision.action
-
-            if decision.action != "NONE":
-                entry["status"] = "SIGNAL"
-                entry["reason"] = decision.reasoning[0] if decision.reasoning else ""
-
-                save_recommendation(
-                    ticker=asset.ticker,
-                    asset_name=asset.display_name,
-                    action=decision.action,
-                    confidence=decision.confidence_score,
-                    entry_price=decision.current_price,
-                    stop_loss=decision.stop_loss_price,
-                    take_profit=decision.take_profit_price,
-                    reasoning=decision.reasoning,
-                )
-
-                results.append({
-                    "asset": asset,
-                    "decision": decision,
-                    "tech": tech,
-                    "sent": sent,
-                })
-            else:
-                entry["status"] = "Ingen signal"
-                if decision.reasoning:
-                    entry["reason"] = decision.reasoning[0]
-                if decision.warnings:
-                    entry["reason"] += f" | {decision.warnings[0]}"
-
-        except Exception as e:
-            entry["status"] = "Fel"
-            entry["reason"] = str(e)[:80]
-
-        report.append(entry)
-
-    results.sort(key=lambda x: x["decision"].confidence_score, reverse=True)
-    return {"results": results, "report": report}
-
-
 def render_daily_picks():
     """Render the auto-scan daily picks view."""
     today_str = datetime.now().strftime("%A %d %B %Y")
@@ -124,13 +33,106 @@ def render_daily_picks():
         )
     with col_btn:
         st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
-        if st.button("🔄 Skanna nu", type="primary", use_container_width=True):
-            st.session_state.pop("scan_data", None)
-            st.rerun()
+        rescan = st.button("🔄 Skanna nu", type="primary", use_container_width=True)
+
+    if rescan:
+        st.session_state.pop("scan_data", None)
 
     if "scan_data" not in st.session_state:
-        with st.spinner("Skannar alla marknader..."):
-            st.session_state["scan_data"] = _run_daily_scan()
+        progress_text = st.empty()
+        progress_bar = st.progress(0)
+        scan_data = {"results": [], "report": []}
+        total = len(ALL_ASSETS_FLAT)
+
+        for i, asset in enumerate(ALL_ASSETS_FLAT):
+            progress_bar.progress((i + 1) / total)
+            progress_text.caption(f"Analyserar {asset.display_name} ({i+1}/{total})...")
+
+            entry = {
+                "name": asset.display_name,
+                "ticker": asset.ticker,
+                "status": "?",
+                "tech_direction": "-",
+                "rsi": "-",
+                "sentiment": "-",
+                "action": "-",
+                "reason": "",
+            }
+
+            try:
+                df = fetch_ohlc(asset.ticker)
+                if df.empty:
+                    entry["status"] = "Ingen data"
+                    entry["reason"] = "yfinance returnerade ingen data"
+                    scan_data["report"].append(entry)
+                    continue
+
+                tech = technical_analyze(df)
+                if tech is None:
+                    entry["status"] = "For lite data"
+                    entry["reason"] = f"Bara {len(df)} dagar"
+                    scan_data["report"].append(entry)
+                    continue
+
+                entry["rsi"] = f"{tech.rsi_value:.1f}"
+                entry["tech_direction"] = tech.direction
+
+                headlines = get_news_for_asset(asset)
+                sent_dict = analyze_sentiment(asset.display_name, json.dumps(headlines))
+                sent = dict_to_signal(sent_dict.copy())
+
+                entry["sentiment"] = f"{sent.direction} ({sent.confidence:.0%})"
+
+                week_range = get_52_week_range(df)
+                w52_low = week_range[0] if week_range else None
+
+                decision = decide(
+                    tech=tech,
+                    sent=sent,
+                    week_52_low=w52_low,
+                    is_crypto=asset.asset_type == "crypto",
+                )
+
+                entry["action"] = decision.action
+
+                if decision.action != "NONE":
+                    entry["status"] = "SIGNAL"
+                    entry["reason"] = decision.reasoning[0] if decision.reasoning else ""
+
+                    save_recommendation(
+                        ticker=asset.ticker,
+                        asset_name=asset.display_name,
+                        action=decision.action,
+                        confidence=decision.confidence_score,
+                        entry_price=decision.current_price,
+                        stop_loss=decision.stop_loss_price,
+                        take_profit=decision.take_profit_price,
+                        reasoning=decision.reasoning,
+                    )
+
+                    scan_data["results"].append({
+                        "asset": asset,
+                        "decision": decision,
+                        "tech": tech,
+                        "sent": sent,
+                    })
+                else:
+                    entry["status"] = "Ingen signal"
+                    if decision.reasoning:
+                        entry["reason"] = decision.reasoning[0]
+                    if decision.warnings:
+                        entry["reason"] += f" | {decision.warnings[0]}"
+
+            except Exception as e:
+                entry["status"] = "Fel"
+                entry["reason"] = str(e)[:80]
+
+            scan_data["report"].append(entry)
+
+        scan_data["results"].sort(key=lambda x: x["decision"].confidence_score, reverse=True)
+        st.session_state["scan_data"] = scan_data
+        progress_bar.empty()
+        progress_text.empty()
 
     scan_data = st.session_state["scan_data"]
 

@@ -1,37 +1,21 @@
-import hashlib
-import pandas as pd
 import streamlit as st
 
-from config import CURATED_ASSETS, get_asset_by_ticker, create_custom_asset, AI_PROVIDER
-from ui.translations import T
+from config import search_asset, AI_PROVIDER
 from ui.daily_picks import render_daily_picks
 from ui.dashboard import render_dashboard
-from ui.scanner_view import render_scanner
-from storage.history import load_history
 
 st.set_page_config(
-    page_title=T["app_title"],
+    page_title="Unitron Handelsanalys",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
 
-def _make_token(password: str) -> str:
-    return hashlib.sha256(f"unitron-{password}".encode()).hexdigest()[:16]
-
-
 def check_password() -> bool:
-    """Password gate that persists via URL token so reloads don't require re-login."""
     try:
         correct_pw = st.secrets["passwords"]["app_password"]
     except (KeyError, FileNotFoundError):
-        return True
-
-    expected_token = _make_token(correct_pw)
-
-    params = st.query_params
-    if params.get("token") == expected_token:
         return True
 
     if st.session_state.get("authenticated"):
@@ -42,7 +26,6 @@ def check_password() -> bool:
     if st.button("Logga in", type="primary"):
         if pw == correct_pw:
             st.session_state["authenticated"] = True
-            st.query_params["token"] = expected_token
             st.rerun()
         else:
             st.error("Fel lösenord")
@@ -52,73 +35,45 @@ def check_password() -> bool:
 if not check_password():
     st.stop()
 
-# --- Sidebar (for deep-dive analysis) ---
-with st.sidebar:
-    st.title(T["app_title"])
-    st.caption(T["app_subtitle"])
-    st.divider()
-
-    st.markdown(f"**{T['ai_provider_label']}:** `{AI_PROVIDER}`")
-    st.divider()
-
-    st.subheader(T["sidebar_title"])
-
-    categories = list(CURATED_ASSETS.keys())
-    selected_category = st.selectbox(T["category_label"], categories)
-
-    assets_in_category = CURATED_ASSETS[selected_category]
-    asset_names = [a.display_name for a in assets_in_category]
-    selected_name = st.selectbox(T["asset_label"], asset_names)
-
-    selected_asset = next(
-        (a for a in assets_in_category if a.display_name == selected_name),
-        assets_in_category[0],
-    )
-
-    st.divider()
-    custom_ticker = st.text_input(T["custom_ticker_label"], value="")
-
-    if custom_ticker.strip():
-        existing = get_asset_by_ticker(custom_ticker.strip())
-        if existing:
-            selected_asset = existing
-        else:
-            selected_asset = create_custom_asset(custom_ticker.strip())
-        st.success(f"Vald: {selected_asset.display_name} ({selected_asset.ticker})")
-
-# --- Main Content ---
-tab_today, tab_analyze, tab_watchlist, tab_history = st.tabs([
-    "Idag",
-    T["tab_analyze"],
-    T["tab_watchlist"],
-    T["tab_history"],
-])
+tab_today, tab_analyze = st.tabs(["Idag", "Analysera"])
 
 with tab_today:
     render_daily_picks()
 
 with tab_analyze:
-    render_dashboard(selected_asset)
+    st.markdown(
+        """
+        <div style="text-align: center; padding: 24px 0 8px 0;">
+            <h1>Analysera en tillgång</h1>
+            <p style="color: #888;">Sök på namn eller ticker — t.ex. "gold", "tesla", "DAX", "NVDA"</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-with tab_watchlist:
-    render_scanner()
+    query = st.text_input(
+        "Sök",
+        placeholder="Skriv t.ex. gold, tesla, DAX, bitcoin, ERIC-B.ST...",
+        label_visibility="collapsed",
+    )
 
-with tab_history:
-    st.header(T["history_title"])
-    history = load_history(days=30)
-    if history:
-        df = pd.DataFrame(history)
-        display_cols = {
-            "timestamp": T["col_date"],
-            "asset_name": T["col_asset"],
-            "action": T["col_action"],
-            "confidence": T["col_confidence"],
-            "entry_price": T["col_price"],
-            "stop_loss": T["col_stop_loss"],
-            "take_profit": T["col_take_profit"],
-        }
-        available_cols = [c for c in display_cols.keys() if c in df.columns]
-        df_display = df[available_cols].rename(columns=display_cols)
-        st.dataframe(df_display, hide_index=True, use_container_width=True)
+    if query.strip():
+        asset = search_asset(query)
+        if asset:
+            render_dashboard(asset)
     else:
-        st.info(T["history_empty"])
+        st.markdown(
+            """
+            <div style="
+                text-align: center;
+                padding: 48px 0;
+                color: #666;
+            ">
+                <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                <p style="font-size: 16px;">
+                    Skriv ett namn eller en ticker ovan för att starta analysen
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )

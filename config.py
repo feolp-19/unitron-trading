@@ -131,3 +131,48 @@ AI_CONFIGS = {
 
 FINNHUB_API_KEY = get_secret("FINNHUB_API_KEY", "")
 MAX_WATCHLIST_SCANS = int(get_secret("MAX_WATCHLIST_SCANS_PER_DAY", "10"))
+
+
+SEARCH_ALIASES = {
+    "gold": "GC=F", "guld": "GC=F",
+    "silver": "SI=F",
+    "oil": "CL=F", "olja": "CL=F",
+    "gas": "NG=F", "naturgas": "NG=F",
+    "dax": "^GDAXI",
+    "omx": "^OMX", "omxs30": "^OMX", "stockholm": "^OMX",
+    "s&p": "^GSPC", "s&p 500": "^GSPC", "sp500": "^GSPC",
+    "nasdaq": "^IXIC",
+    "ftse": "^FTSE",
+    "bitcoin": "BTC-USD", "btc": "BTC-USD",
+    "ethereum": "ETH-USD", "eth": "ETH-USD",
+    "apple": "AAPL",
+    "tesla": "TSLA",
+    "microsoft": "MSFT",
+    "nvidia": "NVDA",
+    "amazon": "AMZN",
+    "ericsson": "ERIC-B.ST",
+    "volvo": "VOLV-B.ST",
+    "h&m": "HM-B.ST", "hm": "HM-B.ST",
+    "seb": "SEB-A.ST",
+    "investor": "INVE-B.ST",
+}
+
+
+def search_asset(query: str) -> Asset | None:
+    """Find an asset by name, ticker, or alias."""
+    q = query.strip().lower()
+    if not q:
+        return None
+
+    if q in SEARCH_ALIASES:
+        ticker = SEARCH_ALIASES[q]
+        found = get_asset_by_ticker(ticker)
+        if found:
+            return found
+        return create_custom_asset(ticker)
+
+    for asset in ALL_ASSETS_FLAT:
+        if q in asset.display_name.lower() or q == asset.ticker.lower():
+            return asset
+
+    return create_custom_asset(query.strip())
