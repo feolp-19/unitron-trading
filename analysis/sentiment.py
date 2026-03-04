@@ -62,9 +62,11 @@ Headlines:
 {headlines_text}"""
 
 
-FULL_ANALYSIS_PROMPT = """You are an expert financial analyst and professional trader. You must decide whether to BUY a BULL certificate (betting price goes UP), BUY a BEAR certificate (betting price goes DOWN), or NO TRADE.
+FULL_ANALYSIS_PROMPT = """You are a conservative professional trader who manages real money. Your #1 priority is CAPITAL PRESERVATION. You must decide: BUY a BULL certificate, BUY a BEAR certificate, or NO TRADE.
 
-Your job is to synthesize ALL the data below and make ONE clear trading decision. Be decisive — only say NO_TRADE if the data is truly conflicting or insufficient.
+CRITICAL MINDSET: Your default answer is NO_TRADE. You only recommend a trade when you see a GENUINE EDGE — multiple strong factors aligning in the same direction. Most days, most assets have NO clear trade. That is normal and correct. A missed trade costs nothing. A bad trade costs real money.
+
+You are scanning {asset_name}. Be brutally honest. If the signal is weak, mixed, or uncertain — say NO_TRADE.
 
 === ASSET ===
 {asset_name}
@@ -106,27 +108,36 @@ Your job is to synthesize ALL the data below and make ONE clear trading decision
 5. VIX: High VIX (>25) = fear/uncertainty, be cautious. Low VIX (<15) = complacency.
 6. NEWS: Headlines must support the technical direction. Contradicting news weakens the signal.
 
-=== CONFIDENCE SCORING RUBRIC (you MUST follow this) ===
-Start at 0.50 and adjust:
-+0.10 if SMA alignment is bullish_stack (for BULL) or bearish_stack (for BEAR)
-+0.05 if SMA alignment is mixed but price is on the right side of SMA200
-+0.10 if daily AND weekly timeframes are aligned (same direction)
--0.10 if daily and weekly timeframes CONFLICT
-+0.05 if RSI supports the direction (RSI < 50 for BEAR, RSI > 50 for BULL)
-+0.05 if RSI is in extreme zone favoring the trade (< 30 for bounce BULL, > 70 for reversal BEAR)
--0.10 if RSI contradicts (e.g. RSI > 65 for BULL = overbought risk)
-+0.10 if volume > 1.5x average (strong conviction)
--0.05 if volume < 0.7x average (weak conviction)
-+0.10 if news sentiment clearly supports the direction
--0.10 if news sentiment contradicts the direction
-+0.05 if no S/R obstacle within 3% of current price in the trade direction
--0.10 if price is within 2% of a major resistance (for BULL) or support (for BEAR)
--0.05 if VIX > 25 (elevated fear)
--0.10 if VIX > 30 (extreme fear)
+=== MINIMUM REQUIREMENTS TO RECOMMEND A TRADE ===
+You MUST say NO_TRADE unless ALL of these are true:
+1. SMA alignment is bullish_stack or bearish_stack (NOT mixed)
+2. News sentiment supports the direction (not contradicting or neutral)
+3. RSI is NOT in a danger zone (not > 65 for BULL, not < 35 for BEAR)
+4. Price is NOT within 2% of a major S/R obstacle in the trade direction
 
-Final confidence MUST be between 0.30 and 0.95. Round to 2 decimals.
+If ANY of these conditions fails → NO_TRADE. No exceptions.
+
+=== CONFIDENCE SCORING RUBRIC (you MUST follow this) ===
+Start at 0.40 (base) and adjust:
++0.15 if SMA alignment is bullish_stack (for BULL) or bearish_stack (for BEAR)
++0.10 if daily AND weekly timeframes are aligned (same direction)
+-0.15 if daily and weekly timeframes CONFLICT
++0.05 if RSI supports the direction (RSI < 50 for BEAR, RSI > 50 for BULL)
++0.05 if RSI is in extreme zone favoring the trade (< 30 for bounce, > 70 for reversal)
+-0.10 if RSI contradicts (e.g. RSI > 65 for BULL = overbought risk)
++0.10 if volume > 1.5x average (strong conviction in the move)
+-0.10 if volume < 0.7x average (weak conviction)
++0.10 if news sentiment STRONGLY supports (multiple headlines in same direction)
++0.05 if news sentiment mildly supports
+-0.10 if news is mixed or contradicts
++0.05 if no S/R obstacle within 5% in trade direction (clear runway)
+-0.05 if VIX > 25
+-0.10 if VIX > 30 (extreme fear — reduce all confidence)
+
+Final confidence MUST be between 0.30 and 0.90. Round to 2 decimals.
+If your calculated confidence is below 0.55 → change verdict to NO_TRADE.
 Each asset WILL score differently — do NOT default to the same number.
-Show your math in the analysis field (e.g. "Base 0.50 + SMA aligned +0.10 + volume confirms +0.10 - near resistance -0.10 = 0.60").
+Show your math in the analysis field (e.g. "Base 0.40 + SMA bullish stack +0.15 + weekly aligned +0.10 + strong news +0.10 = 0.75").
 
 Return ONLY valid JSON:
 {{
@@ -344,6 +355,8 @@ def _interpret_rsi(rsi: float) -> str:
 
 
 def _interpret_volume(vol_ratio: float) -> str:
+    if vol_ratio < 0.01:
+        return "volume data unavailable for this asset — ignore volume factor"
     if vol_ratio > 2.0:
         return "very high volume — strong conviction"
     if vol_ratio > 1.5:

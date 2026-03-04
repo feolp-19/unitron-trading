@@ -236,8 +236,11 @@ def render_dashboard(asset: Asset):
         # Volume
         vol_col1, vol_col2 = st.columns(2)
         with vol_col1:
-            vol_delta = "Hog" if tech.volume_ratio > 1.5 else ("Lag" if tech.volume_ratio < 0.7 else "Normal")
-            st.metric("Volym vs 20d snitt", f"{tech.volume_ratio:.1f}x", delta=vol_delta)
+            if tech.volume_ratio < 0.01:
+                st.metric("Volym vs 20d snitt", "N/A")
+            else:
+                vol_delta = "Hog" if tech.volume_ratio > 1.5 else ("Lag" if tech.volume_ratio < 0.7 else "Normal")
+                st.metric("Volym vs 20d snitt", f"{tech.volume_ratio:.1f}x", delta=vol_delta)
 
         st.divider()
 

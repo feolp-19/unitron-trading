@@ -1,8 +1,8 @@
 """Exit Strategy Engine — generates a complete 'Handelsplan' (Trading Plan)
 for every BULL or BEAR recommendation.
 
-Uses ATR-based stops, support/resistance levels, and risk/reward calculations
-to produce actionable entry, stop-loss, take-profit, and trailing stop levels."""
+Uses ATR-based stops, support/resistance levels, and risk/reward calculations.
+Take-profit is capped at 5x ATR to keep targets realistic for certificate trading."""
 
 from dataclasses import dataclass
 from analysis.technical import TechnicalSignal
@@ -12,20 +12,19 @@ from analysis.technical import TechnicalSignal
 class TradingPlan:
     entry_price: float
     stop_loss: float
-    stop_loss_method: str           # "ATR-baserad" or "Stöd-baserad"
+    stop_loss_method: str
     stop_loss_reasoning: str
     take_profit: float
-    take_profit_method: str         # "Motstånd-baserad" or "Risk/Reward-baserad"
+    take_profit_method: str
     take_profit_reasoning: str
-    risk_reward_ratio: str          # e.g. "1:2.3"
-    risk_amount: float              # distance from entry to stop-loss
-    reward_amount: float            # distance from entry to take-profit
+    risk_reward_ratio: str
+    risk_amount: float
+    reward_amount: float
     trailing_stop_level: float
     trailing_stop_reasoning: str
 
 
 def generate_trading_plan(tech: TechnicalSignal, action: str) -> TradingPlan | None:
-    """Generate a complete exit strategy for a given trade direction."""
     if action not in ("BULL", "BEAR"):
         return None
 
@@ -72,29 +71,39 @@ def _bull_plan(
 
     # --- TAKE-PROFIT ---
     risk_distance = entry - stop_loss
-    min_target = round(entry + 2 * risk_distance, 2)  # 2:1 R/R minimum
+    min_target = round(entry + 2 * risk_distance, 2)
+    max_target = round(entry + 5 * atr, 2)  # cap at 5x ATR
 
     if resistances:
         resistance_target = resistances[0]
-        if resistance_target >= min_target:
+        # Only use resistance if it's within a realistic range (max 5x ATR)
+        if resistance_target <= max_target and resistance_target >= min_target:
             take_profit = round(resistance_target, 2)
             tp_method = "Motstånd-baserad"
             tp_reasoning = (
                 f"Närmaste motståndsnivå på {resistance_target:,.2f}. "
                 f"Historiskt motstånd — hög sannolikhet för vändning."
             )
-        else:
+        elif resistance_target < min_target:
             take_profit = min_target
             tp_method = "Risk/Reward-baserad"
             tp_reasoning = (
                 f"Minst 2:1 risk/reward-kvot krävs. Närmaste motstånd "
                 f"({resistance_target:,.2f}) ger för liten vinst."
             )
+        else:
+            take_profit = max_target
+            tp_method = "ATR-baserad"
+            tp_reasoning = (
+                f"Målkurs satt till 5x ATR ({atr:,.2f}). "
+                f"Närmaste motstånd ({resistance_target:,.2f}) ligger för långt bort "
+                f"för realistisk certifikathandel."
+            )
     else:
-        take_profit = min_target
+        take_profit = min(min_target, max_target)
         tp_method = "Risk/Reward-baserad"
         tp_reasoning = (
-            f"Minst 2:1 risk/reward-kvot. "
+            f"2:1 risk/reward-kvot baserad på ATR. "
             f"Inga tydliga motståndsnivåer identifierade."
         )
 
@@ -158,29 +167,40 @@ def _bear_plan(
 
     # --- TAKE-PROFIT ---
     risk_distance = stop_loss - entry
-    min_target = round(entry - 2 * risk_distance, 2)  # 2:1 R/R minimum
+    min_target = round(entry - 2 * risk_distance, 2)
+    max_target_distance = 5 * atr
+    max_target = round(entry - max_target_distance, 2)  # cap at 5x ATR below
 
     if supports:
         support_target = supports[0]
-        if support_target <= min_target:
+        # Only use support if it's within a realistic range (max 5x ATR)
+        if support_target >= max_target and support_target <= min_target:
             take_profit = round(support_target, 2)
             tp_method = "Stöd-baserad"
             tp_reasoning = (
                 f"Närmaste stödnivå på {support_target:,.2f}. "
                 f"Historiskt stöd — hög sannolikhet för studs."
             )
-        else:
+        elif support_target > min_target:
             take_profit = min_target
             tp_method = "Risk/Reward-baserad"
             tp_reasoning = (
                 f"Minst 2:1 risk/reward-kvot krävs. Närmaste stöd "
                 f"({support_target:,.2f}) ger för liten vinst."
             )
+        else:
+            take_profit = max_target
+            tp_method = "ATR-baserad"
+            tp_reasoning = (
+                f"Målkurs satt till 5x ATR ({atr:,.2f}). "
+                f"Närmaste stöd ({support_target:,.2f}) ligger för långt bort "
+                f"för realistisk certifikathandel."
+            )
     else:
-        take_profit = min_target
+        take_profit = max(min_target, max_target)
         tp_method = "Risk/Reward-baserad"
         tp_reasoning = (
-            f"Minst 2:1 risk/reward-kvot. "
+            f"2:1 risk/reward-kvot baserad på ATR. "
             f"Inga tydliga stödnivåer identifierade."
         )
 

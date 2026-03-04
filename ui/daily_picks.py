@@ -80,7 +80,7 @@ def render_daily_picks():
                 sr = tech.support_resistance
                 entry["rsi"] = f"{tech.rsi_value:.1f}"
                 entry["vix"] = f"{tech.vix_value:.1f}" if tech.vix_value else "-"
-                entry["volume"] = f"{tech.volume_ratio:.1f}x"
+                entry["volume"] = "N/A" if tech.volume_ratio < 0.01 else f"{tech.volume_ratio:.1f}x"
 
                 headlines = get_news_for_asset(asset)
                 headlines_json = json.dumps(headlines)
@@ -125,13 +125,41 @@ def render_daily_picks():
                     else:
                         action = "NONE"
 
+                    # Quality gate: reject weak signals
+                    MIN_CONFIDENCE = 0.55
+                    if action != "NONE" and confidence < MIN_CONFIDENCE:
+                        entry["action"] = "NONE"
+                        entry["status"] = "Svag signal"
+                        entry["reason"] = (
+                            f"AI sa {verdict} men konfidens ({confidence:.0%}) "
+                            f"under minimum ({MIN_CONFIDENCE:.0%})"
+                        )
+                        scan_data["report"].append(entry)
+                        continue
+
+                    trading_plan = None
+                    if action != "NONE":
+                        trading_plan = generate_trading_plan(tech, action)
+
+                        # R/R quality gate: reject trades with poor risk/reward
+                        if trading_plan:
+                            rr_val = (trading_plan.reward_amount / trading_plan.risk_amount
+                                      if trading_plan.risk_amount > 0 else 0)
+                            if rr_val < 1.5:
+                                entry["action"] = "NONE"
+                                entry["status"] = "Svag signal"
+                                entry["reason"] = (
+                                    f"Risk/reward {trading_plan.risk_reward_ratio} "
+                                    f"under minimum (1:1.5)"
+                                )
+                                scan_data["report"].append(entry)
+                                continue
+
                     entry["action"] = action
 
                     if action != "NONE":
                         entry["status"] = "SIGNAL"
                         entry["reason"] = ai_result.get("analysis", "")[:120]
-
-                        trading_plan = generate_trading_plan(tech, action)
 
                         save_recommendation(
                             ticker=asset.ticker,
@@ -155,6 +183,7 @@ def render_daily_picks():
                         entry["status"] = "Ingen signal"
                         entry["reason"] = ai_result.get("analysis", "")[:120]
                 else:
+                    # Fallback to rule-based engine with same quality gates
                     week_range = get_52_week_range(df)
                     w52_low = week_range[0] if week_range else None
                     decision = decide(
@@ -162,8 +191,34 @@ def render_daily_picks():
                         week_52_low=w52_low,
                         is_crypto=asset.asset_type == "crypto",
                     )
-                    entry["action"] = decision.action
                     entry["ai_verdict"] = "fallback"
+
+                    if decision.action != "NONE" and decision.confidence_score < MIN_CONFIDENCE:
+                        decision = decision.__class__(
+                            action="NONE", confidence_score=decision.confidence_score,
+                            current_price=decision.current_price,
+                            stop_loss_price=0, take_profit_price=0,
+                            reasoning=[f"Konfidens ({decision.confidence_score:.0%}) under minimum"],
+                            warnings=[], uncertainty_factors=[],
+                        )
+
+                    fallback_plan = None
+                    if decision.action != "NONE":
+                        fallback_plan = generate_trading_plan(tech, decision.action)
+                        if fallback_plan:
+                            fb_rr = (fallback_plan.reward_amount / fallback_plan.risk_amount
+                                     if fallback_plan.risk_amount > 0 else 0)
+                            if fb_rr < 1.5:
+                                decision = decision.__class__(
+                                    action="NONE", confidence_score=decision.confidence_score,
+                                    current_price=decision.current_price,
+                                    stop_loss_price=0, take_profit_price=0,
+                                    reasoning=[f"Risk/reward ({fallback_plan.risk_reward_ratio}) under minimum"],
+                                    warnings=[], uncertainty_factors=[],
+                                )
+                                fallback_plan = None
+
+                    entry["action"] = decision.action
 
                     if decision.action != "NONE":
                         entry["status"] = "SIGNAL"
@@ -174,7 +229,7 @@ def render_daily_picks():
                             "tech": tech,
                             "sent": sent,
                             "decision": decision,
-                            "trading_plan": generate_trading_plan(tech, decision.action),
+                            "trading_plan": fallback_plan,
                         })
                     else:
                         entry["status"] = "Ingen signal"
@@ -202,6 +257,7 @@ def render_daily_picks():
 
     total = len(report)
     signals = len([r for r in report if r["status"] == "SIGNAL"])
+    weak = len([r for r in report if r["status"] == "Svag signal"])
     no_signal = len([r for r in report if r["status"] == "Ingen signal"])
     failed = len([r for r in report if r["status"] in ("Ingen data", "For lite data", "Fel")])
 
@@ -258,6 +314,10 @@ def render_daily_picks():
                 <div style="color: #888; font-size: 13px;">Signaler</div>
             </div>
             <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: 700; color: #FFD600;">{weak}</div>
+                <div style="color: #888; font-size: 13px;">Avvisade</div>
+            </div>
+            <div style="text-align: center;">
                 <div style="font-size: 24px; font-weight: 700; color: #888;">{no_signal}</div>
                 <div style="color: #888; font-size: 13px;">Ingen signal</div>
             </div>
@@ -302,12 +362,12 @@ def render_daily_picks():
                 text-align: center;
                 margin: 16px 0 24px 0;
             ">
-                <div style="font-size: 64px; margin-bottom: 16px;">😴</div>
-                <h2 style="color: #888;">Inga handelsmöjligheter idag</h2>
+                <div style="font-size: 64px; margin-bottom: 16px;">🛡️</div>
+                <h2 style="color: #888;">Inga starka handelsmöjligheter idag</h2>
                 <p style="color: #666; font-size: 16px;">
-                    AI-motorn hittade ingen tillgång där alla faktorer
-                    (trend, momentum, volym, sentiment, stöd/motstånd) pekar åt samma håll.<br>
-                    Bäst att stå utanför marknaden idag.
+                    AI-motorn hittade ingen tillgång med tillräckligt stark signal
+                    (konfidens ≥55%, R/R ≥1:1.5, SMA-linjering + sentiment i linje).<br>
+                    <strong>Att stå utanför marknaden är ett klokt beslut — en missad trade kostar ingenting.</strong>
                 </p>
             </div>
             """,
@@ -333,6 +393,8 @@ def render_daily_picks():
         def _color_status(val):
             if val == "SIGNAL":
                 return "background-color: #00C85333; color: #00C853"
+            elif val == "Svag signal":
+                return "background-color: #FFD60033; color: #FFD600"
             elif val == "Ingen signal":
                 return "color: #888"
             elif val in ("Ingen data", "For lite data", "Fel"):
@@ -424,13 +486,13 @@ def _render_pick_card(result: dict, rank: int):
                 <strong>Konfidens:</strong> {confidence_pct} —
                 <strong>Pris:</strong> {tech.current_price:,.2f} —
                 <strong>RSI:</strong> {tech.rsi_value:.1f} —
-                <strong>Volym:</strong> {tech.volume_ratio:.1f}x —
+                <strong>Volym:</strong> {'N/A' if tech.volume_ratio < 0.01 else f'{tech.volume_ratio:.1f}x'} —
                 <strong>VIX:</strong> {tech.vix_value if tech.vix_value else 'N/A'}
             </div>
             <div style="font-size: 14px; color: #aaa; line-height: 1.5; margin-bottom: 8px;">
                 {analysis_text}
             </div>
-            {"<div style='font-size: 13px; color: #999; border-top: 1px solid #333; padding-top: 8px;'>" + exit_summary + "</div>" if exit_summary else ""}
+            {"<div style='font-size: 14px; color: #ccc; border-top: 1px solid #444; padding-top: 10px; margin-top: 4px; display: flex; gap: 24px; flex-wrap: wrap;'><div><span style=\"color: #888;\">Ingång:</span> <strong>" + f"{trading_plan.entry_price:,.2f}" + "</strong></div><div><span style=\"color: #888;\">Stop-Loss:</span> <strong style=\"color: #FF6B6B;\">" + f"{trading_plan.stop_loss:,.2f}" + "</strong> <span style=\"font-size:11px;color:#666;\">(" + trading_plan.stop_loss_method + ")</span></div><div><span style=\"color: #888;\">Målkurs:</span> <strong style=\"color: #69F0AE;\">" + f"{trading_plan.take_profit:,.2f}" + "</strong> <span style=\"font-size:11px;color:#666;\">(" + trading_plan.take_profit_method + ")</span></div><div><span style=\"color: #888;\">R/R:</span> <strong>" + trading_plan.risk_reward_ratio + "</strong></div></div>" if trading_plan else ""}
         </div>
         """,
         unsafe_allow_html=True,
