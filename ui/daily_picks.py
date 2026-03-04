@@ -76,6 +76,7 @@ def render_daily_picks():
             rescan = False
 
     if rescan:
+        st.cache_data.clear()
         st.session_state.pop("scan_data", None)
 
     if "scan_data" not in st.session_state:
@@ -367,8 +368,12 @@ def render_daily_picks():
                         take_profit=tp.take_profit if tp else 0,
                         news_keywords=asset.news_keywords,
                     )
-                except Exception:
+                except Exception as ve:
                     verification = None
+                    scan_data["log"].append(
+                        f"   🔴 Verifiering kraschade: {str(ve)[:60]}"
+                    )
+                    _update_log(scan_data["log"], live_log)
 
                 result["verification"] = verification
 

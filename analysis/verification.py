@@ -200,6 +200,21 @@ def verify_recommendation(
     second_raw = second_fn(second_prompt)
     second_data = _parse_json_response(second_raw) if second_raw else None
 
+    # If second provider failed, try all other providers
+    if not second_data:
+        from analysis.sentiment import _call_groq, _call_gemini, _call_grok
+        fallback_providers = [
+            ("Groq", _call_groq), ("Gemini", _call_gemini), ("Grok", _call_grok),
+        ]
+        for fb_name, fb_fn in fallback_providers:
+            if fb_name != first_provider and fb_name != second_name:
+                fb_raw = fb_fn(second_prompt)
+                if fb_raw:
+                    second_data = _parse_json_response(fb_raw)
+                    if second_data:
+                        second_name = fb_name
+                        break
+
     if not second_data:
         return None
 
