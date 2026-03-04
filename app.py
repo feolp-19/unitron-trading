@@ -1,7 +1,8 @@
 import streamlit as st
 
-from config import CURATED_ASSETS, ALL_ASSETS_FLAT, get_asset_by_ticker, create_custom_asset, AI_PROVIDER
+from config import CURATED_ASSETS, get_asset_by_ticker, create_custom_asset, AI_PROVIDER
 from ui.translations import T
+from ui.daily_picks import render_daily_picks
 from ui.dashboard import render_dashboard
 from ui.scanner_view import render_scanner
 from storage.history import load_history
@@ -12,7 +13,7 @@ st.set_page_config(
     page_title=T["app_title"],
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 
@@ -21,7 +22,7 @@ def check_password() -> bool:
     try:
         correct_pw = st.secrets["passwords"]["app_password"]
     except (KeyError, FileNotFoundError):
-        return True  # No password configured = local dev mode
+        return True
 
     if "authenticated" not in st.session_state:
         st.session_state["authenticated"] = False
@@ -43,7 +44,7 @@ def check_password() -> bool:
 if not check_password():
     st.stop()
 
-# --- Sidebar ---
+# --- Sidebar (for deep-dive analysis) ---
 with st.sidebar:
     st.title(T["app_title"])
     st.caption(T["app_subtitle"])
@@ -78,11 +79,15 @@ with st.sidebar:
         st.success(f"Vald: {selected_asset.display_name} ({selected_asset.ticker})")
 
 # --- Main Content ---
-tab_analyze, tab_watchlist, tab_history = st.tabs([
+tab_today, tab_analyze, tab_watchlist, tab_history = st.tabs([
+    "Idag",
     T["tab_analyze"],
     T["tab_watchlist"],
     T["tab_history"],
 ])
+
+with tab_today:
+    render_daily_picks()
 
 with tab_analyze:
     render_dashboard(selected_asset)

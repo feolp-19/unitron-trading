@@ -84,7 +84,7 @@ T = {
 
     # Data issues
     "no_data": "Kunde inte hämta marknadsdata för denna tillgång",
-    "insufficient_data": "Otillräcklig data — minst 200 handelsdagar krävs",
+    "insufficient_data": "Otillräcklig data — minst 50 handelsdagar krävs",
 
     # Table headers
     "col_asset": "Tillgång",
