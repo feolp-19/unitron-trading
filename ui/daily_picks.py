@@ -25,35 +25,18 @@ from storage.usage_tracker import get_usage, get_scan_count, can_scan, track_sca
 
 
 def _render_usage_bar(usage: dict):
-    """Show live API credit usage as a compact bar."""
+    """Show live API credit usage using native Streamlit components."""
     providers = [
-        ("Groq", "groq", "#F55036"),
-        ("Gemini", "gemini", "#4285F4"),
-        ("Tavily", "tavily", "#7C3AED"),
+        ("Groq", "groq"),
+        ("Gemini", "gemini"),
+        ("Tavily", "tavily"),
     ]
-
-    bars_html = ""
-    for label, key, color in providers:
+    cols = st.columns(len(providers))
+    for col, (label, key) in zip(cols, providers):
         u = usage[key]
-        pct = u["pct"]
-        bar_color = color if pct < 80 else ("#FF9100" if pct < 95 else "#FF1744")
-        bars_html += f"""
-        <div style="flex: 1; min-width: 100px;">
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-bottom: 2px;">
-                <span>{label}</span>
-                <span>{u['used']}/{u['limit']}</span>
-            </div>
-            <div style="background: #333; border-radius: 4px; height: 6px; overflow: hidden;">
-                <div style="background: {bar_color}; width: {pct}%; height: 100%; border-radius: 4px;"></div>
-            </div>
-        </div>"""
-
-    st.markdown(
-        f"""<div style="display: flex; gap: 16px; padding: 8px 0 16px 0; flex-wrap: wrap;">
-            {bars_html}
-        </div>""",
-        unsafe_allow_html=True,
-    )
+        with col:
+            st.caption(f"{label}: {u['used']}/{u['limit']}")
+            st.progress(min(u["pct"] / 100, 1.0))
 
 
 def render_daily_picks():
@@ -97,8 +80,9 @@ def render_daily_picks():
     if rescan:
         st.cache_data.clear()
         st.session_state.pop("scan_data", None)
+        st.session_state["run_scan"] = True
 
-    if "scan_data" not in st.session_state:
+    if st.session_state.get("run_scan") and "scan_data" not in st.session_state:
         MIN_CONFIDENCE = 0.55
         MIN_RR_RATIO = 1.5
 
@@ -439,6 +423,29 @@ def render_daily_picks():
         track_scan()
         progress_bar.empty()
         progress_text.empty()
+
+    if "scan_data" not in st.session_state:
+        st.markdown(
+            """
+            <div style="
+                background: #1A1D23;
+                border: 1px solid #333;
+                border-radius: 16px;
+                padding: 48px 32px;
+                text-align: center;
+                margin: 16px 0 24px 0;
+            ">
+                <div style="font-size: 64px; margin-bottom: 16px;">📊</div>
+                <h2 style="color: #ccc;">Välkommen till Unitron</h2>
+                <p style="color: #888; font-size: 16px;">
+                    Tryck på <strong>"Skanna nu"</strong> för att starta dagens marknadsanalys.<br>
+                    AI-motorn screnar alla tillgångar i två steg och visar bara de bästa möjligheterna.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        return
 
     scan_data = st.session_state["scan_data"]
 

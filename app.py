@@ -19,44 +19,49 @@ LOCKOUT_SECONDS = 60
 
 
 def check_password() -> bool:
+    if st.session_state.get("authenticated"):
+        return True
+
     try:
         correct_pw = st.secrets["passwords"]["app_password"]
     except (KeyError, FileNotFoundError):
-        st.error("⚠️ Lösenord ej konfigurerat. Kontakta administratören.")
+        st.error("Lösenord ej konfigurerat. Kontakta administratören.")
+        st.stop()
         return False
-
-    if st.session_state.get("authenticated"):
-        return True
 
     attempts = st.session_state.get("login_attempts", 0)
     locked_until = st.session_state.get("locked_until", 0)
 
     if time.time() < locked_until:
         remaining = int(locked_until - time.time())
-        st.error(f"🔒 För många misslyckade försök. Vänta {remaining} sekunder.")
+        st.error(f"För många misslyckade försök. Vänta {remaining} sekunder.")
+        st.stop()
         return False
 
-    st.title("🔒 Unitron Handelsanalys")
-    pw = st.text_input("Lösenord", type="password")
-    if st.button("Logga in", type="primary"):
-        if hmac.compare_digest(pw.encode(), correct_pw.encode()):
-            st.session_state["authenticated"] = True
-            st.session_state["login_attempts"] = 0
-            st.rerun()
-        else:
-            attempts += 1
-            st.session_state["login_attempts"] = attempts
-            if attempts >= MAX_LOGIN_ATTEMPTS:
-                st.session_state["locked_until"] = time.time() + LOCKOUT_SECONDS
-                st.error(f"🔒 För många försök. Låst i {LOCKOUT_SECONDS} sekunder.")
+    login_container = st.empty()
+    with login_container.container():
+        st.title("Unitron Handelsanalys")
+        pw = st.text_input("Lösenord", type="password", key="pw_input")
+        if st.button("Logga in", type="primary"):
+            if hmac.compare_digest(pw.encode(), correct_pw.encode()):
+                st.session_state["authenticated"] = True
+                st.session_state["login_attempts"] = 0
+                login_container.empty()
+                st.rerun()
             else:
-                remaining = MAX_LOGIN_ATTEMPTS - attempts
-                st.error(f"Fel lösenord ({remaining} försök kvar)")
+                attempts += 1
+                st.session_state["login_attempts"] = attempts
+                if attempts >= MAX_LOGIN_ATTEMPTS:
+                    st.session_state["locked_until"] = time.time() + LOCKOUT_SECONDS
+                    st.error(f"För många försök. Låst i {LOCKOUT_SECONDS} sekunder.")
+                else:
+                    remaining = MAX_LOGIN_ATTEMPTS - attempts
+                    st.error(f"Fel lösenord ({remaining} försök kvar)")
+    st.stop()
     return False
 
 
-if not check_password():
-    st.stop()
+check_password()
 
 tab_today, tab_analyze = st.tabs(["Idag", "Analysera"])
 
