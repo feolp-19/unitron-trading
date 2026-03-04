@@ -17,23 +17,46 @@ from ui.translations import T
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
-def _run_daily_scan() -> list[dict]:
-    """Scan ALL curated assets and return actionable results sorted by confidence."""
+def _run_daily_scan() -> dict:
+    """Scan ALL curated assets. Returns both results and scan report."""
     results = []
+    report = []
 
     for asset in ALL_ASSETS_FLAT:
+        entry = {
+            "name": asset.display_name,
+            "ticker": asset.ticker,
+            "status": "?",
+            "tech_direction": "-",
+            "rsi": "-",
+            "sentiment": "-",
+            "action": "-",
+            "reason": "",
+        }
+
         try:
             df = fetch_ohlc(asset.ticker)
             if df.empty:
+                entry["status"] = "Ingen data"
+                entry["reason"] = "yfinance returnerade ingen data"
+                report.append(entry)
                 continue
 
             tech = technical_analyze(df)
             if tech is None:
+                entry["status"] = "För lite data"
+                entry["reason"] = f"Bara {len(df)} dagar (behöver 50+)"
+                report.append(entry)
                 continue
+
+            entry["rsi"] = f"{tech.rsi_value:.1f}"
+            entry["tech_direction"] = tech.direction
 
             headlines = get_news_for_asset(asset)
             sent_dict = analyze_sentiment(asset.display_name, json.dumps(headlines))
             sent = dict_to_signal(sent_dict.copy())
+
+            entry["sentiment"] = f"{sent.direction} ({sent.confidence:.0%})"
 
             week_range = get_52_week_range(df)
             w52_low = week_range[0] if week_range else None
@@ -45,7 +68,12 @@ def _run_daily_scan() -> list[dict]:
                 is_crypto=asset.asset_type == "crypto",
             )
 
+            entry["action"] = decision.action
+
             if decision.action != "NONE":
+                entry["status"] = "SIGNAL"
+                entry["reason"] = decision.reasoning[0] if decision.reasoning else ""
+
                 save_recommendation(
                     ticker=asset.ticker,
                     asset_name=asset.display_name,
@@ -63,11 +91,21 @@ def _run_daily_scan() -> list[dict]:
                     "tech": tech,
                     "sent": sent,
                 })
-        except Exception:
-            continue
+            else:
+                entry["status"] = "Ingen signal"
+                if decision.reasoning:
+                    entry["reason"] = decision.reasoning[0]
+                if decision.warnings:
+                    entry["reason"] += f" | {decision.warnings[0]}"
+
+        except Exception as e:
+            entry["status"] = "Fel"
+            entry["reason"] = str(e)[:80]
+
+        report.append(entry)
 
     results.sort(key=lambda x: x["decision"].confidence_score, reverse=True)
-    return results
+    return {"results": results, "report": report}
 
 
 def render_daily_picks():
@@ -92,9 +130,73 @@ def render_daily_picks():
             st.rerun()
 
     with st.spinner("Skannar alla marknader..."):
-        results = _run_daily_scan()
+        scan_data = _run_daily_scan()
 
-    if not results:
+    results = scan_data["results"]
+    report = scan_data["report"]
+
+    # --- Scan summary stats ---
+    total = len(report)
+    signals = len([r for r in report if r["status"] == "SIGNAL"])
+    no_signal = len([r for r in report if r["status"] == "Ingen signal"])
+    failed = len([r for r in report if r["status"] in ("Ingen data", "För lite data", "Fel")])
+
+    st.markdown(
+        f"""
+        <div style="
+            background: #1A1D23;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 12px 24px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 32px;
+            justify-content: center;
+        ">
+            <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: 700;">{total}</div>
+                <div style="color: #888; font-size: 13px;">Skannade</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: 700; color: #00C853;">{signals}</div>
+                <div style="color: #888; font-size: 13px;">Signaler</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: 700; color: #888;">{no_signal}</div>
+                <div style="color: #888; font-size: 13px;">Ingen signal</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 24px; font-weight: 700; color: #FF1744;">{failed}</div>
+                <div style="color: #888; font-size: 13px;">Misslyckades</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # --- Results ---
+    if results:
+        st.markdown(
+            f"""
+            <div style="
+                background: #00C85315;
+                border: 1px solid #00C85344;
+                border-radius: 12px;
+                padding: 16px 24px;
+                text-align: center;
+                margin-bottom: 24px;
+            ">
+                <span style="font-size: 18px;">
+                    Motorn hittade <strong>{len(results)}</strong> handelsmöjlighet{'er' if len(results) > 1 else ''} idag
+                </span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        for i, r in enumerate(results):
+            _render_pick_card(r, rank=i + 1)
+    else:
         st.markdown(
             """
             <div style="
@@ -103,7 +205,7 @@ def render_daily_picks():
                 border-radius: 16px;
                 padding: 48px 32px;
                 text-align: center;
-                margin: 32px 0;
+                margin: 16px 0 24px 0;
             ">
                 <div style="font-size: 64px; margin-bottom: 16px;">😴</div>
                 <h2 style="color: #888;">Inga handelsmöjligheter idag</h2>
@@ -116,28 +218,33 @@ def render_daily_picks():
             """,
             unsafe_allow_html=True,
         )
-        return
 
-    st.markdown(
-        f"""
-        <div style="
-            background: #00C85315;
-            border: 1px solid #00C85344;
-            border-radius: 12px;
-            padding: 16px 24px;
-            text-align: center;
-            margin-bottom: 24px;
-        ">
-            <span style="font-size: 18px;">
-                Motorn hittade <strong>{len(results)}</strong> handelsmöjlighet{'er' if len(results) > 1 else ''} idag
-            </span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    # --- Detailed scan report ---
+    with st.expander(f"📋 Skanningsrapport — {total} tillgångar analyserade", expanded=False):
+        import pandas as pd
+        df = pd.DataFrame(report)
+        df = df.rename(columns={
+            "name": "Tillgång",
+            "ticker": "Ticker",
+            "status": "Status",
+            "tech_direction": "Teknisk",
+            "rsi": "RSI",
+            "sentiment": "Sentiment",
+            "action": "Signal",
+            "reason": "Detaljer",
+        })
 
-    for i, r in enumerate(results):
-        _render_pick_card(r, rank=i + 1)
+        def _color_status(val):
+            if val == "SIGNAL":
+                return "background-color: #00C85333; color: #00C853"
+            elif val == "Ingen signal":
+                return "color: #888"
+            elif val in ("Ingen data", "För lite data", "Fel"):
+                return "background-color: #FF174433; color: #FF1744"
+            return ""
+
+        styled = df.style.map(_color_status, subset=["Status"])
+        st.dataframe(styled, hide_index=True, use_container_width=True)
 
 
 def _render_pick_card(result: dict, rank: int):

@@ -121,9 +121,8 @@ def decide(
         if action != "NONE":
             warnings.append(
                 f"Låg datakvalitet: Endast {sent.relevant_count} relevanta rubriker hittades — "
-                f"sentimentet kan vara otillförlitligt"
+                f"sentimentet kan vara opålitligt, men signalen bibehålls"
             )
-            action = "NONE"
 
     # --- Crypto warning ---
     if is_crypto:
