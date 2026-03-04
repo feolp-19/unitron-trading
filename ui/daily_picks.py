@@ -20,9 +20,31 @@ from storage.history import save_recommendation
 from ui.translations import T
 
 
+MAX_DAILY_SCANS = 5
+
+
+def _get_scan_count() -> tuple[int, str]:
+    """Get today's scan count and the date key."""
+    today_key = datetime.now().strftime("%Y-%m-%d")
+    scan_tracker = st.session_state.get("scan_tracker", {})
+    if scan_tracker.get("date") != today_key:
+        scan_tracker = {"date": today_key, "count": 0}
+        st.session_state["scan_tracker"] = scan_tracker
+    return scan_tracker["count"], today_key
+
+
+def _increment_scan_count():
+    today_key = datetime.now().strftime("%Y-%m-%d")
+    scan_tracker = st.session_state.get("scan_tracker", {"date": today_key, "count": 0})
+    scan_tracker["count"] += 1
+    st.session_state["scan_tracker"] = scan_tracker
+
+
 def render_daily_picks():
     """Render the auto-scan daily picks view."""
     today_str = datetime.now().strftime("%A %d %B %Y")
+    scan_count, _ = _get_scan_count()
+    scans_left = MAX_DAILY_SCANS - scan_count
 
     col_title, col_btn = st.columns([4, 1])
     with col_title:
@@ -30,14 +52,27 @@ def render_daily_picks():
             f"""
             <div style="padding: 16px 0 8px 0;">
                 <h1 style="margin-bottom: 0;">Unitron Handelsanalys</h1>
-                <p style="color: #888; font-size: 18px;">{today_str}</p>
+                <p style="color: #888; font-size: 18px;">
+                    {today_str} &nbsp;·&nbsp;
+                    Skanningar idag: {scan_count}/{MAX_DAILY_SCANS}
+                </p>
             </div>
             """,
             unsafe_allow_html=True,
         )
     with col_btn:
         st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
-        rescan = st.button("🔄 Skanna nu", type="primary", use_container_width=True)
+        if scans_left > 0:
+            rescan = st.button(
+                f"🔄 Skanna nu ({scans_left} kvar)",
+                type="primary", use_container_width=True,
+            )
+        else:
+            st.button(
+                "⛔ Dagskvot slut",
+                type="secondary", use_container_width=True, disabled=True,
+            )
+            rescan = False
 
     if rescan:
         st.session_state.pop("scan_data", None)
@@ -375,6 +410,7 @@ def render_daily_picks():
         _update_log(scan_data["log"], live_log)
 
         st.session_state["scan_data"] = scan_data
+        _increment_scan_count()
         progress_bar.empty()
         progress_text.empty()
 

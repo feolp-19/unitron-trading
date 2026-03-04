@@ -314,7 +314,7 @@ def _parse_ai_response(raw: str, headlines: list[dict], provider: str) -> Sentim
         return None
 
 
-@st.cache_data(ttl=86400, show_spinner=False)
+@st.cache_data(ttl=14400, show_spinner=False)
 def analyze_sentiment(asset_name: str, headlines_json: str) -> dict:
     """Analyze sentiment with automatic AI fallback. Returns dict for caching."""
     headlines = json.loads(headlines_json)
@@ -424,7 +424,7 @@ def _format_sr_text(
     return "\n".join(lines)
 
 
-@st.cache_data(ttl=86400, show_spinner=False)
+@st.cache_data(ttl=14400, show_spinner=False)
 def run_full_analysis(
     asset_name: str,
     price: float,
