@@ -1,0 +1,133 @@
+import os
+from dataclasses import dataclass, field
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+
+def get_secret(key: str, default: str = "") -> str:
+    """Read from Streamlit secrets (cloud) or env vars (local)."""
+    try:
+        import streamlit as st
+        if key in st.secrets.get("api_keys", {}):
+            return st.secrets["api_keys"][key]
+    except Exception:
+        pass
+    return os.getenv(key, default)
+
+
+@dataclass
+class Asset:
+    ticker: str
+    display_name: str
+    news_keywords: list[str]
+    asset_type: str  # index, commodity, stock, crypto
+    category: str    # Indices, Råvaror, Svenska aktier, Amerikanska aktier, Krypto
+
+
+CURATED_ASSETS: dict[str, list[Asset]] = {
+    "Index": [
+        Asset("^GDAXI", "DAX 40", ["DAX", "German economy", "Deutsche Börse"], "index", "Index"),
+        Asset("^OMX", "OMXS30", ["OMXS30", "Stockholm börsen", "Swedish economy"], "index", "Index"),
+        Asset("^GSPC", "S&P 500", ["S&P 500", "US economy", "Wall Street"], "index", "Index"),
+        Asset("^IXIC", "Nasdaq", ["Nasdaq", "tech stocks", "US technology"], "index", "Index"),
+        Asset("^FTSE", "FTSE 100", ["FTSE", "UK economy", "London Stock Exchange"], "index", "Index"),
+    ],
+    "Råvaror": [
+        Asset("GC=F", "Guld", ["gold price", "gold market", "precious metals"], "commodity", "Råvaror"),
+        Asset("SI=F", "Silver", ["silver price", "silver market", "precious metals"], "commodity", "Råvaror"),
+        Asset("CL=F", "Olja (WTI)", ["oil price", "crude oil", "WTI", "OPEC"], "commodity", "Råvaror"),
+        Asset("NG=F", "Naturgas", ["natural gas price", "energy market"], "commodity", "Råvaror"),
+    ],
+    "Svenska aktier": [
+        Asset("ERIC-B.ST", "Ericsson B", ["Ericsson", "telecom", "5G"], "stock", "Svenska aktier"),
+        Asset("VOLV-B.ST", "Volvo B", ["Volvo", "trucks", "automotive"], "stock", "Svenska aktier"),
+        Asset("HM-B.ST", "H&M B", ["H&M", "Hennes Mauritz", "fashion retail"], "stock", "Svenska aktier"),
+        Asset("SEB-A.ST", "SEB A", ["SEB", "Swedish bank", "banking"], "stock", "Svenska aktier"),
+        Asset("INVE-B.ST", "Investor B", ["Investor AB", "Wallenberg", "investment"], "stock", "Svenska aktier"),
+    ],
+    "Amerikanska aktier": [
+        Asset("AAPL", "Apple", ["Apple", "iPhone", "tech earnings"], "stock", "Amerikanska aktier"),
+        Asset("TSLA", "Tesla", ["Tesla", "EV", "Elon Musk"], "stock", "Amerikanska aktier"),
+        Asset("MSFT", "Microsoft", ["Microsoft", "Azure", "AI"], "stock", "Amerikanska aktier"),
+        Asset("NVDA", "Nvidia", ["Nvidia", "GPU", "AI chips"], "stock", "Amerikanska aktier"),
+        Asset("AMZN", "Amazon", ["Amazon", "AWS", "e-commerce"], "stock", "Amerikanska aktier"),
+    ],
+    "Krypto": [
+        Asset("BTC-USD", "Bitcoin", ["Bitcoin", "BTC", "cryptocurrency"], "crypto", "Krypto"),
+        Asset("ETH-USD", "Ethereum", ["Ethereum", "ETH", "smart contracts"], "crypto", "Krypto"),
+    ],
+}
+
+ALL_ASSETS_FLAT: list[Asset] = [
+    asset for assets in CURATED_ASSETS.values() for asset in assets
+]
+
+
+def get_asset_by_ticker(ticker: str) -> Asset | None:
+    for asset in ALL_ASSETS_FLAT:
+        if asset.ticker == ticker:
+            return asset
+    return None
+
+
+def create_custom_asset(ticker: str) -> Asset:
+    """Create an Asset for a user-typed ticker not in the curated list."""
+    ticker_upper = ticker.upper().strip()
+
+    if ticker_upper.endswith("-USD"):
+        asset_type = "crypto"
+        category = "Krypto"
+        name = ticker_upper.replace("-USD", "")
+    elif ticker_upper.endswith(".ST"):
+        asset_type = "stock"
+        category = "Svenska aktier"
+        name = ticker_upper.replace(".ST", "").replace("-", " ")
+    elif ticker_upper.startswith("^"):
+        asset_type = "index"
+        category = "Index"
+        name = ticker_upper.lstrip("^")
+    elif "=F" in ticker_upper:
+        asset_type = "commodity"
+        category = "Råvaror"
+        name = ticker_upper.replace("=F", "")
+    else:
+        asset_type = "stock"
+        category = "Amerikanska aktier"
+        name = ticker_upper
+
+    return Asset(
+        ticker=ticker_upper,
+        display_name=name,
+        news_keywords=[name],
+        asset_type=asset_type,
+        category=category,
+    )
+
+
+# AI provider config
+AI_PROVIDER = get_secret("AI_PROVIDER", "groq").lower()
+
+AI_CONFIGS = {
+    "groq": {
+        "api_key_env": "GROQ_API_KEY",
+        "base_url": "https://api.groq.com/openai/v1",
+        "model": "llama-3.3-70b-versatile",
+    },
+    "grok": {
+        "api_key_env": "XAI_API_KEY",
+        "base_url": "https://api.x.ai/v1",
+        "model": "grok-4.1-fast",
+    },
+    "gemini": {
+        "api_key_env": "GOOGLE_API_KEY",
+        "base_url": None,
+        "model": "gemini-2.5-flash",
+    },
+}
+
+FINNHUB_API_KEY = get_secret("FINNHUB_API_KEY", "")
+MAX_WATCHLIST_SCANS = int(get_secret("MAX_WATCHLIST_SCANS_PER_DAY", "10"))
