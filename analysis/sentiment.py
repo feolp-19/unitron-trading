@@ -152,6 +152,73 @@ Return ONLY valid JSON:
 }}"""
 
 
+RISK_ASSESSMENT_PROMPT = """You are a professional risk analyst. Your ONLY job is to find ALL risks for {asset_name} right now.
+Think like someone who WILL LOSE MONEY if you miss a risk.
+
+=== MARKET DATA ===
+- Price: {price}, SMA alignment: {sma_alignment}
+- RSI: {rsi}, Volume: {volume_ratio}x avg, VIX: {vix_value}
+- ATR: {atr} (volatility ratio: {atr_ratio}x)
+- Near resistance: {near_resistance}, Near support: {near_support}
+
+=== SUPPORT & RESISTANCE ===
+{sr_text}
+
+=== NEWS ===
+{headlines_text}
+
+Analyze EVERY risk dimension:
+1. TECHNICAL RISKS: Exhausted trend? Overbought/oversold? Divergences? Volume declining?
+2. MACRO RISKS: Interest rates? Inflation? Central bank decisions? Geopolitical tension?
+3. SECTOR RISKS: Industry-specific headwinds? Regulatory changes? Competition?
+4. TIMING RISKS: End of quarter? Options expiry? Earnings season? Holiday trading?
+5. SENTIMENT RISKS: Too crowded trade? Herd mentality? Contrarian signals?
+6. LIQUIDITY RISKS: Low volume? Wide spreads? Illiquid instrument?
+
+Return ONLY valid JSON:
+{{
+  "overall_risk": "LOW" or "MEDIUM" or "HIGH" or "CRITICAL",
+  "risk_score": 0.0 to 1.0 (1.0 = maximum risk),
+  "risks": [
+    {{"category": "technical|macro|sector|timing|sentiment|liquidity", "description": "specific risk", "severity": "low|medium|high|critical"}},
+    ...
+  ],
+  "biggest_threat": "1 sentence: the single most dangerous risk right now",
+  "safe_to_trade": true or false,
+  "reasoning": "2-3 sentences explaining your overall risk assessment"
+}}"""
+
+
+MACRO_CONTEXT_PROMPT = """You are a macro strategist analyzing {asset_name} in the broader market context.
+
+=== ASSET DATA ===
+- Asset: {asset_name} (type: {asset_type})
+- Price: {price}, SMA alignment: {sma_alignment}
+- VIX: {vix_value}
+
+=== NEWS HEADLINES ===
+{headlines_text}
+
+Analyze the MACRO environment for this specific asset:
+1. How does the current global economic environment affect this asset?
+2. Are there upcoming events (central bank meetings, data releases, elections) that create risk?
+3. What is the prevailing institutional consensus on this asset/sector?
+4. Is this asset correlated with other markets that are showing warning signs?
+5. What is the best-case AND worst-case scenario for the next 1-5 trading days?
+
+Return ONLY valid JSON:
+{{
+  "macro_bias": "bullish" or "bearish" or "neutral",
+  "macro_confidence": 0.0 to 1.0,
+  "key_events": ["upcoming event 1", "event 2"],
+  "correlations": "1 sentence: relevant cross-market signals",
+  "best_case": "1 sentence",
+  "worst_case": "1 sentence",
+  "institutional_view": "1 sentence: what smart money is likely doing",
+  "recommendation_modifier": -0.15 to +0.15
+}}"""
+
+
 def _call_groq(prompt: str) -> str | None:
     try:
         from groq import Groq
@@ -164,7 +231,7 @@ def _call_groq(prompt: str) -> str | None:
             model=AI_CONFIGS["groq"]["model"],
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1,
-            max_tokens=2000,
+            max_tokens=4000,
         )
         track_call("groq")
         return response.choices[0].message.content
@@ -202,7 +269,7 @@ def _call_grok(prompt: str) -> str | None:
             model=AI_CONFIGS["grok"]["model"],
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1,
-            max_tokens=2000,
+            max_tokens=4000,
         )
         track_call("grok")
         return response.choices[0].message.content
@@ -611,6 +678,74 @@ def run_analysis_with_provider(
         data = json.loads(cleaned)
         data["provider"] = provider
         return data
+    except Exception:
+        return None
+
+
+@st.cache_data(ttl=14400, show_spinner=False)
+def run_risk_assessment(
+    asset_name: str, price: float, sma_alignment: str,
+    rsi: float, volume_ratio: float, vix_value: float | None,
+    atr: float, atr_ratio: float,
+    near_resistance: bool, near_support: bool,
+    sr_text: str, headlines_text: str,
+) -> dict | None:
+    """Dedicated risk analysis pass — finds all reasons NOT to trade."""
+    prompt = RISK_ASSESSMENT_PROMPT.format(
+        asset_name=asset_name,
+        price=f"{price:,.2f}",
+        sma_alignment=_interpret_sma_alignment(sma_alignment),
+        rsi=f"{rsi:.1f}",
+        volume_ratio=f"{volume_ratio:.1f}",
+        vix_value=f"{vix_value:.1f}" if vix_value else "unavailable",
+        atr=f"{atr:,.2f}",
+        atr_ratio=f"{atr_ratio:.1f}",
+        near_resistance=near_resistance,
+        near_support=near_support,
+        sr_text=sr_text,
+        headlines_text=headlines_text,
+    )
+    raw = _call_specific_provider(prompt, "Groq")
+    if not raw:
+        return None
+    try:
+        cleaned = raw.strip()
+        if "```" in cleaned:
+            cleaned = cleaned.split("```")[1]
+            if cleaned.startswith("json"):
+                cleaned = cleaned[4:]
+            cleaned = cleaned.strip()
+        return json.loads(cleaned)
+    except Exception:
+        return None
+
+
+@st.cache_data(ttl=14400, show_spinner=False)
+def run_macro_context(
+    asset_name: str, asset_type: str,
+    price: float, sma_alignment: str,
+    vix_value: float | None, headlines_text: str,
+) -> dict | None:
+    """Macro/sector context analysis — bigger picture view."""
+    prompt = MACRO_CONTEXT_PROMPT.format(
+        asset_name=asset_name,
+        asset_type=asset_type,
+        price=f"{price:,.2f}",
+        sma_alignment=_interpret_sma_alignment(sma_alignment),
+        vix_value=f"{vix_value:.1f}" if vix_value else "unavailable",
+        headlines_text=headlines_text,
+    )
+    raw = _call_specific_provider(prompt, "Groq")
+    if not raw:
+        return None
+    try:
+        cleaned = raw.strip()
+        if "```" in cleaned:
+            cleaned = cleaned.split("```")[1]
+            if cleaned.startswith("json"):
+                cleaned = cleaned[4:]
+            cleaned = cleaned.strip()
+        return json.loads(cleaned)
     except Exception:
         return None
 

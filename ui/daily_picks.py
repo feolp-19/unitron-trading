@@ -13,7 +13,8 @@ from data.news_data import get_news_for_asset
 from analysis.technical import analyze as technical_analyze
 from analysis.sentiment import (
     analyze_sentiment, dict_to_signal, run_full_analysis,
-    run_analysis_with_provider, _format_sr_text,
+    run_analysis_with_provider, run_risk_assessment, run_macro_context,
+    _format_sr_text,
 )
 from analysis.synergy import decide
 from analysis.exit_strategy import generate_trading_plan
@@ -173,11 +174,49 @@ def render_daily_picks():
 
                 analysis_kwargs = _run_analysis_args(tech, headlines_json, sr)
 
-                # --- DUAL AI: Run both Groq and Gemini independently ---
+                sr_text = _format_sr_text(
+                    sr.supports, sr.resistances,
+                    tech.current_price, tech.near_resistance, tech.near_support,
+                )
+                headlines_text = "\n".join(
+                    f"{j+1}. {h['headline']}" for j, h in enumerate(headlines)
+                ) if headlines else "No recent headlines available."
+
+                # --- PASS 1: Groq full analysis ---
                 groq_result = run_analysis_with_provider(
                     provider="Groq", asset_name=asset.display_name, **analysis_kwargs,
                 )
-                time.sleep(3)
+                time.sleep(2)
+
+                # --- PASS 2: Risk assessment (Groq) ---
+                risk_data = run_risk_assessment(
+                    asset_name=asset.display_name,
+                    price=tech.current_price,
+                    sma_alignment=tech.sma_alignment,
+                    rsi=tech.rsi_value,
+                    volume_ratio=tech.volume_ratio,
+                    vix_value=tech.vix_value,
+                    atr=tech.atr_value,
+                    atr_ratio=tech.atr_ratio,
+                    near_resistance=tech.near_resistance,
+                    near_support=tech.near_support,
+                    sr_text=sr_text,
+                    headlines_text=headlines_text,
+                )
+                time.sleep(2)
+
+                # --- PASS 3: Macro context (Groq) ---
+                macro_data = run_macro_context(
+                    asset_name=asset.display_name,
+                    asset_type=asset.asset_type,
+                    price=tech.current_price,
+                    sma_alignment=tech.sma_alignment,
+                    vix_value=tech.vix_value,
+                    headlines_text=headlines_text,
+                )
+                time.sleep(2)
+
+                # --- PASS 4: Gemini independent analysis ---
                 gemini_result = run_analysis_with_provider(
                     provider="Gemini", asset_name=asset.display_name, **analysis_kwargs,
                 )
@@ -186,6 +225,27 @@ def render_daily_picks():
                 gemini_verdict = gemini_result.get("verdict", "NO_TRADE") if gemini_result else "NO_TRADE"
                 groq_conf = groq_result.get("confidence", 0) if groq_result else 0
                 gemini_conf = gemini_result.get("confidence", 0) if gemini_result else 0
+
+                # Apply risk/macro modifiers to confidence
+                risk_penalty = 0
+                if risk_data:
+                    risk_level = risk_data.get("overall_risk", "MEDIUM")
+                    if risk_level == "CRITICAL":
+                        risk_penalty = -0.20
+                    elif risk_level == "HIGH":
+                        risk_penalty = -0.10
+                    elif risk_level == "LOW":
+                        risk_penalty = 0.05
+                    if not risk_data.get("safe_to_trade", True):
+                        risk_penalty = min(risk_penalty, -0.15)
+
+                macro_modifier = 0
+                if macro_data:
+                    macro_modifier = float(macro_data.get("recommendation_modifier", 0))
+                    macro_modifier = max(-0.15, min(0.15, macro_modifier))
+
+                groq_conf = max(0, min(1, groq_conf + risk_penalty + macro_modifier))
+                gemini_conf = max(0, min(1, gemini_conf + risk_penalty + macro_modifier))
 
                 groq_ok = groq_result is not None
                 gemini_ok = gemini_result is not None
@@ -203,6 +263,8 @@ def render_daily_picks():
                         ai_result["provider"] = f"Groq ({groq_conf:.0%}) + Gemini ({gemini_conf:.0%})"
                         ai_result["groq_analysis"] = groq_result.get("analysis", "")
                         ai_result["gemini_analysis"] = gemini_result.get("analysis", "")
+                        ai_result["risk_data"] = risk_data
+                        ai_result["macro_data"] = macro_data
                         consensus_tag = "KONSENSUS"
                     elif groq_verdict == "NO_TRADE" and gemini_verdict == "NO_TRADE":
                         ai_result = groq_result
@@ -227,6 +289,17 @@ def render_daily_picks():
                     ai_result = None
                     consensus_tag = "BÅDA MISSLYCKADES"
 
+                # Build detailed log line showing all 4 passes
+                risk_tag = ""
+                if risk_data:
+                    r_level = risk_data.get("overall_risk", "?")
+                    risk_tag = f" | Risk: {r_level}"
+                macro_tag = ""
+                if macro_data:
+                    m_bias = macro_data.get("macro_bias", "?")
+                    m_mod = macro_data.get("recommendation_modifier", 0)
+                    macro_tag = f" | Makro: {m_bias} ({m_mod:+.2f})"
+
                 if ai_result:
                     verdict = ai_result.get("verdict", "NO_TRADE")
                     confidence = ai_result.get("confidence", 0)
@@ -247,10 +320,11 @@ def render_daily_picks():
                         )
                         scan_data["report"].append(entry)
                         scan_data["log"].append(
-                            f"🟡 {asset.display_name} — {verdict} avvisad ({consensus_tag}, konfidens {confidence:.0%} < 55%)"
+                            f"🟡 {asset.display_name} — {verdict} avvisad ({consensus_tag}{risk_tag}{macro_tag}, "
+                            f"konfidens {confidence:.0%} < 55%)"
                         )
                         _update_log(scan_data["log"], live_log)
-                        time.sleep(3)
+                        time.sleep(2)
                         continue
 
                     trading_plan = None
@@ -299,13 +373,14 @@ def render_daily_picks():
                             "headlines": headlines,
                         })
                         scan_data["log"].append(
-                            f"🟢 {asset.display_name} — **{verdict}** ({confidence:.0%}) ✅ {consensus_tag}"
+                            f"🟢 {asset.display_name} — **{verdict}** ({confidence:.0%}) "
+                            f"✅ {consensus_tag}{risk_tag}{macro_tag}"
                         )
                     else:
                         entry["status"] = "Ingen signal"
                         entry["reason"] = ai_result.get("analysis", "")[:120]
                         scan_data["log"].append(
-                            f"⚪ {asset.display_name} — NO_TRADE ({consensus_tag})"
+                            f"⚪ {asset.display_name} — NO_TRADE ({consensus_tag}{risk_tag}{macro_tag})"
                         )
                 else:
                     # Both AIs failed — fallback to rule-based engine
@@ -809,6 +884,35 @@ def _render_pick_card(result: dict, rank: int):
             st.markdown("**Risker:**")
             for r in risks:
                 st.caption(f"⚠️ {r}")
+
+        # Risk Assessment details (from dedicated risk pass)
+        risk_data = ai_result.get("risk_data") if ai_result else None
+        if risk_data:
+            st.divider()
+            risk_colors = {"LOW": "#00C853", "MEDIUM": "#FFD600", "HIGH": "#FF9100", "CRITICAL": "#FF1744"}
+            rl = risk_data.get("overall_risk", "UNKNOWN")
+            st.markdown(f"**🛡️ Riskbedömning:** <span style='color:{risk_colors.get(rl, '#888')}'>{rl}</span>", unsafe_allow_html=True)
+            if risk_data.get("biggest_threat"):
+                st.caption(f"Största hot: {risk_data['biggest_threat']}")
+            for rd in risk_data.get("risks", [])[:5]:
+                sev = rd.get("severity", "")
+                st.caption(f"{'🔴' if sev == 'critical' else '🟡' if sev == 'high' else '⚪'} [{rd.get('category', '')}] {rd.get('description', '')}")
+
+        # Macro Context details (from dedicated macro pass)
+        macro_data = ai_result.get("macro_data") if ai_result else None
+        if macro_data:
+            st.divider()
+            m_bias = macro_data.get("macro_bias", "neutral")
+            m_conf = macro_data.get("macro_confidence", 0)
+            st.markdown(f"**🌍 Makroanalys:** {m_bias.upper()} ({m_conf:.0%} konfidens)")
+            if macro_data.get("institutional_view"):
+                st.caption(f"Institutionell vy: {macro_data['institutional_view']}")
+            if macro_data.get("best_case"):
+                st.caption(f"Bästa scenario: {macro_data['best_case']}")
+            if macro_data.get("worst_case"):
+                st.caption(f"Värsta scenario: {macro_data['worst_case']}")
+            for evt in macro_data.get("key_events", [])[:3]:
+                st.caption(f"📅 {evt}")
 
         if tp:
             st.divider()
