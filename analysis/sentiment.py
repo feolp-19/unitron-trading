@@ -705,7 +705,9 @@ def run_risk_assessment(
         sr_text=sr_text,
         headlines_text=headlines_text,
     )
-    raw = _call_specific_provider(prompt, "Groq")
+    raw = _call_specific_provider(prompt, "Gemini")
+    if not raw:
+        raw = _call_specific_provider(prompt, "Groq")
     if not raw:
         return None
     try:
@@ -735,7 +737,9 @@ def run_macro_context(
         vix_value=f"{vix_value:.1f}" if vix_value else "unavailable",
         headlines_text=headlines_text,
     )
-    raw = _call_specific_provider(prompt, "Groq")
+    raw = _call_specific_provider(prompt, "Gemini")
+    if not raw:
+        raw = _call_specific_provider(prompt, "Groq")
     if not raw:
         return None
     try:

@@ -197,7 +197,12 @@ def render_daily_picks():
                 )
                 time.sleep(2)
 
-                # --- PASS 2: Risk assessment (Groq) ---
+                # --- PASS 2: Gemini independent analysis ---
+                gemini_result = run_analysis_with_provider(
+                    provider="Gemini", asset_name=asset.display_name, **analysis_kwargs,
+                )
+
+                # --- PASS 3: Risk assessment (Gemini, Groq fallback) ---
                 risk_data = run_risk_assessment(
                     asset_name=asset.display_name,
                     price=tech.current_price,
@@ -212,9 +217,8 @@ def render_daily_picks():
                     sr_text=sr_text,
                     headlines_text=headlines_text,
                 )
-                time.sleep(2)
 
-                # --- PASS 3: Macro context (Groq) ---
+                # --- PASS 4: Macro context (Gemini, Groq fallback) ---
                 macro_data = run_macro_context(
                     asset_name=asset.display_name,
                     asset_type=asset.asset_type,
@@ -222,12 +226,6 @@ def render_daily_picks():
                     sma_alignment=tech.sma_alignment,
                     vix_value=tech.vix_value,
                     headlines_text=headlines_text,
-                )
-                time.sleep(2)
-
-                # --- PASS 4: Gemini independent analysis ---
-                gemini_result = run_analysis_with_provider(
-                    provider="Gemini", asset_name=asset.display_name, **analysis_kwargs,
                 )
 
                 groq_verdict = groq_result.get("verdict", "NO_TRADE") if groq_result else "NO_TRADE"
@@ -450,7 +448,7 @@ def render_daily_picks():
 
             scan_data["report"].append(entry)
             _update_log(scan_data["log"], live_log)
-            time.sleep(3)
+            time.sleep(4)
 
         scan_data["results"].sort(
             key=lambda x: x.get("ai_result", {}).get("confidence", 0)
