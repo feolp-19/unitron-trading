@@ -87,6 +87,15 @@ def render_daily_picks():
         st.session_state.pop("scan_from_file", None)
         st.session_state["run_scan"] = True
 
+    # Auto-scan: if no results exist for today, start scanning automatically
+    if "scan_data" not in st.session_state and not st.session_state.get("run_scan"):
+        saved = load_scan()
+        if saved:
+            st.session_state["scan_data"] = saved
+            st.session_state["scan_from_file"] = True
+        elif scans_left > 0:
+            st.session_state["run_scan"] = True
+
     if st.session_state.get("run_scan") and "scan_data" not in st.session_state:
         MIN_CONFIDENCE = 0.55
         MIN_RR_RATIO = 1.5
@@ -554,10 +563,10 @@ def render_daily_picks():
         progress_text.empty()
 
     if "scan_data" not in st.session_state:
-        saved = load_scan()
-        if saved:
-            st.session_state["scan_data"] = saved
-            st.session_state["scan_from_file"] = True
+        if scans_left > 0:
+            st.info("Startar dagens marknadsanalys automatiskt...")
+            st.session_state["run_scan"] = True
+            st.rerun()
         else:
             st.markdown(
                 """
@@ -569,11 +578,11 @@ def render_daily_picks():
                     text-align: center;
                     margin: 16px 0 24px 0;
                 ">
-                    <div style="font-size: 64px; margin-bottom: 16px;">📊</div>
-                    <h2 style="color: #ccc;">Välkommen till Unitron</h2>
-                    <p style="color: #888; font-size: 16px;">
-                        Tryck på <strong>"Skanna nu"</strong> för att starta dagens marknadsanalys.<br>
-                        AI-motorn screnar alla tillgångar i två steg och visar bara de bästa möjligheterna.
+                    <div style="font-size: 64px; margin-bottom: 16px;">⛔</div>
+                    <h2 style="color: #888;">Dagens skanningar är slut</h2>
+                    <p style="color: #666; font-size: 16px;">
+                        Alla dagliga skanningar har använts och resultaten kunde inte hämtas.<br>
+                        Kom tillbaka imorgon för en ny analys.
                     </p>
                 </div>
                 """,

@@ -1,14 +1,17 @@
 """Persistent daily scan results — survive browser close / session reset.
 
-Saves the fully rendered scan data to a JSON file so it can be loaded
-on next visit without re-running the scan. Automatically expires at midnight."""
+Uses st.cache_resource (in-memory, shared across all sessions) as primary store,
+with JSON file as backup. Results expire at midnight."""
 
 import json
 import os
 from datetime import datetime, date
-from dataclasses import asdict
+
+import streamlit as st
 
 _RESULTS_FILE = os.path.join(os.path.dirname(__file__), "latest_scan.json")
+
+_memory_cache: dict = {"data": None, "date": None}
 
 
 def _serialize_result(result: dict) -> dict:
@@ -20,17 +23,14 @@ def _serialize_result(result: dict) -> dict:
     verification = result.get("verification")
     decision = result.get("decision")
 
-    sr = tech.support_resistance
-
-    out = {
-        "asset": {
-            "ticker": asset.ticker,
-            "display_name": asset.display_name,
-            "news_keywords": asset.news_keywords,
-            "asset_type": asset.asset_type,
-            "category": asset.category,
-        },
-        "tech": {
+    if isinstance(tech, dict):
+        sr_supports = tech.get("supports", [])
+        sr_resistances = tech.get("resistances", [])
+        tech_dict = tech
+    else:
+        sr_supports = tech.support_resistance.supports
+        sr_resistances = tech.support_resistance.resistances
+        tech_dict = {
             "current_price": tech.current_price,
             "rsi_value": tech.rsi_value,
             "sma_20": tech.sma_20,
@@ -48,14 +48,29 @@ def _serialize_result(result: dict) -> dict:
             "vix_level": tech.vix_level,
             "near_resistance": tech.near_resistance,
             "near_support": tech.near_support,
-            "supports": sr.supports,
-            "resistances": sr.resistances,
-        },
+            "supports": sr_supports,
+            "resistances": sr_resistances,
+        }
+
+    if isinstance(asset, dict):
+        asset_dict = asset
+    else:
+        asset_dict = {
+            "ticker": asset.ticker,
+            "display_name": asset.display_name,
+            "news_keywords": asset.news_keywords,
+            "asset_type": asset.asset_type,
+            "category": asset.category,
+        }
+
+    out = {
+        "asset": asset_dict,
+        "tech": tech_dict,
         "ai_result": ai_result,
         "headlines": result.get("headlines", []),
     }
 
-    if trading_plan:
+    if trading_plan and not isinstance(trading_plan, dict):
         out["trading_plan"] = {
             "entry_price": trading_plan.entry_price,
             "stop_loss": trading_plan.stop_loss,
@@ -71,9 +86,9 @@ def _serialize_result(result: dict) -> dict:
             "trailing_stop_reasoning": trading_plan.trailing_stop_reasoning,
         }
     else:
-        out["trading_plan"] = None
+        out["trading_plan"] = trading_plan
 
-    if verification:
+    if verification and not isinstance(verification, dict):
         out["verification"] = {
             "consensus": verification.consensus,
             "second_ai_agrees": verification.second_ai_agrees,
@@ -91,22 +106,22 @@ def _serialize_result(result: dict) -> dict:
             "verified": verification.verified,
         }
     else:
-        out["verification"] = None
+        out["verification"] = verification
 
-    if decision:
+    if decision and not isinstance(decision, dict):
         out["decision"] = {
             "action": decision.action,
             "confidence_score": decision.confidence_score,
             "reasoning": decision.reasoning,
         }
     else:
-        out["decision"] = None
+        out["decision"] = decision
 
     return out
 
 
 def save_scan(scan_data: dict) -> None:
-    """Save scan results + report + log to JSON file."""
+    """Save scan results to in-memory cache + JSON file backup."""
     serialized_results = [_serialize_result(r) for r in scan_data.get("results", [])]
 
     payload = {
@@ -117,23 +132,33 @@ def save_scan(scan_data: dict) -> None:
         "log": scan_data.get("log", []),
     }
 
-    os.makedirs(os.path.dirname(_RESULTS_FILE), exist_ok=True)
-    with open(_RESULTS_FILE, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
+    _memory_cache["data"] = payload
+    _memory_cache["date"] = date.today().isoformat()
+
+    try:
+        os.makedirs(os.path.dirname(_RESULTS_FILE), exist_ok=True)
+        with open(_RESULTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+    except OSError:
+        pass
 
 
 def load_scan() -> dict | None:
-    """Load today's scan results. Returns None if no scan exists or if it's from a previous day."""
-    if not os.path.exists(_RESULTS_FILE):
-        return None
+    """Load today's scan results. Checks in-memory cache first, then file."""
+    today = date.today().isoformat()
 
-    try:
-        with open(_RESULTS_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except (json.JSONDecodeError, IOError):
-        return None
+    if _memory_cache["date"] == today and _memory_cache["data"]:
+        return _memory_cache["data"]
 
-    if data.get("scan_date") != date.today().isoformat():
-        return None
+    if os.path.exists(_RESULTS_FILE):
+        try:
+            with open(_RESULTS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if data.get("scan_date") == today:
+                _memory_cache["data"] = data
+                _memory_cache["date"] = today
+                return data
+        except (json.JSONDecodeError, IOError):
+            pass
 
-    return data
+    return None
