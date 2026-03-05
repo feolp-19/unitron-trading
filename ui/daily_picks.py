@@ -22,6 +22,7 @@ from ui.translations import T
 
 
 from storage.usage_tracker import get_usage, get_scan_count, can_scan, track_scan
+from storage.scan_results import save_scan, load_scan
 
 
 def _render_usage_bar(usage: dict):
@@ -64,12 +65,12 @@ def render_daily_picks():
         st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
         if scans_left > 0:
             rescan = st.button(
-                f"🔄 Skanna nu ({scans_left} kvar)",
+                "🔄 Starta dagens skanning",
                 type="primary", use_container_width=True,
             )
         else:
             st.button(
-                "⛔ Dagskvot slut",
+                "✅ Dagens skanning klar",
                 type="secondary", use_container_width=True, disabled=True,
             )
             rescan = False
@@ -80,6 +81,7 @@ def render_daily_picks():
     if rescan:
         st.cache_data.clear()
         st.session_state.pop("scan_data", None)
+        st.session_state.pop("scan_from_file", None)
         st.session_state["run_scan"] = True
 
     if st.session_state.get("run_scan") and "scan_data" not in st.session_state:
@@ -420,34 +422,45 @@ def render_daily_picks():
         _update_log(scan_data["log"], live_log)
 
         st.session_state["scan_data"] = scan_data
+        save_scan(scan_data)
         track_scan()
         progress_bar.empty()
         progress_text.empty()
 
     if "scan_data" not in st.session_state:
-        st.markdown(
-            """
-            <div style="
-                background: #1A1D23;
-                border: 1px solid #333;
-                border-radius: 16px;
-                padding: 48px 32px;
-                text-align: center;
-                margin: 16px 0 24px 0;
-            ">
-                <div style="font-size: 64px; margin-bottom: 16px;">📊</div>
-                <h2 style="color: #ccc;">Välkommen till Unitron</h2>
-                <p style="color: #888; font-size: 16px;">
-                    Tryck på <strong>"Skanna nu"</strong> för att starta dagens marknadsanalys.<br>
-                    AI-motorn screnar alla tillgångar i två steg och visar bara de bästa möjligheterna.
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        return
+        saved = load_scan()
+        if saved:
+            st.session_state["scan_data"] = saved
+            st.session_state["scan_from_file"] = True
+        else:
+            st.markdown(
+                """
+                <div style="
+                    background: #1A1D23;
+                    border: 1px solid #333;
+                    border-radius: 16px;
+                    padding: 48px 32px;
+                    text-align: center;
+                    margin: 16px 0 24px 0;
+                ">
+                    <div style="font-size: 64px; margin-bottom: 16px;">📊</div>
+                    <h2 style="color: #ccc;">Välkommen till Unitron</h2>
+                    <p style="color: #888; font-size: 16px;">
+                        Tryck på <strong>"Skanna nu"</strong> för att starta dagens marknadsanalys.<br>
+                        AI-motorn screnar alla tillgångar i två steg och visar bara de bästa möjligheterna.
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            return
 
     scan_data = st.session_state["scan_data"]
+    is_saved = st.session_state.get("scan_from_file", False)
+
+    if is_saved:
+        scan_time = scan_data.get("scan_time", "")
+        st.caption(f"Visar sparade resultat från dagens skanning ({scan_time})")
 
     results = scan_data["results"]
     report = scan_data["report"]
@@ -602,13 +615,29 @@ def render_daily_picks():
         st.dataframe(styled, hide_index=True, use_container_width=True)
 
 
+def _get(obj, key, default=None):
+    """Access attribute or dict key — works for both dataclass objects and loaded dicts."""
+    if isinstance(obj, dict):
+        return obj.get(key, default)
+    return getattr(obj, key, default)
+
+
 def _render_pick_card(result: dict, rank: int):
     """Render a single daily pick with exit strategy and verification."""
     asset = result["asset"]
     tech = result["tech"]
     ai_result = result.get("ai_result")
-    trading_plan = result.get("trading_plan")
-    verification: VerificationResult | None = result.get("verification")
+    tp = result.get("trading_plan")
+    verif = result.get("verification")
+
+    asset_name = _get(asset, "display_name", "")
+    asset_ticker = _get(asset, "ticker", "")
+    asset_category = _get(asset, "category", "")
+
+    price = _get(tech, "current_price", 0)
+    rsi = _get(tech, "rsi_value", 0)
+    vol = _get(tech, "volume_ratio", 0)
+    vix = _get(tech, "vix_value")
 
     if ai_result:
         verdict = ai_result.get("verdict", "NO_TRADE")
@@ -619,47 +648,57 @@ def _render_pick_card(result: dict, rank: int):
         provider = ai_result.get("provider", "")
     else:
         decision = result.get("decision")
-        verdict = f"BUY_{decision.action}" if decision and decision.action != "NONE" else "NO_TRADE"
-        confidence = decision.confidence_score if decision else 0
-        analysis_text = "; ".join(decision.reasoning) if decision else ""
+        if isinstance(decision, dict):
+            d_action = decision.get("action", "NONE")
+            d_conf = decision.get("confidence_score", 0)
+            d_reason = decision.get("reasoning", [])
+        elif decision:
+            d_action = decision.action
+            d_conf = decision.confidence_score
+            d_reason = decision.reasoning
+        else:
+            d_action, d_conf, d_reason = "NONE", 0, []
+        verdict = f"BUY_{d_action}" if d_action != "NONE" else "NO_TRADE"
+        confidence = d_conf
+        analysis_text = "; ".join(d_reason) if d_reason else ""
         key_factors = []
         risks = []
         provider = "regelbaserad"
 
     if verdict == "BUY_BULL":
-        color = "#00C853"
-        icon = "📈"
-        action_text = "KÖP BULL-CERTIFIKAT"
-        action = "BULL"
+        color, icon, action_text, action = "#00C853", "📈", "KÖP BULL-CERTIFIKAT", "BULL"
     elif verdict == "BUY_BEAR":
-        color = "#FF1744"
-        icon = "📉"
-        action_text = "KÖP BEAR-CERTIFIKAT"
-        action = "BEAR"
+        color, icon, action_text, action = "#FF1744", "📉", "KÖP BEAR-CERTIFIKAT", "BEAR"
     else:
         return
 
     confidence_pct = f"{confidence:.0%}"
 
-    # Verification badge
-    if verification:
-        if verification.verified:
-            badge = "✅ VERIFIERAD"
-            badge_color = "#00C853"
-        else:
-            badge = "⚠️ EJ VERIFIERAD"
-            badge_color = "#FF9100"
+    v_verified = _get(verif, "verified", False) if verif else None
+    if verif:
+        badge = "✅ VERIFIERAD" if v_verified else "⚠️ EJ VERIFIERAD"
+        badge_color = "#00C853" if v_verified else "#FF9100"
     else:
-        badge = "🔄 Ej verifierad"
-        badge_color = "#888"
+        badge, badge_color = "🔄 Ej verifierad", "#888"
 
-    # Build exit strategy summary for the card
-    exit_summary = ""
-    if trading_plan:
-        exit_summary = (
-            f"<strong>SL:</strong> {trading_plan.stop_loss:,.2f} — "
-            f"<strong>TP:</strong> {trading_plan.take_profit:,.2f} — "
-            f"<strong>R/R:</strong> {trading_plan.risk_reward_ratio}"
+    tp_entry = _get(tp, "entry_price", 0) if tp else 0
+    tp_sl = _get(tp, "stop_loss", 0) if tp else 0
+    tp_tp = _get(tp, "take_profit", 0) if tp else 0
+    tp_sl_method = _get(tp, "stop_loss_method", "") if tp else ""
+    tp_tp_method = _get(tp, "take_profit_method", "") if tp else ""
+    tp_rr = _get(tp, "risk_reward_ratio", "") if tp else ""
+
+    tp_html = ""
+    if tp:
+        tp_html = (
+            f"<div style='font-size: 14px; color: #ccc; border-top: 1px solid #444; "
+            f"padding-top: 10px; margin-top: 4px; display: flex; gap: 24px; flex-wrap: wrap;'>"
+            f"<div><span style=\"color: #888;\">Ingång:</span> <strong>{tp_entry:,.2f}</strong></div>"
+            f"<div><span style=\"color: #888;\">Stop-Loss:</span> <strong style=\"color: #FF6B6B;\">{tp_sl:,.2f}</strong>"
+            f" <span style=\"font-size:11px;color:#666;\">({tp_sl_method})</span></div>"
+            f"<div><span style=\"color: #888;\">Målkurs:</span> <strong style=\"color: #69F0AE;\">{tp_tp:,.2f}</strong>"
+            f" <span style=\"font-size:11px;color:#666;\">({tp_tp_method})</span></div>"
+            f"<div><span style=\"color: #888;\">R/R:</span> <strong>{tp_rr}</strong></div></div>"
         )
 
     st.markdown(
@@ -675,10 +714,10 @@ def _render_pick_card(result: dict, rank: int):
                 <span style="font-size: 36px;">{icon}</span>
                 <div>
                     <div style="font-size: 24px; font-weight: 700; color: {color};">
-                        #{rank} {html.escape(asset.display_name)}
+                        #{rank} {html.escape(asset_name)}
                     </div>
                     <div style="font-size: 14px; color: #888;">
-                        {html.escape(asset.ticker)} — {html.escape(asset.category)} — via {html.escape(provider)}
+                        {html.escape(asset_ticker)} — {html.escape(asset_category)} — via {html.escape(provider)}
                         &nbsp;&nbsp;<span style="color: {badge_color}; font-weight: 600;">{badge}</span>
                     </div>
                 </div>
@@ -695,21 +734,21 @@ def _render_pick_card(result: dict, rank: int):
             </div>
             <div style="font-size: 15px; color: #ccc; margin-bottom: 8px;">
                 <strong>Konfidens:</strong> {confidence_pct} —
-                <strong>Pris:</strong> {tech.current_price:,.2f} —
-                <strong>RSI:</strong> {tech.rsi_value:.1f} —
-                <strong>Volym:</strong> {'N/A' if tech.volume_ratio < 0.01 else f'{tech.volume_ratio:.1f}x'} —
-                <strong>VIX:</strong> {tech.vix_value if tech.vix_value else 'N/A'}
+                <strong>Pris:</strong> {price:,.2f} —
+                <strong>RSI:</strong> {rsi:.1f} —
+                <strong>Volym:</strong> {'N/A' if vol < 0.01 else f'{vol:.1f}x'} —
+                <strong>VIX:</strong> {vix if vix else 'N/A'}
             </div>
             <div style="font-size: 14px; color: #aaa; line-height: 1.5; margin-bottom: 8px;">
                 {html.escape(analysis_text)}
             </div>
-            {"<div style='font-size: 14px; color: #ccc; border-top: 1px solid #444; padding-top: 10px; margin-top: 4px; display: flex; gap: 24px; flex-wrap: wrap;'><div><span style=\"color: #888;\">Ingång:</span> <strong>" + f"{trading_plan.entry_price:,.2f}" + "</strong></div><div><span style=\"color: #888;\">Stop-Loss:</span> <strong style=\"color: #FF6B6B;\">" + f"{trading_plan.stop_loss:,.2f}" + "</strong> <span style=\"font-size:11px;color:#666;\">(" + trading_plan.stop_loss_method + ")</span></div><div><span style=\"color: #888;\">Målkurs:</span> <strong style=\"color: #69F0AE;\">" + f"{trading_plan.take_profit:,.2f}" + "</strong> <span style=\"font-size:11px;color:#666;\">(" + trading_plan.take_profit_method + ")</span></div><div><span style=\"color: #888;\">R/R:</span> <strong>" + trading_plan.risk_reward_ratio + "</strong></div></div>" if trading_plan else ""}
+            {tp_html}
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    with st.expander(f"Detaljer & Handelsplan — {html.escape(asset.display_name)}"):
+    with st.expander(f"Detaljer & Handelsplan — {html.escape(asset_name)}"):
         if key_factors:
             st.markdown("**Avgörande faktorer:**")
             for f in key_factors:
@@ -720,83 +759,91 @@ def _render_pick_card(result: dict, rank: int):
             for r in risks:
                 st.caption(f"⚠️ {r}")
 
-        # Exit strategy details
-        if trading_plan:
+        if tp:
             st.divider()
             st.markdown("**Handelsplan (Exit-strategi):**")
             col1, col2, col3, col4 = st.columns(4)
             with col1:
-                st.metric("Ingång", f"{trading_plan.entry_price:,.2f}")
+                st.metric("Ingång", f"{tp_entry:,.2f}")
             with col2:
-                st.metric(f"Stop-Loss ({trading_plan.stop_loss_method})",
-                           f"{trading_plan.stop_loss:,.2f}")
+                st.metric(f"Stop-Loss ({tp_sl_method})", f"{tp_sl:,.2f}")
             with col3:
-                st.metric(f"Målkurs ({trading_plan.take_profit_method})",
-                           f"{trading_plan.take_profit:,.2f}")
+                st.metric(f"Målkurs ({tp_tp_method})", f"{tp_tp:,.2f}")
             with col4:
-                st.metric("Risk/Reward", trading_plan.risk_reward_ratio)
+                st.metric("Risk/Reward", tp_rr)
 
-            st.caption(f"Stop-Loss: {trading_plan.stop_loss_reasoning}")
-            st.caption(f"Målkurs: {trading_plan.take_profit_reasoning}")
-            st.caption(f"Trailing Stop: {trading_plan.trailing_stop_reasoning}")
+            st.caption(f"Stop-Loss: {_get(tp, 'stop_loss_reasoning', '')}")
+            st.caption(f"Målkurs: {_get(tp, 'take_profit_reasoning', '')}")
+            st.caption(f"Trailing Stop: {_get(tp, 'trailing_stop_reasoning', '')}")
 
-        # S/R levels
-        sr = tech.support_resistance
-        if sr.supports or sr.resistances:
+        supports = _get(tech, "supports", []) if isinstance(tech, dict) else tech.support_resistance.supports
+        resistances = _get(tech, "resistances", []) if isinstance(tech, dict) else tech.support_resistance.resistances
+        if supports or resistances:
             st.divider()
             sr_col1, sr_col2 = st.columns(2)
             with sr_col1:
                 st.markdown("**Stöd:**")
-                for i, s in enumerate(sr.supports[:3]):
+                for i, s in enumerate(supports[:3]):
                     st.caption(f"S{i+1}: {s:,.2f}")
             with sr_col2:
                 st.markdown("**Motstånd:**")
-                for i, r_val in enumerate(sr.resistances[:3]):
+                for i, r_val in enumerate(resistances[:3]):
                     st.caption(f"R{i+1}: {r_val:,.2f}")
 
-        # Verification details
-        if verification:
+        if verif:
             st.divider()
             st.markdown("**🔍 Steg 2 — Verifiering:**")
 
+            v_agrees = _get(verif, "second_ai_agrees", False)
+            v_provider = _get(verif, "second_ai_provider", "")
+            v_conf = _get(verif, "second_ai_confidence", 0)
+            v_reasoning = _get(verif, "second_ai_reasoning", "")
+            v_disagree = _get(verif, "disagreement_points", [])
+            v_da_risk = _get(verif, "devils_advocate_risk", "UNKNOWN")
+            v_biggest = _get(verif, "biggest_risk", "")
+            v_da_rec = _get(verif, "devils_advocate_recommendation", "")
+            v_counter = _get(verif, "counter_arguments", [])
+            v_risk_news = _get(verif, "risk_headlines", [])
+
             v_col1, v_col2 = st.columns(2)
             with v_col1:
-                agree_icon = "✅" if verification.second_ai_agrees else "❌"
+                agree_icon = "✅" if v_agrees else "❌"
                 st.markdown(
-                    f"**Andra AI:n ({html.escape(verification.second_ai_provider)}):** "
-                    f"{agree_icon} {'Håller med' if verification.second_ai_agrees else 'Håller INTE med'} "
-                    f"({verification.second_ai_confidence:.0%} konfidens)"
+                    f"**Andra AI:n ({html.escape(v_provider)}):** "
+                    f"{agree_icon} {'Håller med' if v_agrees else 'Håller INTE med'} "
+                    f"({v_conf:.0%} konfidens)"
                 )
-                if verification.second_ai_reasoning:
-                    st.caption(verification.second_ai_reasoning)
-                if verification.disagreement_points:
-                    for dp in verification.disagreement_points:
+                if v_reasoning:
+                    st.caption(v_reasoning)
+                if v_disagree:
+                    for dp in v_disagree:
                         st.caption(f"⚠️ {dp}")
 
             with v_col2:
                 risk_colors = {"LOW": "#00C853", "MEDIUM": "#FFD600", "HIGH": "#FF9100", "CRITICAL": "#FF1744"}
-                rc = risk_colors.get(verification.devils_advocate_risk, "#888")
+                rc = risk_colors.get(v_da_risk, "#888")
                 st.markdown(
                     f"**Djävulens Advokat:** "
-                    f"<span style='color:{rc};font-weight:700;'>{verification.devils_advocate_risk}</span> risk",
+                    f"<span style='color:{rc};font-weight:700;'>{v_da_risk}</span> risk",
                     unsafe_allow_html=True,
                 )
-                if verification.biggest_risk:
-                    st.caption(f"🎯 Största risken: {verification.biggest_risk}")
-                if verification.devils_advocate_recommendation:
-                    st.caption(f"💡 {verification.devils_advocate_recommendation}")
+                if v_biggest:
+                    st.caption(f"🎯 Största risken: {v_biggest}")
+                if v_da_rec:
+                    st.caption(f"💡 {v_da_rec}")
 
-            if verification.counter_arguments:
+            if v_counter:
                 st.markdown("**Motargument:**")
-                for ca in verification.counter_arguments:
+                for ca in v_counter:
                     st.caption(f"❗ {ca}")
 
-            if verification.risk_headlines:
+            if v_risk_news:
                 st.markdown("**Ytterligare risknyheter:**")
-                for rh in verification.risk_headlines[:3]:
-                    st.caption(f"📰 {rh.get('headline', '')}")
+                for rh in v_risk_news[:3]:
+                    headline = rh.get("headline", "") if isinstance(rh, dict) else str(rh)
+                    st.caption(f"📰 {headline}")
 
-        certs = search_certificates(asset.ticker, action)
+        certs = search_certificates(asset_ticker, action)
         if certs:
             st.divider()
             st.markdown(f"**{T['avanza_title']}:**")
