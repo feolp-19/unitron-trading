@@ -224,6 +224,13 @@ def _call_ai_with_fallback(prompt: str) -> tuple[str | None, str]:
     return None, "none"
 
 
+def _call_specific_provider(prompt: str, provider: str) -> str | None:
+    """Call a specific AI provider by name."""
+    fns = {"Groq": _call_groq, "Gemini": _call_gemini, "Grok": _call_grok}
+    fn = fns.get(provider)
+    return fn(prompt) if fn else None
+
+
 def _keyword_fallback(headlines: list[dict]) -> SentimentSignal:
     positive_words = {"surge", "rally", "gain", "rise", "up", "bull", "growth", "profit",
                       "beat", "record", "high", "boost", "strong", "positive", "recovery"}
@@ -501,6 +508,95 @@ def run_full_analysis(
     )
 
     raw, provider = _call_ai_with_fallback(prompt)
+    if not raw:
+        return None
+
+    try:
+        cleaned = raw.strip()
+        if "```" in cleaned:
+            cleaned = cleaned.split("```")[1]
+            if cleaned.startswith("json"):
+                cleaned = cleaned[4:]
+            cleaned = cleaned.strip()
+
+        data = json.loads(cleaned)
+        data["provider"] = provider
+        return data
+    except Exception:
+        return None
+
+
+@st.cache_data(ttl=14400, show_spinner=False)
+def run_analysis_with_provider(
+    provider: str,
+    asset_name: str,
+    price: float,
+    sma_20: float,
+    sma_50: float,
+    sma_200: float,
+    price_vs_sma: str,
+    sma_50w: float | None,
+    price_vs_weekly_sma: str,
+    sma_alignment: str,
+    rsi: float,
+    atr: float,
+    rsi_trend: float,
+    atr_ratio: float,
+    volume_ratio: float,
+    vix_value: float | None,
+    vix_level: str,
+    supports_json: str,
+    resistances_json: str,
+    near_resistance: bool,
+    near_support: bool,
+    headlines_json: str,
+) -> dict | None:
+    """Run full analysis forcing a specific AI provider (Groq, Gemini, etc.)."""
+    headlines = json.loads(headlines_json)
+    supports = json.loads(supports_json)
+    resistances = json.loads(resistances_json)
+    headlines_text = "\n".join(
+        f"{i+1}. {h['headline']}" for i, h in enumerate(headlines)
+    ) if headlines else "No recent headlines available."
+
+    if price_vs_sma == price_vs_weekly_sma and price_vs_sma != "at":
+        timeframe_alignment = f"ALIGNED — price is {price_vs_sma} both daily and weekly trends (strong)"
+    elif price_vs_weekly_sma == "unavailable":
+        timeframe_alignment = "Weekly data unavailable — rely on daily trend only"
+    elif price_vs_sma == "at" or price_vs_weekly_sma == "at":
+        timeframe_alignment = "One timeframe is neutral — signal is moderate"
+    else:
+        timeframe_alignment = f"CONFLICTING — daily: {price_vs_sma}, weekly: {price_vs_weekly_sma} (weak)"
+
+    sr_text = _format_sr_text(supports, resistances, price, near_resistance, near_support)
+
+    prompt = FULL_ANALYSIS_PROMPT.format(
+        asset_name=asset_name,
+        price=f"{price:,.2f}",
+        sma_20=f"{sma_20:,.2f}",
+        sma_50=f"{sma_50:,.2f}",
+        sma_200=f"{sma_200:,.2f}",
+        price_vs_sma=price_vs_sma,
+        sma_50w=f"{sma_50w:,.2f}" if sma_50w else "unavailable",
+        price_vs_weekly_sma=price_vs_weekly_sma if price_vs_weekly_sma != "unavailable" else "N/A",
+        sma_alignment=_interpret_sma_alignment(sma_alignment),
+        timeframe_alignment=timeframe_alignment,
+        sr_text=sr_text,
+        rsi=f"{rsi:.1f}",
+        rsi_interpretation=_interpret_rsi(rsi),
+        rsi_trend=f"{rsi_trend:+.1f}",
+        rsi_momentum="accelerating upward" if rsi_trend > 3 else ("accelerating downward" if rsi_trend < -3 else "stable"),
+        atr=f"{atr:,.2f}",
+        atr_ratio=f"{atr_ratio:.1f}",
+        volatility_interpretation=_interpret_volatility(atr_ratio),
+        volume_ratio=f"{volume_ratio:.1f}",
+        volume_interpretation=_interpret_volume(volume_ratio),
+        vix_value=f"{vix_value:.1f}" if vix_value else "unavailable",
+        vix_interpretation=_interpret_vix(vix_value, vix_level),
+        headlines_text=headlines_text,
+    )
+
+    raw = _call_specific_provider(prompt, provider)
     if not raw:
         return None
 

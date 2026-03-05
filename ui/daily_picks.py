@@ -11,11 +11,13 @@ from config import ALL_ASSETS_FLAT, Asset
 from data.market_data import fetch_ohlc, get_52_week_range
 from data.news_data import get_news_for_asset
 from analysis.technical import analyze as technical_analyze
-from analysis.sentiment import analyze_sentiment, dict_to_signal, run_full_analysis
+from analysis.sentiment import (
+    analyze_sentiment, dict_to_signal, run_full_analysis,
+    run_analysis_with_provider, _format_sr_text,
+)
 from analysis.synergy import decide
 from analysis.exit_strategy import generate_trading_plan
 from analysis.verification import verify_recommendation, VerificationResult
-from analysis.sentiment import _format_sr_text
 from avanza.certificates import search_certificates
 from storage.history import save_recommendation
 from ui.translations import T
@@ -88,16 +90,43 @@ def render_daily_picks():
         MIN_CONFIDENCE = 0.55
         MIN_RR_RATIO = 1.5
 
-        st.markdown("#### ⚙️ Steg 1 — AI-screening av alla tillgångar")
+        st.markdown("#### ⚙️ Steg 1 — Dubbel AI-screening (Groq + Gemini)")
         progress_text = st.empty()
         progress_bar = st.progress(0)
         live_log = st.empty()
         scan_data = {"results": [], "report": [], "log": []}
         total = len(ALL_ASSETS_FLAT)
 
+        def _update_log(log_lines, container):
+            container.markdown("\n".join(log_lines), unsafe_allow_html=False)
+
+        def _run_analysis_args(tech, headlines_json, sr):
+            return dict(
+                price=tech.current_price,
+                sma_20=tech.sma_20,
+                sma_50=tech.sma_50,
+                sma_200=tech.sma_200,
+                price_vs_sma=tech.price_vs_sma,
+                sma_50w=tech.sma_50w,
+                price_vs_weekly_sma=tech.price_vs_weekly_sma,
+                sma_alignment=tech.sma_alignment,
+                rsi=tech.rsi_value,
+                atr=tech.atr_value,
+                rsi_trend=tech.rsi_trend_2d,
+                atr_ratio=tech.atr_ratio,
+                volume_ratio=tech.volume_ratio,
+                vix_value=tech.vix_value,
+                vix_level=tech.vix_level,
+                supports_json=json.dumps(sr.supports),
+                resistances_json=json.dumps(sr.resistances),
+                near_resistance=tech.near_resistance,
+                near_support=tech.near_support,
+                headlines_json=headlines_json,
+            )
+
         for i, asset in enumerate(ALL_ASSETS_FLAT):
             progress_bar.progress((i + 1) / total)
-            progress_text.caption(f"Analyserar {asset.display_name} ({i+1}/{total})...")
+            progress_text.caption(f"Analyserar {asset.display_name} ({i+1}/{total}) — Groq + Gemini...")
 
             entry = {
                 "name": asset.display_name,
@@ -111,12 +140,6 @@ def render_daily_picks():
                 "ai_verdict": "-",
                 "reason": "",
             }
-
-            def _update_log(log_lines, container):
-                container.markdown(
-                    "\n".join(log_lines),
-                    unsafe_allow_html=False,
-                )
 
             try:
                 df = fetch_ohlc(asset.ticker)
@@ -146,32 +169,63 @@ def render_daily_picks():
                 headlines_json = json.dumps(headlines)
                 sent_dict = analyze_sentiment(asset.display_name, headlines_json)
                 sent = dict_to_signal(sent_dict.copy())
-
                 entry["sentiment"] = f"{sent.direction} ({sent.confidence:.0%})"
 
-                ai_result = run_full_analysis(
-                    asset_name=asset.display_name,
-                    price=tech.current_price,
-                    sma_20=tech.sma_20,
-                    sma_50=tech.sma_50,
-                    sma_200=tech.sma_200,
-                    price_vs_sma=tech.price_vs_sma,
-                    sma_50w=tech.sma_50w,
-                    price_vs_weekly_sma=tech.price_vs_weekly_sma,
-                    sma_alignment=tech.sma_alignment,
-                    rsi=tech.rsi_value,
-                    atr=tech.atr_value,
-                    rsi_trend=tech.rsi_trend_2d,
-                    atr_ratio=tech.atr_ratio,
-                    volume_ratio=tech.volume_ratio,
-                    vix_value=tech.vix_value,
-                    vix_level=tech.vix_level,
-                    supports_json=json.dumps(sr.supports),
-                    resistances_json=json.dumps(sr.resistances),
-                    near_resistance=tech.near_resistance,
-                    near_support=tech.near_support,
-                    headlines_json=headlines_json,
+                analysis_kwargs = _run_analysis_args(tech, headlines_json, sr)
+
+                # --- DUAL AI: Run both Groq and Gemini independently ---
+                groq_result = run_analysis_with_provider(
+                    provider="Groq", asset_name=asset.display_name, **analysis_kwargs,
                 )
+                time.sleep(3)
+                gemini_result = run_analysis_with_provider(
+                    provider="Gemini", asset_name=asset.display_name, **analysis_kwargs,
+                )
+
+                groq_verdict = groq_result.get("verdict", "NO_TRADE") if groq_result else "NO_TRADE"
+                gemini_verdict = gemini_result.get("verdict", "NO_TRADE") if gemini_result else "NO_TRADE"
+                groq_conf = groq_result.get("confidence", 0) if groq_result else 0
+                gemini_conf = gemini_result.get("confidence", 0) if gemini_result else 0
+
+                groq_ok = groq_result is not None
+                gemini_ok = gemini_result is not None
+
+                # Determine consensus
+                if groq_ok and gemini_ok:
+                    same_direction = (
+                        (groq_verdict == gemini_verdict and groq_verdict != "NO_TRADE")
+                        or (groq_verdict in ("BUY_BULL", "BUY_BEAR") and gemini_verdict == groq_verdict)
+                    )
+                    if same_direction:
+                        avg_conf = (groq_conf + gemini_conf) / 2
+                        ai_result = groq_result if groq_conf >= gemini_conf else gemini_result
+                        ai_result["confidence"] = round(avg_conf, 2)
+                        ai_result["provider"] = f"Groq ({groq_conf:.0%}) + Gemini ({gemini_conf:.0%})"
+                        ai_result["groq_analysis"] = groq_result.get("analysis", "")
+                        ai_result["gemini_analysis"] = gemini_result.get("analysis", "")
+                        consensus_tag = "KONSENSUS"
+                    elif groq_verdict == "NO_TRADE" and gemini_verdict == "NO_TRADE":
+                        ai_result = groq_result
+                        ai_result["provider"] = "Groq + Gemini"
+                        consensus_tag = "ENIGA: NO_TRADE"
+                    else:
+                        ai_result = {"verdict": "NO_TRADE", "confidence": 0, "provider": "Groq + Gemini"}
+                        ai_result["analysis"] = (
+                            f"AI:erna är oense: Groq={groq_verdict} ({groq_conf:.0%}), "
+                            f"Gemini={gemini_verdict} ({gemini_conf:.0%}). Ingen konsensus = ingen trade."
+                        )
+                        ai_result["key_factors"] = []
+                        ai_result["risks"] = [f"Groq: {groq_verdict}, Gemini: {gemini_verdict} — ingen konsensus"]
+                        consensus_tag = "OENIGA"
+                elif groq_ok:
+                    ai_result = groq_result
+                    consensus_tag = "ENBART GROQ"
+                elif gemini_ok:
+                    ai_result = gemini_result
+                    consensus_tag = "ENBART GEMINI"
+                else:
+                    ai_result = None
+                    consensus_tag = "BÅDA MISSLYCKADES"
 
                 if ai_result:
                     verdict = ai_result.get("verdict", "NO_TRADE")
@@ -185,26 +239,23 @@ def render_daily_picks():
                     else:
                         action = "NONE"
 
-                    # Quality gate: reject weak signals
                     if action != "NONE" and confidence < MIN_CONFIDENCE:
                         entry["action"] = "NONE"
                         entry["status"] = "Svag signal"
                         entry["reason"] = (
-                            f"AI sa {verdict} men konfidens ({confidence:.0%}) "
-                            f"under minimum ({MIN_CONFIDENCE:.0%})"
+                            f"Konfidens ({confidence:.0%}) under minimum ({MIN_CONFIDENCE:.0%})"
                         )
                         scan_data["report"].append(entry)
                         scan_data["log"].append(
-                            f"🟡 {asset.display_name} — {verdict} avvisad (konfidens {confidence:.0%} < 55%)"
+                            f"🟡 {asset.display_name} — {verdict} avvisad ({consensus_tag}, konfidens {confidence:.0%} < 55%)"
                         )
                         _update_log(scan_data["log"], live_log)
+                        time.sleep(3)
                         continue
 
                     trading_plan = None
                     if action != "NONE":
                         trading_plan = generate_trading_plan(tech, action)
-
-                        # R/R quality gate: reject trades with poor risk/reward
                         if trading_plan:
                             rr_val = (trading_plan.reward_amount / trading_plan.risk_amount
                                       if trading_plan.risk_amount > 0 else 0)
@@ -212,14 +263,14 @@ def render_daily_picks():
                                 entry["action"] = "NONE"
                                 entry["status"] = "Svag signal"
                                 entry["reason"] = (
-                                    f"Risk/reward {trading_plan.risk_reward_ratio} "
-                                    f"under minimum (1:1.5)"
+                                    f"Risk/reward {trading_plan.risk_reward_ratio} under minimum (1:1.5)"
                                 )
                                 scan_data["report"].append(entry)
                                 scan_data["log"].append(
                                     f"🟡 {asset.display_name} — {verdict} avvisad (R/R {trading_plan.risk_reward_ratio} < 1:1.5)"
                                 )
                                 _update_log(scan_data["log"], live_log)
+                                time.sleep(3)
                                 continue
 
                     entry["action"] = action
@@ -248,16 +299,16 @@ def render_daily_picks():
                             "headlines": headlines,
                         })
                         scan_data["log"].append(
-                            f"🟢 {asset.display_name} — **{verdict}** ({confidence:.0%}) ✅ KANDIDAT"
+                            f"🟢 {asset.display_name} — **{verdict}** ({confidence:.0%}) ✅ {consensus_tag}"
                         )
                     else:
                         entry["status"] = "Ingen signal"
                         entry["reason"] = ai_result.get("analysis", "")[:120]
                         scan_data["log"].append(
-                            f"⚪ {asset.display_name} — NO_TRADE (AI: ingen edge)"
+                            f"⚪ {asset.display_name} — NO_TRADE ({consensus_tag})"
                         )
                 else:
-                    # Fallback to rule-based engine with same quality gates
+                    # Both AIs failed — fallback to rule-based engine
                     week_range = get_52_week_range(df)
                     w52_low = week_range[0] if week_range else None
                     decision = decide(
@@ -315,7 +366,7 @@ def render_daily_picks():
 
             scan_data["report"].append(entry)
             _update_log(scan_data["log"], live_log)
-            time.sleep(5)
+            time.sleep(3)
 
         scan_data["results"].sort(
             key=lambda x: x.get("ai_result", {}).get("confidence", 0)
@@ -323,14 +374,14 @@ def render_daily_picks():
             reverse=True,
         )
 
-        # --- Stage 2: Verify candidates ---
+        # --- Stage 2: Deep dive on candidates (Devil's Advocate + risk news) ---
         if scan_data["results"]:
             n_candidates = len(scan_data["results"])
             scan_data["log"].append("")
-            scan_data["log"].append(f"#### ⚙️ Steg 2 — Verifierar {n_candidates} kandidat{'er' if n_candidates > 1 else ''}")
+            scan_data["log"].append(f"#### ⚙️ Steg 2 — Djupanalys av {n_candidates} kandidat{'er' if n_candidates > 1 else ''}")
             _update_log(scan_data["log"], live_log)
 
-            progress_text.caption("Steg 2: Verifierar kandidater med andra AI-modellen...")
+            progress_text.caption("Steg 2: Djupanalys — Devil's Advocate + risksökning...")
             progress_bar.progress(0)
 
             verified_results = []
@@ -343,10 +394,10 @@ def render_daily_picks():
                 verdict = ai_result.get("verdict", "BUY_BULL") if ai_result else "BUY_BULL"
 
                 progress_text.caption(
-                    f"Verifierar {asset.display_name} ({idx+1}/{n_candidates})..."
+                    f"Djupanalys {asset.display_name} ({idx+1}/{n_candidates})..."
                 )
                 progress_bar.progress((idx + 1) / n_candidates)
-                scan_data["log"].append(f"🔍 Verifierar {asset.display_name}...")
+                scan_data["log"].append(f"🔍 Djupanalys {asset.display_name}...")
                 _update_log(scan_data["log"], live_log)
 
                 sr = tech.support_resistance
@@ -363,7 +414,7 @@ def render_daily_picks():
                 try:
                     verification = verify_recommendation(
                         asset_name=asset.display_name,
-                        first_provider=provider,
+                        first_provider="Groq",
                         verdict=verdict,
                         confidence=ai_result.get("confidence", 0) if ai_result else 0,
                         tech=tech,
@@ -376,7 +427,7 @@ def render_daily_picks():
                 except Exception as ve:
                     verification = None
                     scan_data["log"].append(
-                        f"   🔴 Verifiering kraschade: {str(ve)[:60]}"
+                        f"   🔴 Djupanalys kraschade: {str(ve)[:60]}"
                     )
                     _update_log(scan_data["log"], live_log)
 
@@ -386,21 +437,19 @@ def render_daily_picks():
                     verified_results.append(result)
                     scan_data["log"].append(
                         f"   ✅ {asset.display_name} — VERIFIERAD "
-                        f"(AI #2: {'håller med' if verification.second_ai_agrees else 'håller inte med'}, "
-                        f"risk: {verification.devils_advocate_risk})"
+                        f"(Devil's Advocate: {verification.devils_advocate_risk} risk)"
                     )
                 elif verification and not verification.verified:
                     result["rejected_reason"] = "verification_failed"
                     verified_results.append(result)
                     scan_data["log"].append(
                         f"   ⚠️ {asset.display_name} — EJ VERIFIERAD "
-                        f"(AI #2: {'håller med' if verification.second_ai_agrees else 'AVVISAR'}, "
-                        f"risk: {verification.devils_advocate_risk})"
+                        f"(risk: {verification.devils_advocate_risk})"
                     )
                 else:
                     verified_results.append(result)
                     scan_data["log"].append(
-                        f"   🔄 {asset.display_name} — Verifiering misslyckades"
+                        f"   🔄 {asset.display_name} — Djupanalys misslyckades"
                     )
 
                 _update_log(scan_data["log"], live_log)
@@ -408,14 +457,16 @@ def render_daily_picks():
             scan_data["results"] = verified_results
         else:
             scan_data["log"].append("")
-            scan_data["log"].append("ℹ️ Inga kandidater att verifiera — steg 2 hoppades över")
+            scan_data["log"].append("ℹ️ Inga kandidater — steg 2 hoppades över")
 
         # Final summary
-        n_signals = len([r for r in scan_data["results"] if r.get("verification") and r["verification"].verified])
-        n_unverified = len([r for r in scan_data["results"] if r.get("verification") and not r["verification"].verified])
+        n_signals = len([r for r in scan_data["results"]
+                         if r.get("verification") and r["verification"].verified])
+        n_unverified = len([r for r in scan_data["results"]
+                            if r.get("verification") and not r["verification"].verified])
         scan_data["log"].append("")
         scan_data["log"].append(
-            f"**Klart!** {total} tillgångar screenade → "
+            f"**Klart!** {total} tillgångar screenade med dubbel AI → "
             f"{len(scan_data['results'])} kandidater → "
             f"{n_signals} verifierade, {n_unverified} ej verifierade"
         )
