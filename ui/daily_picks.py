@@ -68,7 +68,7 @@ def render_daily_picks():
         st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
         if scans_left > 0:
             rescan = st.button(
-                "🔄 Starta dagens skanning",
+                f"🔄 Skanna nu ({scans_left} kvar)",
                 type="primary", use_container_width=True,
             )
         else:
