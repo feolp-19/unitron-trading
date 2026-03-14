@@ -131,16 +131,26 @@ def _serialize_result(result: dict) -> dict:
 
 
 def save_scan(scan_data: dict) -> None:
-    """Save scan results to in-memory cache + JSON file backup."""
-    serialized_results = [_serialize_result(r) for r in scan_data.get("results", [])]
+    """Save scan results to in-memory cache + JSON file backup.
 
-    payload = {
-        "scan_date": date.today().isoformat(),
-        "scan_time": datetime.now().strftime("%H:%M"),
-        "results": serialized_results,
-        "report": scan_data.get("report", []),
-        "log": scan_data.get("log", []),
-    }
+    Accepts both the old format (with 'results' list) and the new deep-scan
+    format (with 'all_scores', 'top5', 'final_picks').
+    """
+    if "all_scores" in scan_data:
+        payload = {
+            "scan_date": scan_data.get("scan_date", date.today().isoformat()),
+            "scan_time": scan_data.get("scan_time", datetime.now().strftime("%H:%M")),
+            **{k: v for k, v in scan_data.items() if k not in ("scan_date", "scan_time")},
+        }
+    else:
+        serialized_results = [_serialize_result(r) for r in scan_data.get("results", [])]
+        payload = {
+            "scan_date": date.today().isoformat(),
+            "scan_time": datetime.now().strftime("%H:%M"),
+            "results": serialized_results,
+            "report": scan_data.get("report", []),
+            "log": scan_data.get("log", []),
+        }
 
     _memory_cache["data"] = payload
     _memory_cache["date"] = date.today().isoformat()
