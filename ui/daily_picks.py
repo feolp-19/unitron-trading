@@ -1,4 +1,4 @@
-"""Unitron Morgonrapport — 3-phase deep scan with Master Report UI."""
+"""Unitron 8-Stage Intelligence Pipeline — Master Report UI."""
 
 import html
 import json
@@ -18,7 +18,6 @@ from storage.scan_results import save_scan, load_scan
 
 
 def _render_usage_bar(usage: dict):
-    """Show live API credit usage using native Streamlit components."""
     providers = [
         ("Groq", "groq"),
         ("Gemini", "gemini"),
@@ -33,7 +32,6 @@ def _render_usage_bar(usage: dict):
 
 
 def render_daily_picks():
-    """Render the deep-scan Master Report view."""
     today_str = datetime.now().strftime("%A %d %B %Y")
     usage = get_usage()
     scan_count = usage["scans"]["used"]
@@ -44,9 +42,9 @@ def render_daily_picks():
         st.markdown(
             f"""
             <div style="padding: 16px 0 8px 0;">
-                <h1 style="margin-bottom: 0;">Unitron Djupanalys</h1>
+                <h1 style="margin-bottom: 0;">Unitron 8-Stegs Djupanalys</h1>
                 <p style="color: #888; font-size: 18px;">
-                    {today_str} &nbsp;·&nbsp;
+                    {today_str} &nbsp;&middot;&nbsp;
                     Skanningar: {scan_count}/{usage['scans']['limit']}
                 </p>
             </div>
@@ -57,12 +55,12 @@ def render_daily_picks():
         st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
         if scans_left > 0:
             rescan = st.button(
-                f"🔬 Djupskanna ({scans_left} kvar)",
+                f"Djupskanna ({scans_left} kvar)",
                 type="primary", use_container_width=True,
             )
         else:
             st.button(
-                "✅ Dagens analys klar",
+                "Dagens analys klar",
                 type="secondary", use_container_width=True, disabled=True,
             )
             rescan = False
@@ -83,54 +81,8 @@ def render_daily_picks():
         elif scans_left > 0:
             st.session_state["run_scan"] = True
 
-    # --- RUN DEEP SCAN ---
     if st.session_state.get("run_scan") and "scan_data" not in st.session_state:
-        st.markdown(
-            """
-            <div style="
-                background: #1A1D2390;
-                border: 1px solid #444;
-                border-radius: 12px;
-                padding: 16px 24px;
-                margin-bottom: 16px;
-                text-align: center;
-            ">
-                <div style="font-size: 32px; margin-bottom: 8px;">🔬</div>
-                <div style="font-size: 18px; font-weight: 600;">Djupanalys pågår...</div>
-                <div style="color: #888; font-size: 14px;">
-                    3-fas pipeline: Kvantitativ Granskning → Djävulens Advokat → Makrosyntes<br>
-                    ~5 min — analyserar 17+ tillgångar med maximal noggrannhet
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        progress_bar = st.progress(0)
-        progress_text = st.empty()
-        live_log = st.empty()
-        log_lines = []
-
-        total_steps = len(ALL_ASSETS_FLAT) + 10  # phase1 + phase2 + phase3
-        step_counter = [0]
-
-        def ui_log(phase, msg):
-            step_counter[0] += 1
-            progress_bar.progress(min(step_counter[0] / total_steps, 1.0))
-            if phase in ("phase1", "phase2", "phase3"):
-                progress_text.caption(msg)
-            log_lines.append(msg)
-            live_log.markdown("\n\n".join(log_lines[-15:]), unsafe_allow_html=False)
-
-        result = run_deep_scan(log_fn=ui_log, max_top=5, api_delay=5)
-
-        scan_data = _serialize_deep_result(result)
-        st.session_state["scan_data"] = scan_data
-        save_scan(scan_data)
-        track_scan()
-
-        progress_bar.empty()
-        progress_text.empty()
+        _run_scan_ui()
 
     if "scan_data" not in st.session_state:
         if scans_left > 0:
@@ -145,11 +97,10 @@ def render_daily_picks():
                     border-radius: 16px; padding: 48px 32px;
                     text-align: center; margin: 16px 0 24px 0;
                 ">
-                    <div style="font-size: 64px; margin-bottom: 16px;">⛔</div>
-                    <h2 style="color: #888;">Dagens analyser är slut</h2>
+                    <div style="font-size: 64px; margin-bottom: 16px;">---</div>
+                    <h2 style="color: #888;">Dagens analyser ar slut</h2>
                     <p style="color: #666; font-size: 16px;">
-                        Resultat från den automatiska morgonskanningen saknas.<br>
-                        Kom tillbaka imorgon kl 07:00 för ny djupanalys.
+                        Kom tillbaka imorgon kl 07:00 for ny djupanalys.
                     </p>
                 </div>
                 """,
@@ -162,13 +113,68 @@ def render_daily_picks():
 
     if is_saved:
         scan_time = scan_data.get("scan_time", "")
-        st.caption(f"Visar sparade resultat från {scan_data.get('scan_date', 'idag')} ({scan_time})")
+        st.caption(f"Visar sparade resultat fran {scan_data.get('scan_date', 'idag')} ({scan_time})")
 
     _render_master_report(scan_data)
 
 
+def _run_scan_ui():
+    st.markdown(
+        """
+        <div style="
+            background: #1A1D2390;
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-bottom: 16px;
+            text-align: center;
+        ">
+            <div style="font-size: 32px; margin-bottom: 8px;">&#128300;</div>
+            <div style="font-size: 18px; font-weight: 600;">8-stegs djupanalys pagar...</div>
+            <div style="color: #888; font-size: 14px;">
+                Steg 0-8: Datafundament &rarr; Makroankare &rarr; Flerlins Skanning &rarr;
+                Djupforskning &rarr; Devil's Advocate &rarr; Korsvalidering<br>
+                ~15-25 min — maximalt djup med 5s mellan varje AI-anrop
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    progress_bar = st.progress(0)
+    progress_text = st.empty()
+    live_log = st.empty()
+    log_lines = []
+
+    total_steps = len(ALL_ASSETS_FLAT) * 6 + 40
+    step_counter = [0]
+
+    def ui_log(phase, msg):
+        step_counter[0] += 1
+        progress_bar.progress(min(step_counter[0] / total_steps, 1.0))
+        stage_names = {
+            "stage0": "Steg 0", "stage1": "Steg 1", "stage2": "Steg 2",
+            "stage3": "Steg 3-4", "stage4": "Steg 3-4",
+            "stage5": "Steg 5", "stage6": "Steg 6", "stage7": "Steg 7",
+            "stage8": "Steg 8", "synthesis": "Syntes",
+        }
+        if phase in stage_names:
+            progress_text.caption(f"[{stage_names[phase]}] {msg}")
+        log_lines.append(msg)
+        live_log.markdown("\n\n".join(log_lines[-20:]), unsafe_allow_html=False)
+
+    result = run_deep_scan(log_fn=ui_log, max_top=5, api_delay=5)
+
+    scan_data = _serialize_deep_result(result)
+    st.session_state["scan_data"] = scan_data
+    save_scan(scan_data)
+    track_scan()
+
+    progress_bar.empty()
+    progress_text.empty()
+
+
 def _serialize_deep_result(result: DeepScanResult) -> dict:
-    """Convert DeepScanResult to a JSON-serializable dict."""
     def _ser_candidate(c):
         asset = c["asset"]
         tech = c["tech"]
@@ -202,8 +208,14 @@ def _serialize_deep_result(result: DeepScanResult) -> dict:
 
         out = {
             "asset": asset_d, "tech": tech_d,
-            "phase1": c.get("phase1"), "phase2": c.get("phase2"),
-            "phase3": c.get("phase3"), "headlines": c.get("headlines", []),
+            "stage2": c.get("stage2"),
+            "stage5": c.get("stage5"),
+            "stage6": c.get("stage6"),
+            "stage7": c.get("stage7"),
+            "synthesis": c.get("synthesis"),
+            "headlines": c.get("headlines", []),
+            "final_verdict": c.get("final_verdict", "NO_TRADE"),
+            "final_confidence": c.get("final_confidence", 0),
         }
 
         tp = c.get("trading_plan")
@@ -223,10 +235,6 @@ def _serialize_deep_result(result: DeepScanResult) -> dict:
         else:
             out["trading_plan"] = tp
 
-        if "final_verdict" in c:
-            out["final_verdict"] = c["final_verdict"]
-            out["final_confidence"] = c.get("final_confidence", 0)
-
         return out
 
     return {
@@ -234,15 +242,17 @@ def _serialize_deep_result(result: DeepScanResult) -> dict:
         "scan_time": result.scan_time,
         "vix_value": result.vix_value,
         "dxy_value": result.dxy_value,
+        "us10y_value": result.us10y_value,
+        "market_regime": result.market_regime,
+        "regime_report": result.regime_report,
         "global_sentiment": result.global_sentiment,
         "all_scores": result.all_scores,
         "top5": [_ser_candidate(c) for c in result.top5],
         "final_picks": [_ser_candidate(c) for c in result.final_picks],
+        "yesterday_review": result.yesterday_review,
         "log": result.log,
         "total_assets": result.total_assets,
-        "phase1_calls": result.phase1_calls,
-        "phase2_calls": result.phase2_calls,
-        "phase3_calls": result.phase3_calls,
+        "stage_calls": result.stage_calls,
     }
 
 
@@ -257,24 +267,28 @@ def _get(obj, key, default=None):
 # ---------------------------------------------------------------------------
 
 def _render_master_report(scan_data: dict):
-    """Render the complete Unitron Master Report."""
-
     vix = scan_data.get("vix_value")
     dxy = scan_data.get("dxy_value")
+    us10y = scan_data.get("us10y_value")
+    regime = scan_data.get("market_regime", "")
     global_sent = scan_data.get("global_sentiment", "")
     all_scores = scan_data.get("all_scores", [])
     top5 = scan_data.get("top5", [])
     final_picks = scan_data.get("final_picks", [])
     total = scan_data.get("total_assets", 0)
+    yesterday = scan_data.get("yesterday_review")
 
-    # --- "Morgonens Hjärtslag" ---
-    _render_heartbeat(vix, dxy, global_sent, total, len(all_scores), len(top5), len(final_picks))
+    _render_heartbeat(vix, dxy, us10y, regime, global_sent, total, len(all_scores), len(top5), len(final_picks))
 
-    # --- Score Overview ---
+    if yesterday:
+        _render_yesterday_review(yesterday)
+
+    if regime:
+        _render_regime_report(scan_data.get("regime_report", "{}"), regime)
+
     if all_scores:
         _render_scores_overview(all_scores)
 
-    # --- Final Picks ---
     if final_picks:
         st.markdown(
             f"""
@@ -284,7 +298,7 @@ def _render_master_report(scan_data: dict):
                 text-align: center; margin-bottom: 24px;
             ">
                 <span style="font-size: 18px;">
-                    Djupanalysen rekommenderar <strong>{len(final_picks)}</strong> trade{'s' if len(final_picks) > 1 else ''}
+                    8-stegs djupanalysen rekommenderar <strong>{len(final_picks)}</strong> trade{'s' if len(final_picks) > 1 else ''}
                 </span>
             </div>
             """,
@@ -301,34 +315,30 @@ def _render_master_report(scan_data: dict):
                 border-radius: 16px; padding: 48px 32px;
                 text-align: center; margin: 16px 0 24px 0;
             ">
-                <div style="font-size: 64px; margin-bottom: 16px;">🛡️</div>
+                <div style="font-size: 64px; margin-bottom: 16px;">&#128737;</div>
                 <h2 style="color: #888;">Inga rekommendationer idag</h2>
                 <p style="color: #666; font-size: 16px;">
-                    3-fas djupanalysen fann inga tillgångar som klarade alla granskningssteg.<br>
-                    <strong>Att stå utanför marknaden är ofta det klokaste beslutet.</strong>
+                    8-stegs djupanalysen fann inga tillgangar som klarade alla granskningssteg.<br>
+                    <strong>Att sta utanfor marknaden ar ofta det klokaste beslutet.</strong>
                 </p>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-    # --- Deep-Dive Expanders for all Top 5 ---
     if top5:
         st.divider()
-        st.markdown("### 🔍 Djupanalys — Topp 5 Kandidater")
+        st.markdown("### Djupanalys — Topp 5 Finalister")
         for candidate in top5:
             _render_candidate_expander(candidate)
 
-    # --- Scan Log ---
     log_lines = scan_data.get("log", [])
     if log_lines:
-        with st.expander("📋 Fullständig skanningslogg", expanded=False):
+        with st.expander("Fullstandig skanningslogg", expanded=False):
             st.markdown("\n\n".join(log_lines))
 
-    # --- Footer ---
-    p1 = scan_data.get("phase1_calls", 0)
-    p2 = scan_data.get("phase2_calls", 0)
-    p3 = scan_data.get("phase3_calls", 0)
+    stage_calls = scan_data.get("stage_calls", {})
+    total_calls = sum(v for v in stage_calls.values() if isinstance(v, int))
     st.markdown(
         f"""
         <div style="
@@ -336,9 +346,9 @@ def _render_master_report(scan_data: dict):
             padding: 12px 24px; margin-top: 32px;
             text-align: center; border-radius: 8px;
         ">
-            <span style="color: #00C853; font-weight: 700;">Analysens komplexitetsgrad: MAXIMERAD</span><br>
+            <span style="color: #00C853; font-weight: 700;">Analysens komplexitetsgrad: 8 STEG / MAXIMERAD</span><br>
             <span style="color: #666; font-size: 12px;">
-                Fas 1: {p1} kvantitativa granskningar · Fas 2: {p2} skeptiska granskningar · Fas 3: {p3} makrosynteser
+                Totalt {total_calls} AI-anrop over 8 analyssteg
             </span>
         </div>
         """,
@@ -346,15 +356,18 @@ def _render_master_report(scan_data: dict):
     )
 
 
-def _render_heartbeat(vix, dxy, global_sent, total, scored, top5_count, picks_count):
-    """Render the 'Morgonens Hjärtslag' section."""
+def _render_heartbeat(vix, dxy, us10y, regime, global_sent, total, scored, top5_count, picks_count):
+    vix_text = f"{vix:.1f}" if vix else "N/A"
+    dxy_text = f"{dxy:.2f}" if dxy else "N/A"
+    us10y_text = f"{us10y:.2f}%" if us10y else "N/A"
+
     if vix is not None:
         if vix > 30:
-            vix_color, vix_label = "#FF1744", "EXTREM RÄDSLA"
+            vix_color, vix_label = "#FF1744", "EXTREM RADSLA"
         elif vix > 25:
-            vix_color, vix_label = "#FF9100", "Förhöjd rädsla"
+            vix_color, vix_label = "#FF9100", "Forhojd radsla"
         elif vix > 20:
-            vix_color, vix_label = "#FFD600", "Försiktighet"
+            vix_color, vix_label = "#FFD600", "Forsiktighet"
         elif vix > 15:
             vix_color, vix_label = "#888", "Normal"
         else:
@@ -362,8 +375,12 @@ def _render_heartbeat(vix, dxy, global_sent, total, scored, top5_count, picks_co
     else:
         vix_color, vix_label = "#888", "N/A"
 
-    dxy_text = f"{dxy:.2f}" if dxy else "N/A"
-    vix_text = f"{vix:.1f}" if vix else "N/A"
+    regime_colors = {
+        "RISK_ON": "#00C853", "RISK_OFF": "#FF1744", "REFLATION": "#FF9100",
+        "STAGFLATION": "#FF5252", "TIGHTENING": "#FFD600", "EASING": "#69F0AE",
+        "TRANSITION": "#888",
+    }
+    regime_color = regime_colors.get(regime, "#888")
 
     st.markdown(
         f"""
@@ -372,27 +389,35 @@ def _render_heartbeat(vix, dxy, global_sent, total, scored, top5_count, picks_co
             border: 1px solid #333; border-radius: 16px;
             padding: 24px 32px; margin-bottom: 20px;
         ">
-            <h3 style="margin: 0 0 16px 0; color: #fff;">💓 Morgonens Hjärtslag</h3>
-            <div style="display: flex; gap: 32px; flex-wrap: wrap; justify-content: center;">
-                <div style="text-align: center; min-width: 120px;">
-                    <div style="font-size: 28px; font-weight: 700; color: {vix_color};">{vix_text}</div>
-                    <div style="color: #888; font-size: 13px;">VIX — {vix_label}</div>
+            <h3 style="margin: 0 0 16px 0; color: #fff;">Morgonens Hjartslag</h3>
+            <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;">
+                <div style="text-align: center; min-width: 100px;">
+                    <div style="font-size: 24px; font-weight: 700; color: {regime_color};">{html.escape(regime or 'N/A')}</div>
+                    <div style="color: #888; font-size: 12px;">Marknadsregim</div>
                 </div>
-                <div style="text-align: center; min-width: 120px;">
-                    <div style="font-size: 28px; font-weight: 700;">{dxy_text}</div>
-                    <div style="color: #888; font-size: 13px;">Dollar Index (DXY)</div>
+                <div style="text-align: center; min-width: 100px;">
+                    <div style="font-size: 24px; font-weight: 700; color: {vix_color};">{vix_text}</div>
+                    <div style="color: #888; font-size: 12px;">VIX — {vix_label}</div>
                 </div>
-                <div style="text-align: center; min-width: 120px;">
-                    <div style="font-size: 28px; font-weight: 700;">{total}</div>
-                    <div style="color: #888; font-size: 13px;">Tillgångar skannade</div>
+                <div style="text-align: center; min-width: 100px;">
+                    <div style="font-size: 24px; font-weight: 700;">{dxy_text}</div>
+                    <div style="color: #888; font-size: 12px;">DXY</div>
                 </div>
-                <div style="text-align: center; min-width: 120px;">
-                    <div style="font-size: 28px; font-weight: 700; color: #4285F4;">{top5_count}</div>
-                    <div style="color: #888; font-size: 13px;">Djupanalyserade</div>
+                <div style="text-align: center; min-width: 100px;">
+                    <div style="font-size: 24px; font-weight: 700;">{us10y_text}</div>
+                    <div style="color: #888; font-size: 12px;">US 10Y Yield</div>
                 </div>
-                <div style="text-align: center; min-width: 120px;">
-                    <div style="font-size: 28px; font-weight: 700; color: #00C853;">{picks_count}</div>
-                    <div style="color: #888; font-size: 13px;">Rekommenderade</div>
+                <div style="text-align: center; min-width: 80px;">
+                    <div style="font-size: 24px; font-weight: 700;">{total}</div>
+                    <div style="color: #888; font-size: 12px;">Skannade</div>
+                </div>
+                <div style="text-align: center; min-width: 80px;">
+                    <div style="font-size: 24px; font-weight: 700; color: #4285F4;">{top5_count}</div>
+                    <div style="color: #888; font-size: 12px;">Djupanalyserade</div>
+                </div>
+                <div style="text-align: center; min-width: 80px;">
+                    <div style="font-size: 24px; font-weight: 700; color: #00C853;">{picks_count}</div>
+                    <div style="color: #888; font-size: 12px;">Rekommenderade</div>
                 </div>
             </div>
             <div style="color: #aaa; font-size: 14px; margin-top: 16px; text-align: center;">
@@ -404,72 +429,147 @@ def _render_heartbeat(vix, dxy, global_sent, total, scored, top5_count, picks_co
     )
 
 
+def _render_yesterday_review(review: dict):
+    with st.expander("Gardagens Utvardering", expanded=False):
+        acc = review.get("accuracy_pct", 0)
+        adj = review.get("confidence_adjustment", "maintain")
+        brief = review.get("learning_brief", "")
+
+        adj_colors = {"raise": "#00C853", "lower": "#FF1744", "maintain": "#FFD600"}
+        adj_labels = {"raise": "HOJD", "lower": "SANKD", "maintain": "BIBEHALLEN"}
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Traffsakerhet", f"{acc:.0f}%")
+        with col2:
+            c = adj_colors.get(adj, "#888")
+            l = adj_labels.get(adj, adj.upper())
+            st.markdown(
+                f"**Konfidensjustering:** <span style='color:{c}; font-weight:700;'>{l}</span>",
+                unsafe_allow_html=True,
+            )
+
+        if brief:
+            st.info(brief)
+
+        reviews = review.get("reviews", [])
+        if reviews:
+            import pandas as pd
+            rows = []
+            for r in reviews:
+                correct = r.get("correct", False)
+                rows.append({
+                    "Tillgang": r.get("asset", ""),
+                    "Riktning": r.get("yesterday_direction", ""),
+                    "Ingang": r.get("yesterday_entry", 0),
+                    "Dagspris": r.get("today_price", 0),
+                    "P/L": r.get("pnl_pct", ""),
+                    "Ratt": "JA" if correct else "NEJ",
+                })
+            st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+
+
+def _render_regime_report(regime_report_json: str, regime: str):
+    with st.expander(f"Steg 1: Marknadsregim — {regime}", expanded=False):
+        try:
+            data = json.loads(regime_report_json) if isinstance(regime_report_json, str) else regime_report_json
+        except Exception:
+            data = {}
+
+        if data.get("regime_description"):
+            st.markdown(f"**Regimbeskrivning:** {data['regime_description']}")
+
+        biases = data.get("asset_biases", {})
+        if biases:
+            cols = st.columns(4)
+            labels = {"equities": "Aktier", "commodities": "Ravaror", "crypto": "Krypto", "safe_havens": "Trygga hamnar"}
+            bias_colors = {"bullish": "#00C853", "bearish": "#FF1744", "neutral": "#FFD600"}
+            for col, (key, label) in zip(cols, labels.items()):
+                bias = biases.get(key, "neutral")
+                c = bias_colors.get(bias, "#888")
+                with col:
+                    st.markdown(
+                        f"**{label}:** <span style='color:{c};'>{bias.upper()}</span>",
+                        unsafe_allow_html=True,
+                    )
+
+        risks = data.get("macro_risks", [])
+        if risks:
+            st.markdown("**Topp 3 Makrorisker:**")
+            for i, risk in enumerate(risks):
+                st.markdown(f"{i+1}. {risk}")
+
+        levels = data.get("key_levels", {})
+        if levels:
+            st.markdown("**Bevaknnigsnivaer:**")
+            for key, val in levels.items():
+                st.caption(f"{key}: {val}")
+
+
 def _render_scores_overview(all_scores: list[dict]):
-    """Render the ranked score table for all assets."""
-    with st.expander("📊 Kvantitativt Betyg — Alla Tillgångar", expanded=False):
+    with st.expander("Steg 2: Kvantitativt Betyg — Alla Tillgangar", expanded=False):
         import pandas as pd
         scores_sorted = sorted(all_scores, key=lambda x: x.get("score", 0), reverse=True)
         rows = []
         for s in scores_sorted:
             score = s.get("score", 0)
             if score >= 7:
-                emoji = "🟢"
+                indicator = "+++"
             elif score >= 5:
-                emoji = "🟡"
+                indicator = "++"
+            elif score >= 3:
+                indicator = "+"
             else:
-                emoji = "⚪"
+                indicator = "-"
             rows.append({
-                "": emoji,
-                "Tillgång": s.get("name", ""),
-                "Betyg": f"{score}/10",
+                "": indicator,
+                "Tillgang": s.get("name", ""),
+                "Betyg": f"{score:.1f}/10",
                 "Riktning": s.get("direction", ""),
                 "Konfidens": f"{s.get('confidence', 0):.0%}",
-                "Sammanfattning": s.get("summary", "")[:80],
             })
         df = pd.DataFrame(rows)
         st.dataframe(df, hide_index=True, use_container_width=True)
 
 
 def _render_deep_pick(pick: dict, rank: int):
-    """Render a final recommendation card with full depth."""
     asset = pick.get("asset", {})
     tech = pick.get("tech", {})
-    p1 = pick.get("phase1", {}) or {}
-    p2 = pick.get("phase2", {}) or {}
-    p3 = pick.get("phase3", {}) or {}
+    s2 = pick.get("stage2", {}) or {}
+    synthesis = pick.get("synthesis", {}) or {}
+    s6 = pick.get("stage6", {}) or {}
     tp = pick.get("trading_plan")
 
     name = _get(asset, "display_name", "")
     ticker = _get(asset, "ticker", "")
     category = _get(asset, "category", "")
 
-    verdict = pick.get("final_verdict", p3.get("verdict", "NO_TRADE"))
-    confidence = pick.get("final_confidence", p3.get("final_confidence", 0))
+    verdict = pick.get("final_verdict", synthesis.get("verdict", "NO_TRADE"))
+    confidence = pick.get("final_confidence", synthesis.get("final_confidence", 0))
 
     if verdict == "BUY_BULL":
-        color, icon, action_text, action = "#00C853", "📈", "KÖP BULL-CERTIFIKAT", "BULL"
+        color, action_text, action = "#00C853", "KOP BULL-CERTIFIKAT", "BULL"
     elif verdict == "BUY_BEAR":
-        color, icon, action_text, action = "#FF1744", "📉", "KÖP BEAR-CERTIFIKAT", "BEAR"
+        color, action_text, action = "#FF1744", "KOP BEAR-CERTIFIKAT", "BEAR"
     else:
         return
 
     price = _get(tech, "current_price", 0)
     rsi = _get(tech, "rsi_value", 0)
     vol = _get(tech, "volume_ratio", 0)
-    vix = _get(tech, "vix_value")
+    composite = s2.get("composite_score", 0)
 
-    # DA risk badge
-    risk_rating = p2.get("risk_rating", "?")
+    risk_rating = s6.get("risk_rating", "?")
     risk_colors = {"LOW": "#00C853", "MEDIUM": "#FFD600", "HIGH": "#FF9100", "CRITICAL": "#FF1744"}
     risk_c = risk_colors.get(risk_rating, "#888")
 
-    key_catalyst = p3.get("key_catalyst", "")
-    time_horizon = p3.get("time_horizon", "")
+    key_catalyst = synthesis.get("key_catalyst", "")
+    time_horizon = synthesis.get("time_horizon", "")
 
-    tp_entry = _get(tp, "entry_price", p3.get("entry_price", 0))
-    tp_sl = _get(tp, "stop_loss", p3.get("stop_loss", 0))
-    tp_tp = _get(tp, "take_profit", p3.get("take_profit", 0))
-    tp_rr = _get(tp, "risk_reward_ratio", p3.get("risk_reward", ""))
+    tp_entry = _get(tp, "entry_price", synthesis.get("entry_price", 0))
+    tp_sl = _get(tp, "stop_loss", synthesis.get("stop_loss", 0))
+    tp_tp = _get(tp, "take_profit", synthesis.get("take_profit", 0))
+    tp_rr = _get(tp, "risk_reward_ratio", synthesis.get("risk_reward", ""))
     tp_sl_method = _get(tp, "stop_loss_method", "")
     tp_tp_method = _get(tp, "take_profit_method", "")
 
@@ -478,10 +578,10 @@ def _render_deep_pick(pick: dict, rank: int):
         tp_html = (
             f"<div style='font-size: 14px; color: #ccc; border-top: 1px solid #444; "
             f"padding-top: 10px; margin-top: 4px; display: flex; gap: 24px; flex-wrap: wrap;'>"
-            f"<div><span style='color: #888;'>Ingång:</span> <strong>{tp_entry:,.2f}</strong></div>"
+            f"<div><span style='color: #888;'>Ingang:</span> <strong>{tp_entry:,.2f}</strong></div>"
             f"<div><span style='color: #888;'>Stop-Loss:</span> <strong style='color: #FF6B6B;'>{tp_sl:,.2f}</strong>"
             f" <span style='font-size:11px;color:#666;'>({tp_sl_method})</span></div>"
-            f"<div><span style='color: #888;'>Målkurs:</span> <strong style='color: #69F0AE;'>{tp_tp:,.2f}</strong>"
+            f"<div><span style='color: #888;'>Malkurs:</span> <strong style='color: #69F0AE;'>{tp_tp:,.2f}</strong>"
             f" <span style='font-size:11px;color:#666;'>({tp_tp_method})</span></div>"
             f"<div><span style='color: #888;'>R/R:</span> <strong>{tp_rr}</strong></div>"
             f"<div><span style='color: #888;'>Tidshorisont:</span> <strong>{time_horizon}</strong></div></div>"
@@ -495,7 +595,6 @@ def _render_deep_pick(pick: dict, rank: int):
             border-radius: 16px; padding: 24px 32px; margin-bottom: 20px;
         ">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
-                <span style="font-size: 36px;">{icon}</span>
                 <div>
                     <div style="font-size: 24px; font-weight: 700; color: {color};">
                         #{rank} {html.escape(str(name))}
@@ -517,7 +616,7 @@ def _render_deep_pick(pick: dict, rank: int):
                 <strong>Pris:</strong> {price:,.2f} —
                 <strong>RSI:</strong> {rsi:.1f} —
                 <strong>Volym:</strong> {'N/A' if vol < 0.01 else f'{vol:.1f}x'} —
-                <strong>Setup:</strong> {p1.get('setup_score', '?')}/10
+                <strong>Komposit:</strong> {composite:.1f}/10
             </div>
             <div style="font-size: 14px; color: #FFD600; margin-bottom: 8px;">
                 <strong>Katalysator:</strong> {html.escape(str(key_catalyst))}
@@ -528,14 +627,12 @@ def _render_deep_pick(pick: dict, rank: int):
         unsafe_allow_html=True,
     )
 
-    # Detailed expander
-    with st.expander(f"🔬 Fullständig Djupanalys — {html.escape(str(name))}"):
+    with st.expander(f"Fullstandig 8-Stegs Djupanalys — {html.escape(str(name))}"):
         _render_candidate_details(pick)
 
-    # Avanza certificates
     certs = search_certificates(str(ticker), action)
     if certs:
-        with st.expander(f"💰 Avanza-certifikat — {html.escape(str(name))}"):
+        with st.expander(f"Avanza-certifikat — {html.escape(str(name))}"):
             for cert in certs[:5]:
                 if cert["url"]:
                     st.markdown(f"- [{cert['name']}]({cert['url']}) ({T['leverage_label']}: {cert['leverage']})")
@@ -544,57 +641,117 @@ def _render_deep_pick(pick: dict, rank: int):
 
 
 def _render_candidate_expander(candidate: dict):
-    """Render a detailed expander for a top-5 candidate (even non-picked ones)."""
     asset = candidate.get("asset", {})
     name = _get(asset, "display_name", "?")
-    p1 = candidate.get("phase1", {}) or {}
-    p3 = candidate.get("phase3", {}) or {}
+    s2 = candidate.get("stage2", {}) or {}
+    verdict = candidate.get("final_verdict", "NO_TRADE")
+    score = s2.get("composite_score", 0)
+    direction = s2.get("consensus_direction", "?")
 
-    verdict = p3.get("verdict", "NO_TRADE") if p3 else "Ej analyserad"
-    score = p1.get("setup_score", 0)
-    direction = p1.get("direction", "?")
+    indicator = "++" if score >= 7 else ("+" if score >= 5 else "-")
 
-    emoji = "🟢" if score >= 7 else ("🟡" if score >= 5 else "⚪")
-
-    with st.expander(f"{emoji} {name} — Betyg {score}/10, Riktning: {direction}, Slutdom: {verdict}"):
+    with st.expander(f"[{indicator}] {name} — Betyg {score:.1f}/10, Riktning: {direction}, Slutdom: {verdict}"):
         _render_candidate_details(candidate)
 
 
 def _render_candidate_details(candidate: dict):
-    """Render the 3-phase detail sections for a candidate."""
-    p1 = candidate.get("phase1", {}) or {}
-    p2 = candidate.get("phase2", {}) or {}
-    p3 = candidate.get("phase3", {}) or {}
+    s2 = candidate.get("stage2", {}) or {}
+    s5 = candidate.get("stage5", {}) or {}
+    s6 = candidate.get("stage6", {}) or {}
+    s7 = candidate.get("stage7", {}) or {}
+    synthesis = candidate.get("synthesis", {}) or {}
     tech = candidate.get("tech", {})
     tp = candidate.get("trading_plan")
 
-    # --- Phase 1: Technical Status ---
-    st.markdown("#### 📊 Fas 1: Kvantitativ Granskning (Groq)")
+    # --- Stage 2: Multi-Lens Technical ---
+    st.markdown("#### Steg 2: Flerlins Teknisk Analys (Groq)")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Setup-betyg", f"{p1.get('setup_score', 0)}/10")
+        st.metric("Kompositbetyg", f"{s2.get('composite_score', 0):.1f}/10")
     with col2:
-        st.metric("Riktning", p1.get("direction", "?"))
+        st.metric("Riktning", s2.get("consensus_direction", "?"))
     with col3:
-        st.metric("Konfidens", f"{p1.get('confidence', 0):.0%}")
+        st.metric("Konfidens", f"{s2.get('confidence', 0):.0%}")
 
-    if p1.get("trend_analysis"):
-        st.markdown(f"**Trend:** {p1['trend_analysis']}")
-    if p1.get("momentum_analysis"):
-        st.markdown(f"**Momentum:** {p1['momentum_analysis']}")
-    if p1.get("volatility_analysis"):
-        st.markdown(f"**Volatilitet:** {p1['volatility_analysis']}")
-    if p1.get("volume_analysis"):
-        st.markdown(f"**Volym:** {p1['volume_analysis']}")
-    if p1.get("setup_summary"):
-        st.info(p1["setup_summary"])
+    lenses = s2.get("lenses", {})
+    if lenses:
+        for lens_name, lens_data in lenses.items():
+            if isinstance(lens_data, dict):
+                score = lens_data.get("score", "?")
+                analysis = lens_data.get("analysis", "")
+                st.caption(f"**{lens_name.upper()}:** {score}/10 — {analysis[:120]}")
 
-    # --- Phase 2: Skeptical Risks ---
+    # --- Stage 5: High-Dimensional Research ---
     st.divider()
-    st.markdown("#### 😈 Fas 2: Djävulens Advokat")
+    st.markdown("#### Steg 5: Hogdimensionell Djupforskning (Gemini)")
 
-    if p2:
-        risk_rating = p2.get("risk_rating", "?")
+    mod_a = s5.get("A")
+    mod_b = s5.get("B")
+    mod_c = s5.get("C")
+    mod_d = s5.get("D")
+
+    if mod_a:
+        with st.expander("Modul A: Historiska Analogier"):
+            analogs = mod_a.get("analogs", [])
+            for a in analogs:
+                st.markdown(f"**{a.get('period', '')}** (Relevans: {a.get('relevance_score', '?')}/10)")
+                st.caption(f"{a.get('description', '')} → {a.get('outcome', '')}")
+            st.markdown(f"**Historisk dom:** {mod_a.get('historical_verdict', '?')}")
+            if mod_a.get("key_lesson"):
+                st.info(mod_a["key_lesson"])
+
+    if mod_b:
+        with st.expander("Modul B: Intermarknadsanalys"):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown(f"**DXY-korrelation:** {mod_b.get('dxy_correlation', '?')}")
+                st.markdown(f"**DXY-dom:** {mod_b.get('dxy_verdict', '?')}")
+                st.markdown(f"**Rantepaverkan:** {mod_b.get('yield_impact', '?')}")
+            with col2:
+                st.markdown(f"**Verklig rorelse:** {mod_b.get('real_move_confidence', 0):.0%}")
+                st.markdown(f"**Korsbekraftelse:** {mod_b.get('cross_asset_confirmation', '?')}")
+                st.markdown(f"**Dom:** {mod_b.get('inter_market_verdict', '?')}")
+            if mod_b.get("analysis"):
+                st.caption(mod_b["analysis"])
+
+    if mod_c:
+        with st.expander("Modul C: Utbud/Efterfragan & Geopolitik"):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown(f"**Utbudstryck:** {mod_c.get('supply_pressure', '?')}")
+                st.markdown(f"**Efterfragetrend:** {mod_c.get('demand_trend', '?')}")
+                st.markdown(f"**Sasongsbias:** {mod_c.get('seasonal_bias', '?')}")
+            with col2:
+                st.markdown(f"**Geopolitisk risk:** {mod_c.get('geopolitical_risk', '?')}")
+                st.markdown(f"**Fundamental dom:** {mod_c.get('fundamental_verdict', '?')}")
+                st.markdown(f"**Konfidens:** {mod_c.get('confidence', 0):.0%}")
+            factors = mod_c.get("geopolitical_factors", [])
+            if factors:
+                st.caption("Faktorer: " + ", ".join(factors))
+            if mod_c.get("key_driver"):
+                st.info(f"Nyckelfaktor: {mod_c['key_driver']}")
+
+    if mod_d:
+        with st.expander("Modul D: Scenariostresstest"):
+            scenarios = mod_d.get("scenarios", [])
+            for sc in scenarios:
+                st.markdown(f"**{sc.get('name', '')}:** {sc.get('pct_move', '?')} ({sc.get('timeframe', '?')})")
+                st.caption(sc.get("reasoning", ""))
+            st.markdown(f"**Varsta pris:** {mod_d.get('worst_case_price', '?')}")
+            st.markdown(f"**Max drawdown:** {mod_d.get('max_drawdown_pct', '?')}")
+            tail = mod_d.get("tail_risk_verdict", "?")
+            tail_c = {"MANAGEABLE": "#00C853", "ELEVATED": "#FF9100", "EXTREME": "#FF1744"}.get(tail, "#888")
+            st.markdown(
+                f"**Tail-risk:** <span style='color:{tail_c}; font-weight:700;'>{tail}</span>",
+                unsafe_allow_html=True,
+            )
+
+    # --- Stage 6: Devil's Advocate ---
+    st.divider()
+    st.markdown("#### Steg 6: Djavulens Advokat (Gemini)")
+
+    if s6:
+        risk_rating = s6.get("risk_rating", "?")
         risk_colors = {"LOW": "#00C853", "MEDIUM": "#FFD600", "HIGH": "#FF9100", "CRITICAL": "#FF1744"}
         rc = risk_colors.get(risk_rating, "#888")
 
@@ -604,60 +761,99 @@ def _render_candidate_details(candidate: dict):
                 f"**Riskbetyg:** <span style='color:{rc}; font-weight:700; font-size:18px;'>{risk_rating}</span>",
                 unsafe_allow_html=True,
             )
-            proceed = p2.get("should_proceed", False)
-            st.markdown(f"**Rekommendation:** {'✅ Fortsätt' if proceed else '⛔ Avbryt'}")
-
+            proceed = s6.get("should_proceed", False)
+            st.markdown(f"**Rekommendation:** {'FORTSATT' if proceed else 'AVBRYT'}")
         with col2:
-            if p2.get("recommendation"):
-                st.markdown(f"**Slutsats:** {p2['recommendation']}")
-            if p2.get("invalidation_level"):
-                st.markdown(f"**Invalideringsnivå:** {p2['invalidation_level']:,.2f}")
+            if s6.get("recommendation"):
+                st.markdown(f"**Slutsats:** {s6['recommendation']}")
+            if s6.get("invalidation_level"):
+                st.markdown(f"**Invalideringsniva:** {s6['invalidation_level']:,.2f}")
 
-        failure_reasons = p2.get("failure_reasons", [])
+        failure_reasons = s6.get("failure_reasons", [])
         if failure_reasons:
             st.markdown("**Riskfaktorer:**")
             for fr in failure_reasons:
                 sev = fr.get("severity", "")
                 ftype = fr.get("type", "")
-                icon = "🔴" if sev == "critical" else ("🟠" if sev == "high" else "🟡")
-                st.markdown(f"{icon} **[{ftype}]** {fr.get('reason', '')}")
+                indicator = "[!]" if sev == "critical" else ("[*]" if sev == "high" else "[~]")
+                st.markdown(f"{indicator} **[{ftype}]** {fr.get('reason', '')}")
 
-        if p2.get("worst_case_scenario"):
-            st.error(f"**Värsta scenario:** {p2['worst_case_scenario']}")
+        if s6.get("worst_case_scenario"):
+            st.error(f"**Varsta scenario:** {s6['worst_case_scenario']}")
     else:
-        st.caption("Djävulens Advokat-granskning ej genomförd.")
+        st.caption("Djavulens Advokat ej genomford.")
 
-    # --- Phase 3: Macro Synthesis ---
+    # --- Stage 7: Cross-Validation ---
     st.divider()
-    st.markdown("#### 🌍 Fas 3: Makrosyntes & Slutgiltig Dom (Gemini)")
+    st.markdown("#### Steg 7: Korsvalidering (Groq)")
 
-    if p3:
+    if s7:
+        cv_verdict = s7.get("final_verdict", "?")
+        cv_conf = s7.get("adjusted_confidence", 0)
+        cv_colors = {"APPROVE": "#00C853", "REJECT": "#FF1744", "REDUCE_CONFIDENCE": "#FF9100"}
+        cv_c = cv_colors.get(cv_verdict, "#888")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(
+                f"**Dom:** <span style='color:{cv_c}; font-weight:700;'>{cv_verdict}</span>",
+                unsafe_allow_html=True,
+            )
+        with col2:
+            st.metric("Justerad konfidens", f"{cv_conf:.0%}")
+
+        hallucinations = s7.get("hallucinations_found", [])
+        if hallucinations:
+            st.warning("**Hallucinationer:**")
+            for h in hallucinations:
+                st.caption(f"- {h}")
+
+        errors = s7.get("logical_errors", [])
+        if errors:
+            st.error("**Logiska fel:**")
+            for e in errors:
+                st.caption(f"- {e}")
+
+        missing = s7.get("missing_risks", [])
+        if missing:
+            st.info("**Missade risker:**")
+            for m in missing:
+                st.caption(f"- {m}")
+
+        if s7.get("auditor_notes"):
+            st.markdown(f"**Revisionsnoteringar:** {s7['auditor_notes']}")
+    else:
+        st.caption("Korsvalidering ej genomford.")
+
+    # --- Synthesis: Chain-of-Thought ---
+    if synthesis:
+        st.divider()
+        st.markdown("#### Slutgiltig Syntes & Dom")
+
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Slutgiltig dom", p3.get("verdict", "?"))
+            st.metric("Slutgiltig dom", synthesis.get("verdict", "?"))
         with col2:
-            st.metric("Konfidens", f"{p3.get('final_confidence', 0):.0%}")
+            st.metric("Konfidens", f"{synthesis.get('final_confidence', 0):.0%}")
         with col3:
-            st.metric("Tidshorisont", p3.get("time_horizon", "?"))
+            st.metric("Tidshorisont", synthesis.get("time_horizon", "?"))
 
-        cot = p3.get("chain_of_thought", "")
+        cot = synthesis.get("chain_of_thought", "")
         if cot:
-            st.markdown("**Resonemang (Chain-of-Thought):**")
+            st.markdown("**Resonemang:**")
             st.markdown(f"> {cot}")
 
-        if p3.get("key_catalyst"):
-            st.success(f"**Nyckelkatalysator:** {p3['key_catalyst']}")
-        if p3.get("biggest_risk"):
-            st.warning(f"**Största risk:** {p3['biggest_risk']}")
-        if p3.get("exit_strategy"):
-            st.info(f"**Exit-strategi:** {p3['exit_strategy']}")
-    else:
-        st.caption("Makrosyntes ej genomförd.")
+        if synthesis.get("key_catalyst"):
+            st.success(f"**Nyckelkatalysator:** {synthesis['key_catalyst']}")
+        if synthesis.get("biggest_risk"):
+            st.warning(f"**Storsta risk:** {synthesis['biggest_risk']}")
+        if synthesis.get("exit_strategy"):
+            st.info(f"**Exit-strategi:** {synthesis['exit_strategy']}")
 
     # --- Trading Plan ---
     if tp:
         st.divider()
-        st.markdown("#### 📋 Handelsplan (Exit-strategi)")
+        st.markdown("#### Handelsplan (Exit-strategi)")
         tp_entry = _get(tp, "entry_price", 0)
         tp_sl = _get(tp, "stop_loss", 0)
         tp_tp = _get(tp, "take_profit", 0)
@@ -667,11 +863,11 @@ def _render_candidate_details(candidate: dict):
 
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("Ingång", f"{tp_entry:,.2f}")
+            st.metric("Ingang", f"{tp_entry:,.2f}")
         with col2:
             st.metric(f"Stop-Loss ({tp_sl_method})", f"{tp_sl:,.2f}")
         with col3:
-            st.metric(f"Målkurs ({tp_tp_method})", f"{tp_tp:,.2f}")
+            st.metric(f"Malkurs ({tp_tp_method})", f"{tp_tp:,.2f}")
         with col4:
             st.metric("Risk/Reward", tp_rr)
 
@@ -695,10 +891,10 @@ def _render_candidate_details(candidate: dict):
         st.divider()
         sr_col1, sr_col2 = st.columns(2)
         with sr_col1:
-            st.markdown("**Stöd:**")
+            st.markdown("**Stod:**")
             for i, s in enumerate(supports[:3]):
                 st.caption(f"S{i+1}: {s:,.2f}")
         with sr_col2:
-            st.markdown("**Motstånd:**")
+            st.markdown("**Motstand:**")
             for i, r_val in enumerate(resistances[:3]):
                 st.caption(f"R{i+1}: {r_val:,.2f}")

@@ -130,19 +130,38 @@ def _build_search_query(asset) -> str:
     return type_context.get(asset.asset_type, f"{base} latest news market analysis")
 
 
-def get_news_for_asset(asset) -> list[dict]:
-    """Get news using Tavily first, then Finnhub as fallback."""
-    search_query = _build_search_query(asset)
-    headlines = fetch_tavily(search_query)
-    if headlines:
-        return headlines
-
-    # Fallback: Finnhub company news for stocks
+def get_news_for_screening(asset) -> list[dict]:
+    """Get news for initial screening — Finnhub first (free, unlimited)."""
     if asset.asset_type == "stock" and not asset.ticker.startswith("^"):
         clean_symbol = asset.ticker.replace(".ST", "").replace("-", ".")
         headlines = fetch_finnhub_company(clean_symbol)
         if headlines:
             return headlines
 
-    # Fallback: Finnhub general news
+    headlines = fetch_finnhub_general(asset.news_keywords)
+    if headlines:
+        return headlines
+
+    search_query = _build_search_query(asset)
+    return fetch_tavily(search_query)
+
+
+def get_deep_news(asset) -> list[dict]:
+    """Get premium news for Top 5 finalists — Tavily first (deep, AI-curated)."""
+    search_query = _build_search_query(asset)
+    headlines = fetch_tavily(search_query)
+    if headlines:
+        return headlines
+
+    if asset.asset_type == "stock" and not asset.ticker.startswith("^"):
+        clean_symbol = asset.ticker.replace(".ST", "").replace("-", ".")
+        headlines = fetch_finnhub_company(clean_symbol)
+        if headlines:
+            return headlines
+
     return fetch_finnhub_general(asset.news_keywords)
+
+
+def get_news_for_asset(asset) -> list[dict]:
+    """Backward-compatible: uses deep news (for Analysera tab)."""
+    return get_deep_news(asset)

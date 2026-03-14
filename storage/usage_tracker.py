@@ -11,7 +11,7 @@ DAILY_LIMITS = {
     "gemini": 1000,
     "grok": 1000,
     "tavily": 33,
-    "scans": 3,
+    "scans": 1,
 }
 
 

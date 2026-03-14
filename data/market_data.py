@@ -38,3 +38,17 @@ def get_52_week_range(df: pd.DataFrame) -> tuple[float, float] | None:
         return None
     last_252 = df["Close"].tail(252)
     return float(last_252.min()), float(last_252.max())
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_macro_indicator(ticker: str) -> float | None:
+    """Fetch a single macro indicator (DXY, VIX, US10Y, etc.)."""
+    try:
+        df = yf.download(ticker, period="5d", progress=False, auto_adjust=True)
+        if df.empty:
+            return None
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        return float(df["Close"].iloc[-1])
+    except Exception:
+        return None

@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""Automated daily deep scan — runs via GitHub Actions cron job.
+"""Automated daily 8-stage deep scan — runs via GitHub Actions cron job.
 
-Executes the full 3-phase deep scan pipeline:
-  Phase 1: Quantitative Sifting (Groq) — all assets
-  Phase 2: Devil's Advocate (Gemini) — top 5
-  Phase 3: Macro Synthesis (Gemini) — survivors
+Executes the full 8-stage intelligence pipeline:
+  Stage 0: Data Foundation
+  Stage 1: Global Macro Anchor (Gemini)
+  Stage 2: Multi-Lens Technical Scan (Groq)
+  Stage 3-4: Ranking & Deep News
+  Stage 5: High-Dimensional Deep Dive (Gemini)
+  Stage 6: Devil's Advocate (Gemini)
+  Stage 7: Cross-Validation (Groq)
+  Stage 8: Yesterday's Accuracy Review
 
 Saves results to storage/latest_scan.json for the Streamlit app.
 Uses 8s delays between API calls for generous rate-limit headroom.
@@ -13,7 +18,7 @@ Uses 8s delays between API calls for generous rate-limit headroom.
 import json
 import os
 import sys
-from datetime import datetime, date
+from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -30,8 +35,6 @@ def log(msg: str):
 
 
 def _serialize_result(result: DeepScanResult) -> dict:
-    """Convert DeepScanResult to a JSON-serializable dict for file storage."""
-
     def _ser_candidate(c):
         asset = c["asset"]
         tech = c["tech"]
@@ -65,8 +68,14 @@ def _serialize_result(result: DeepScanResult) -> dict:
 
         out = {
             "asset": asset_d, "tech": tech_d,
-            "phase1": c.get("phase1"), "phase2": c.get("phase2"),
-            "phase3": c.get("phase3"), "headlines": c.get("headlines", []),
+            "stage2": c.get("stage2"),
+            "stage5": c.get("stage5"),
+            "stage6": c.get("stage6"),
+            "stage7": c.get("stage7"),
+            "synthesis": c.get("synthesis"),
+            "headlines": c.get("headlines", []),
+            "final_verdict": c.get("final_verdict", "NO_TRADE"),
+            "final_confidence": c.get("final_confidence", 0),
         }
 
         tp = c.get("trading_plan")
@@ -86,10 +95,6 @@ def _serialize_result(result: DeepScanResult) -> dict:
         else:
             out["trading_plan"] = tp
 
-        if "final_verdict" in c:
-            out["final_verdict"] = c["final_verdict"]
-            out["final_confidence"] = c.get("final_confidence", 0)
-
         return out
 
     return {
@@ -97,20 +102,22 @@ def _serialize_result(result: DeepScanResult) -> dict:
         "scan_time": result.scan_time,
         "vix_value": result.vix_value,
         "dxy_value": result.dxy_value,
+        "us10y_value": result.us10y_value,
+        "market_regime": result.market_regime,
+        "regime_report": result.regime_report,
         "global_sentiment": result.global_sentiment,
         "all_scores": result.all_scores,
         "top5": [_ser_candidate(c) for c in result.top5],
         "final_picks": [_ser_candidate(c) for c in result.final_picks],
+        "yesterday_review": result.yesterday_review,
         "log": result.log,
         "total_assets": result.total_assets,
-        "phase1_calls": result.phase1_calls,
-        "phase2_calls": result.phase2_calls,
-        "phase3_calls": result.phase3_calls,
+        "stage_calls": result.stage_calls,
     }
 
 
 def run_scan():
-    log(f"Starting Unitron Deep Scan — 3-phase pipeline")
+    log("Starting Unitron 8-Stage Intelligence Pipeline")
 
     def console_log(phase, msg):
         log(f"  [{phase}] {msg}")
@@ -124,7 +131,8 @@ def run_scan():
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
     log(f"Results saved to {_RESULTS_FILE}")
-    log(f"Summary: {result.total_assets} scanned → {len(result.top5)} deep-analyzed → {len(result.final_picks)} recommended")
+    log(f"Summary: {result.total_assets} scanned -> {len(result.top5)} deep-analyzed -> {len(result.final_picks)} recommended")
+    log(f"Market Regime: {result.market_regime}")
 
 
 if __name__ == "__main__":
