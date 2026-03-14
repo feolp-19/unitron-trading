@@ -33,6 +33,44 @@ from analysis.sentiment import (
 API_DELAY = 5
 _RESULTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "storage")
 
+NAME_ALIASES: dict[str, str] = {
+    "gold": "Guld", "silver": "Silver", "oil": "Olja (WTI)", "wti": "Olja (WTI)",
+    "crude oil": "Olja (WTI)", "natural gas": "Naturgas", "platinum": "Platina",
+    "copper": "Koppar", "bitcoin": "Bitcoin", "ethereum": "Ethereum",
+    "solana": "Solana", "xrp": "XRP", "ripple": "XRP",
+    "guld": "Guld", "olja": "Olja (WTI)", "naturgas": "Naturgas",
+    "platina": "Platina", "koppar": "Koppar",
+}
+
+
+def _match_asset_response(ai_name: str, batch: list[dict], already_matched: set) -> dict | None:
+    """Match an AI-returned asset name to a batch item using ticker, display name, and aliases."""
+    ai_lower = ai_name.lower().strip()
+    ai_upper = ai_name.upper().strip()
+
+    for item in batch:
+        if item["asset"].ticker in already_matched:
+            continue
+        if item["asset"].ticker in ai_upper or item["asset"].ticker.upper() in ai_upper:
+            return item
+
+    for item in batch:
+        if item["asset"].ticker in already_matched:
+            continue
+        dn = item["asset"].display_name.lower()
+        if dn in ai_lower or ai_lower in dn:
+            return item
+
+    resolved = NAME_ALIASES.get(ai_lower)
+    if resolved:
+        for item in batch:
+            if item["asset"].ticker in already_matched:
+                continue
+            if item["asset"].display_name == resolved:
+                return item
+
+    return None
+
 
 def _parse_json(raw: str) -> dict | None:
     if not raw:
@@ -47,19 +85,6 @@ def _parse_json(raw: str) -> dict | None:
         return json.loads(cleaned)
     except Exception:
         return None
-
-
-def _build_ohlcv_table(df, days: int = 60) -> str:
-    tail = df.tail(days)
-    lines = ["Date       | Open     | High     | Low      | Close    | Volume"]
-    lines.append("-" * 70)
-    for date_idx, row in tail.iterrows():
-        d = date_idx.strftime("%Y-%m-%d")
-        lines.append(
-            f"{d} | {row['Open']:>8.2f} | {row['High']:>8.2f} | "
-            f"{row['Low']:>8.2f} | {row['Close']:>8.2f} | {int(row['Volume']):>10,}"
-        )
-    return "\n".join(lines)
 
 
 def _load_yesterday_results() -> dict | None:
@@ -169,7 +194,7 @@ STAGE1_PROMPT = """You are a senior macro strategist. Analyze the current global
 
 3. Identify the TOP 3 macro risks for the next 1-5 trading days.
 
-Return ONLY valid JSON:
+Output ONLY the raw JSON object. No markdown, no code blocks, no explanation.
 {{
   "regime": "one of the regime names above",
   "regime_description": "2-3 sentences explaining WHY this regime applies now",
@@ -236,31 +261,31 @@ MICRO_LENS_PROMPTS = {
 - Is the primary trend bullish, bearish, or ranging?
 - SMA alignment (20/50/200) direction?
 - Is price above or below the 50-week SMA?
-Return a trend_score (1-10) and direction (BULL/BEAR/NEUTRAL) for each.""",
+Rate "score" from 1 (worst trend) to 10 (strongest, clearest trend).""",
 
-    "reversal": """Analyze REVERSAL SIGNALS for these assets. Look for:
+    "reversal": """Analyze REVERSAL SAFETY for these assets. Look for:
 - RSI divergences (price making new high/low but RSI not confirming)
 - Double tops/bottoms in the recent 60 days
 - Exhaustion candles or capitulation volume
-Return a reversal_risk (1-10, higher = more likely reversal) for each.""",
+Rate "score" from 1 (extreme reversal risk, very dangerous) to 10 (no reversal signals, very safe to trade).""",
 
     "momentum": """Analyze MOMENTUM for these assets. Focus on:
 - MACD histogram direction and crossover status
 - RSI level and trajectory (rising/falling)
 - Volume trend (expanding or contracting with price)
-Return a momentum_score (1-10) for each.""",
+Rate "score" from 1 (weakest momentum) to 10 (strongest, most confirmed momentum).""",
 
     "volatility": """Analyze VOLATILITY SETUP for these assets. Look for:
 - Bollinger Band squeeze (narrowing bands = potential breakout)
 - ATR trend (expanding = trend, contracting = consolidation)
 - VIX correlation (is macro volatility aligned?)
-Return a volatility_score (1-10) and squeeze_detected (true/false) for each.""",
+Rate "score" from 1 (worst volatility setup) to 10 (best setup, e.g. breakout from squeeze).""",
 
     "risk_reward": """Analyze RISK/REWARD for these assets. Calculate:
 - Distance to nearest support (downside risk)
 - Distance to nearest resistance (upside potential)
 - Current R:R ratio for a new position
-Return a rr_score (1-10) and estimated_rr (e.g. "1:2.3") for each.""",
+Rate "score" from 1 (terrible R:R) to 10 (excellent R:R, e.g. 1:3+).""",
 }
 
 STAGE2_PROMPT = """You are a quantitative analyst. Analyze the following {batch_count} assets through a {lens_name} lens.
@@ -273,11 +298,14 @@ STAGE2_PROMPT = """You are a quantitative analyst. Analyze the following {batch_
 
 {lens_instruction}
 
-Return ONLY valid JSON — an array with one object per asset:
+IMPORTANT: For "asset", use the EXACT identifier from each asset header, e.g. "DAX 40 (^GDAXI)".
+Use the exact field name "score" for your 1-10 rating.
+
+Output ONLY the raw JSON array. No markdown, no code blocks, no explanation.
 [
   {{
-    "asset": "asset name",
-    "score": 1-10,
+    "asset": "exact header identifier",
+    "score": 7,
     "direction": "BULL" or "BEAR" or "NEUTRAL",
     "analysis": "1-2 sentence specific analysis",
     "key_level": 0.0
@@ -336,17 +364,20 @@ def run_stage2(asset_data: list[dict], macro: MacroContext, log_fn=None, delay: 
 
             results = _parse_json(raw)
             if results and isinstance(results, list):
-                for r in results:
+                matched_tickers = set()
+                for idx, r in enumerate(results):
                     asset_name = r.get("asset", "")
-                    for item in batch:
-                        if item["asset"].display_name in asset_name or asset_name in item["asset"].display_name:
-                            all_lens_scores[item["asset"].ticker][lens_name] = {
-                                "score": r.get("score", 5),
-                                "direction": r.get("direction", "NEUTRAL"),
-                                "analysis": r.get("analysis", ""),
-                                "key_level": r.get("key_level", 0),
-                            }
-                            break
+                    matched_item = _match_asset_response(asset_name, batch, matched_tickers)
+                    if not matched_item and idx < len(batch):
+                        matched_item = batch[idx]
+                    if matched_item:
+                        matched_tickers.add(matched_item["asset"].ticker)
+                        all_lens_scores[matched_item["asset"].ticker][lens_name] = {
+                            "score": r.get("score", 5),
+                            "direction": r.get("direction", "NEUTRAL"),
+                            "analysis": r.get("analysis", ""),
+                            "key_level": r.get("key_level", 0),
+                        }
 
             time.sleep(delay)
 
@@ -438,18 +469,18 @@ showed a comparable technical and macro setup. Consider:
 
 For each analog, state: What happened next? What was the outcome 5-20 trading days later?
 
-Return ONLY valid JSON:
+Output ONLY the raw JSON object. No markdown, no code blocks, no explanation.
 {{
   "analogs": [
     {{
       "period": "e.g. Q4 2022",
       "description": "1-2 sentences on the setup similarity",
       "outcome": "what happened — percentage move and timeframe",
-      "relevance_score": 1-10
+      "relevance_score": 8
     }}
   ],
   "historical_verdict": "BULLISH" or "BEARISH" or "INCONCLUSIVE",
-  "confidence_from_history": 0.0 to 1.0,
+  "confidence_from_history": 0.5,
   "key_lesson": "1 sentence: the most important lesson from history"
 }}"""
 
@@ -467,7 +498,7 @@ Analyze INTER-MARKET CONVERGENCE:
 3. Currency effect: Is this a REAL move in the asset, or is it primarily a USD effect?
 4. Cross-asset confirmation: Are related assets (e.g., gold vs silver, oil vs energy stocks) confirming the move?
 
-Return ONLY valid JSON:
+Output ONLY the raw JSON object. No markdown, no code blocks, no explanation.
 {{
   "dxy_correlation": "positive/negative/decorrelated",
   "dxy_verdict": "confirms/contradicts/neutral",
@@ -495,7 +526,7 @@ Analyze SUPPLY/DEMAND FUNDAMENTALS and GEOPOLITICAL FACTORS:
 
 Be SPECIFIC. Reference actual events from the news headlines.
 
-Return ONLY valid JSON:
+Output ONLY the raw JSON object. No markdown, no code blocks, no explanation.
 {{
   "supply_pressure": "tight/balanced/oversupplied",
   "demand_trend": "rising/stable/falling",
@@ -528,7 +559,7 @@ Simulate THREE stress scenarios and estimate the likely price impact on {asset_n
 
 For each scenario, provide a specific price target and percentage move.
 
-Return ONLY valid JSON:
+Output ONLY the raw JSON object. No markdown, no code blocks, no explanation.
 {{
   "scenarios": [
     {{
@@ -661,7 +692,7 @@ Entry: ~{price} | Market Regime: {regime}
 YOUR MISSION: Find exactly 3 strong, SPECIFIC, data-driven reasons why this trade will FAIL.
 For each reason, reference actual price levels, news events, or historical precedent.
 
-Return ONLY valid JSON:
+Output ONLY the raw JSON object. No markdown, no code blocks, no explanation.
 {{
   "risk_rating": "LOW" or "MEDIUM" or "HIGH" or "CRITICAL",
   "failure_reasons": [
@@ -771,7 +802,7 @@ CHECK FOR:
 3. OVERCONFIDENCE: Is the confidence justified by the data spread?
 4. MISSING RISKS: Are there obvious risks the analysis ignored?
 
-Return ONLY valid JSON:
+Output ONLY the raw JSON object. No markdown, no code blocks, no explanation.
 {{
   "hallucinations_found": [],
   "logical_errors": [],
@@ -874,7 +905,7 @@ Then write a LEARNING BRIEF (2-4 sentences):
 - What patterns did we miss?
 - How should this adjust our confidence today?
 
-Return ONLY valid JSON:
+Output ONLY the raw JSON object. No markdown, no code blocks, no explanation.
 {{
   "reviews": [
     {{
@@ -918,14 +949,15 @@ def run_stage8(log_fn=None, delay: int = API_DELAY) -> dict | None:
 
     for pick in picks:
         asset = pick.get("asset", {})
-        p3 = pick.get("phase3") or pick.get("stage5") or {}
+        tp = pick.get("trading_plan") or {}
+        syn = pick.get("synthesis") or {}
         ticker = asset.get("ticker", "")
         name = asset.get("display_name", "?")
 
-        verdict = pick.get("final_verdict", p3.get("verdict", "?"))
-        entry = p3.get("entry_price", 0)
-        target = p3.get("take_profit", 0)
-        stop = p3.get("stop_loss", 0)
+        verdict = pick.get("final_verdict", syn.get("verdict", "?"))
+        entry = tp.get("entry_price") or syn.get("entry_price", 0)
+        target = tp.get("take_profit") or syn.get("take_profit", 0)
+        stop = tp.get("stop_loss") or syn.get("stop_loss", 0)
 
         picks_lines.append(
             f"- {name} ({ticker}): {verdict}, Entry: {entry}, Target: {target}, Stop: {stop}"
@@ -1006,7 +1038,7 @@ INSTRUKTIONER:
 3. Konfidens under 0.55 = NO_TRADE
 4. Skriv MINST 150 ord resonemang
 
-Returnera ENBART giltig JSON:
+Returnera ENBART rå JSON. Ingen markdown, inga kodblock, ingen förklaring utanför JSON.
 {{
   "verdict": "BUY_BULL" eller "BUY_BEAR" eller "NO_TRADE",
   "final_confidence": 0.0 till 1.0,

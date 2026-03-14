@@ -264,6 +264,7 @@ def _call_gemini(prompt: str) -> str | None:
         response = client.models.generate_content(
             model=AI_CONFIGS["gemini"]["model"],
             contents=prompt,
+            config={"max_output_tokens": 4096, "temperature": 0.1},
         )
         track_call("gemini")
         return response.text
