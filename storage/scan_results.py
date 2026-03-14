@@ -50,6 +50,16 @@ def _serialize_result(result: dict) -> dict:
             "near_support": tech.near_support,
             "supports": sr_supports,
             "resistances": sr_resistances,
+            "sma_bias": tech.sma_bias,
+            "macd_value": tech.macd_value,
+            "macd_signal": tech.macd_signal,
+            "macd_histogram": tech.macd_histogram,
+            "macd_cross": tech.macd_cross,
+            "bb_upper": tech.bb_upper,
+            "bb_lower": tech.bb_lower,
+            "bb_middle": tech.bb_middle,
+            "bb_position": tech.bb_position,
+            "bb_width": tech.bb_width,
         }
 
     if isinstance(asset, dict):

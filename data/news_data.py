@@ -117,11 +117,23 @@ def fetch_finnhub_company(symbol: str, max_headlines: int = 20) -> list[dict]:
         return []
 
 
+def _build_search_query(asset) -> str:
+    """Build a targeted search query based on asset type."""
+    base = " ".join(asset.news_keywords[:2])
+
+    type_context = {
+        "index": f"{base} stock market outlook today trading",
+        "commodity": f"{base} price forecast supply demand today",
+        "crypto": f"{base} crypto market sentiment regulation today",
+        "stock": f"{base} stock earnings outlook analyst rating",
+    }
+    return type_context.get(asset.asset_type, f"{base} latest news market analysis")
+
+
 def get_news_for_asset(asset) -> list[dict]:
     """Get news using Tavily first, then Finnhub as fallback."""
-    # Try Tavily first (best coverage)
-    search_terms = " ".join(asset.news_keywords[:2])
-    headlines = fetch_tavily(search_terms)
+    search_query = _build_search_query(asset)
+    headlines = fetch_tavily(search_query)
     if headlines:
         return headlines
 

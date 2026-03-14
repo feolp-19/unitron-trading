@@ -28,6 +28,7 @@ class TechnicalSignal:
     price_vs_sma: str               # above, below, at  (vs 200-day)
     price_vs_weekly_sma: str         # above, below, at, unavailable
     sma_alignment: str               # bullish_stack, bearish_stack, mixed
+    sma_bias: str                    # bullish, bearish, neutral (relaxed alignment)
     rsi_trend_2d: float
     atr_ratio: float
     volume_ratio: float
@@ -36,6 +37,15 @@ class TechnicalSignal:
     support_resistance: SupportResistance
     near_resistance: bool            # True if price within 2% of nearest resistance
     near_support: bool               # True if price within 2% of nearest support
+    macd_value: float                # MACD line
+    macd_signal: float               # Signal line
+    macd_histogram: float            # Histogram (MACD - signal)
+    macd_cross: str                  # bullish_cross, bearish_cross, none
+    bb_upper: float                  # Bollinger Band upper
+    bb_lower: float                  # Bollinger Band lower
+    bb_middle: float                 # Bollinger Band middle (SMA 20)
+    bb_position: str                 # above_upper, below_lower, in_band
+    bb_width: float                  # Band width as % of price (squeeze indicator)
 
 
 def compute_rsi(series: pd.Series, period: int = 14) -> pd.Series:
@@ -172,6 +182,49 @@ def _classify_sma_alignment(price: float, sma20: float, sma50: float, sma200: fl
     return "mixed"
 
 
+def _classify_sma_bias(price: float, sma20: float, sma50: float, sma200: float) -> str:
+    """Relaxed directional bias — counts how many SMAs support each direction."""
+    bull_count = sum([price > sma20, price > sma50, price > sma200])
+    if bull_count >= 2:
+        return "bullish"
+    elif bull_count <= 1:
+        return "bearish"
+    return "neutral"
+
+
+def compute_macd(series: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9):
+    """Compute MACD, signal line, and histogram."""
+    ema_fast = series.ewm(span=fast, adjust=False).mean()
+    ema_slow = series.ewm(span=slow, adjust=False).mean()
+    macd_line = ema_fast - ema_slow
+    signal_line = macd_line.ewm(span=signal, adjust=False).mean()
+    histogram = macd_line - signal_line
+    return macd_line, signal_line, histogram
+
+
+def _detect_macd_cross(macd_line: pd.Series, signal_line: pd.Series) -> str:
+    """Detect recent MACD/signal crossover (within last 3 bars)."""
+    if len(macd_line) < 4:
+        return "none"
+    for i in range(-3, 0):
+        prev_diff = macd_line.iloc[i - 1] - signal_line.iloc[i - 1]
+        curr_diff = macd_line.iloc[i] - signal_line.iloc[i]
+        if prev_diff <= 0 and curr_diff > 0:
+            return "bullish_cross"
+        if prev_diff >= 0 and curr_diff < 0:
+            return "bearish_cross"
+    return "none"
+
+
+def compute_bollinger_bands(series: pd.Series, period: int = 20, std_dev: float = 2.0):
+    """Compute Bollinger Bands (upper, middle, lower)."""
+    middle = series.rolling(window=period).mean()
+    std = series.rolling(window=period).std()
+    upper = middle + (std * std_dev)
+    lower = middle - (std * std_dev)
+    return upper, middle, lower
+
+
 def analyze(df: pd.DataFrame, ticker: str = "") -> TechnicalSignal | None:
     """Run full technical analysis."""
     if df.empty or len(df) < 50:
@@ -217,6 +270,28 @@ def analyze(df: pd.DataFrame, ticker: str = "") -> TechnicalSignal | None:
 
     # SMA alignment
     sma_alignment = _classify_sma_alignment(current_price, sma_20, sma_50, sma_200)
+    sma_bias = _classify_sma_bias(current_price, sma_20, sma_50, sma_200)
+
+    # MACD
+    macd_line, signal_line, histogram = compute_macd(close)
+    macd_value = float(macd_line.iloc[-1])
+    macd_signal_val = float(signal_line.iloc[-1])
+    macd_histogram = float(histogram.iloc[-1])
+    macd_cross = _detect_macd_cross(macd_line, signal_line)
+
+    # Bollinger Bands
+    bb_upper_series, bb_middle_series, bb_lower_series = compute_bollinger_bands(close)
+    bb_upper = float(bb_upper_series.iloc[-1])
+    bb_middle = float(bb_middle_series.iloc[-1])
+    bb_lower = float(bb_lower_series.iloc[-1])
+    bb_width = ((bb_upper - bb_lower) / current_price) * 100 if current_price > 0 else 0
+
+    if current_price > bb_upper:
+        bb_position = "above_upper"
+    elif current_price < bb_lower:
+        bb_position = "below_lower"
+    else:
+        bb_position = "in_band"
 
     # VIX
     vix_value = fetch_vix()
@@ -257,6 +332,7 @@ def analyze(df: pd.DataFrame, ticker: str = "") -> TechnicalSignal | None:
         price_vs_sma=price_vs_sma,
         price_vs_weekly_sma=price_vs_weekly_sma,
         sma_alignment=sma_alignment,
+        sma_bias=sma_bias,
         rsi_trend_2d=round(rsi_trend_2d, 2),
         atr_ratio=round(atr_ratio, 2),
         volume_ratio=round(volume_ratio, 2),
@@ -265,4 +341,13 @@ def analyze(df: pd.DataFrame, ticker: str = "") -> TechnicalSignal | None:
         support_resistance=sr,
         near_resistance=near_resistance,
         near_support=near_support,
+        macd_value=round(macd_value, 4),
+        macd_signal=round(macd_signal_val, 4),
+        macd_histogram=round(macd_histogram, 4),
+        macd_cross=macd_cross,
+        bb_upper=round(bb_upper, 2),
+        bb_lower=round(bb_lower, 2),
+        bb_middle=round(bb_middle, 2),
+        bb_position=bb_position,
+        bb_width=round(bb_width, 2),
     )

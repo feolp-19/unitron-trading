@@ -120,6 +120,7 @@ def render_daily_picks():
                 sma_50w=tech.sma_50w,
                 price_vs_weekly_sma=tech.price_vs_weekly_sma,
                 sma_alignment=tech.sma_alignment,
+                sma_bias=tech.sma_bias,
                 rsi=tech.rsi_value,
                 atr=tech.atr_value,
                 rsi_trend=tech.rsi_trend_2d,
@@ -132,6 +133,15 @@ def render_daily_picks():
                 near_resistance=tech.near_resistance,
                 near_support=tech.near_support,
                 headlines_json=headlines_json,
+                macd_value=tech.macd_value,
+                macd_signal=tech.macd_signal,
+                macd_histogram=tech.macd_histogram,
+                macd_cross=tech.macd_cross,
+                bb_upper=tech.bb_upper,
+                bb_lower=tech.bb_lower,
+                bb_middle=tech.bb_middle,
+                bb_position=tech.bb_position,
+                bb_width=tech.bb_width,
             )
 
         for i, asset in enumerate(ALL_ASSETS_FLAT):
@@ -870,7 +880,9 @@ def _render_pick_card(result: dict, rank: int):
                 <strong>Pris:</strong> {price:,.2f} —
                 <strong>RSI:</strong> {rsi:.1f} —
                 <strong>Volym:</strong> {'N/A' if vol < 0.01 else f'{vol:.1f}x'} —
-                <strong>VIX:</strong> {vix if vix else 'N/A'}
+                <strong>VIX:</strong> {vix if vix else 'N/A'} —
+                <strong>MACD:</strong> {_get(result, 'tech', 'macd_cross', 'none').replace('_', ' ')} —
+                <strong>BB:</strong> {_get(result, 'tech', 'bb_position', 'N/A').replace('_', ' ')}
             </div>
             <div style="font-size: 14px; color: #aaa; line-height: 1.5; margin-bottom: 8px;">
                 {html.escape(analysis_text)}

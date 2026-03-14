@@ -62,23 +62,29 @@ Headlines:
 {headlines_text}"""
 
 
-FULL_ANALYSIS_PROMPT = """You are a conservative professional trader who manages real money. Your #1 priority is CAPITAL PRESERVATION. You must decide: BUY a BULL certificate, BUY a BEAR certificate, or NO TRADE.
+FULL_ANALYSIS_PROMPT = """You are a professional trader managing real money. You must decide: BUY a BULL certificate, BUY a BEAR certificate, or NO TRADE.
 
-CRITICAL MINDSET: Your default answer is NO_TRADE. You only recommend a trade when you see a GENUINE EDGE — multiple strong factors aligning in the same direction. Most days, most assets have NO clear trade. That is normal and correct. A missed trade costs nothing. A bad trade costs real money.
+MINDSET: Default is NO_TRADE, but you SHOULD recommend trades when genuine opportunities exist. Look for setups where 3+ indicators align. Not every asset will have a trade, but good setups happen regularly across 17 assets.
 
-You are scanning {asset_name}. Be brutally honest. If the signal is weak, mixed, or uncertain — say NO_TRADE.
+You are scanning {asset_name}.
 
-=== ASSET ===
-{asset_name}
-
-=== PRICE & TREND (SMAs) ===
+=== PRICE & TREND ===
 - Current price: {price}
-- 20-day SMA: {sma_20} (short-term trend)
-- 50-day SMA: {sma_50} (medium-term trend)
-- 200-day SMA: {sma_200} → price is {price_vs_sma} the 200-day SMA
+- 20-day SMA: {sma_20} | 50-day SMA: {sma_50} | 200-day SMA: {sma_200}
+- Price vs 200-day SMA: {price_vs_sma}
 - 50-week SMA: {sma_50w} → price is {price_vs_weekly_sma} the weekly trend
-- SMA alignment: {sma_alignment}
+- SMA stack alignment: {sma_alignment}
+- SMA directional bias: {sma_bias}
 - Multi-timeframe: {timeframe_alignment}
+
+=== MACD ===
+- MACD: {macd_value} | Signal: {macd_signal} | Histogram: {macd_histogram}
+- MACD crossover: {macd_cross}
+
+=== BOLLINGER BANDS ===
+- Upper: {bb_upper} | Middle: {bb_middle} | Lower: {bb_lower}
+- Price position: {bb_position}
+- Band width: {bb_width}% ({bb_interpretation})
 
 === SUPPORT & RESISTANCE ===
 {sr_text}
@@ -88,11 +94,10 @@ You are scanning {asset_name}. Be brutally honest. If the signal is weak, mixed,
 - RSI 2-day change: {rsi_trend} (momentum is {rsi_momentum})
 
 === VOLATILITY ===
-- ATR (14): {atr}
-- Volatility ratio: {atr_ratio}x vs 30-day average ({volatility_interpretation})
+- ATR (14): {atr} | Volatility ratio: {atr_ratio}x ({volatility_interpretation})
 
 === VOLUME ===
-- Current volume vs 20-day average: {volume_ratio}x ({volume_interpretation})
+- Volume vs 20-day average: {volume_ratio}x ({volume_interpretation})
 
 === FEAR & GREED (VIX) ===
 - VIX: {vix_value} — {vix_interpretation}
@@ -100,55 +105,64 @@ You are scanning {asset_name}. Be brutally honest. If the signal is weak, mixed,
 === NEWS & MACRO ===
 {headlines_text}
 
-=== DECISION RULES ===
-1. SMA ALIGNMENT: If Price > SMA20 > SMA50 > SMA200 = "bullish stack" (strong BULL). If reversed = "bearish stack" (strong BEAR). Mixed = weaker signal.
-2. SUPPORT/RESISTANCE: If price is near a major resistance, be cautious about BULL entries (risk of rejection). If near support, be cautious about BEAR entries. USE these levels for stop-loss and take-profit reasoning.
-3. MOMENTUM: RSI 30-70 is normal. Below 30 = oversold (potential bounce). Above 70 = overbought (potential pullback).
-4. VOLUME: Volume > 1.5x average confirms the current move. Low volume means weak conviction.
-5. VIX: High VIX (>25) = fear/uncertainty, be cautious. Low VIX (<15) = complacency.
-6. NEWS: Headlines must support the technical direction. Contradicting news weakens the signal.
+=== TRADE SETUP PATTERNS (look for these) ===
+1. TREND CONTINUATION: Price above key SMAs + MACD bullish + RSI 40-65 = strong BULL
+2. TREND CONTINUATION (BEAR): Price below key SMAs + MACD bearish + RSI 35-60 = strong BEAR
+3. BREAKOUT: Price breaking above Bollinger upper band with high volume = momentum BULL
+4. BREAKDOWN: Price breaking below Bollinger lower band with high volume = momentum BEAR
+5. BOUNCE: Price near Bollinger lower + RSI < 35 + support nearby = reversal BULL
+6. REJECTION: Price near Bollinger upper + RSI > 65 + resistance nearby = reversal BEAR
+7. MACD CROSS: Recent bullish/bearish MACD crossover confirms direction change
 
-=== MINIMUM REQUIREMENTS TO RECOMMEND A TRADE ===
-You MUST say NO_TRADE unless ALL of these are true:
-1. SMA alignment is bullish_stack or bearish_stack (NOT mixed)
-2. News sentiment supports the direction (not contradicting or neutral)
-3. RSI is NOT in a danger zone (not > 65 for BULL, not < 35 for BEAR)
-4. Price is NOT within 2% of a major S/R obstacle in the trade direction
+=== MINIMUM REQUIREMENTS FOR A TRADE ===
+At least 3 of these must be true:
+1. SMA bias supports the direction (bullish bias for BULL, bearish for BEAR)
+2. MACD supports (histogram positive for BULL, negative for BEAR, or recent cross)
+3. RSI supports (not contradicting — not > 70 for BULL, not < 30 for BEAR)
+4. News sentiment is not contradicting the direction
+5. Bollinger position supports (not at extreme opposite band)
+6. Volume > 1.0x average (some conviction behind the move)
+7. No major S/R obstacle within 2% in the trade direction
 
-If ANY of these conditions fails → NO_TRADE. No exceptions.
+If fewer than 3 conditions are met → NO_TRADE.
 
-=== CONFIDENCE SCORING RUBRIC (you MUST follow this) ===
+=== CONFIDENCE SCORING RUBRIC ===
 Start at 0.40 (base) and adjust:
-+0.15 if SMA alignment is bullish_stack (for BULL) or bearish_stack (for BEAR)
-+0.10 if daily AND weekly timeframes are aligned (same direction)
--0.15 if daily and weekly timeframes CONFLICT
-+0.05 if RSI supports the direction (RSI < 50 for BEAR, RSI > 50 for BULL)
-+0.05 if RSI is in extreme zone favoring the trade (< 30 for bounce, > 70 for reversal)
--0.10 if RSI contradicts (e.g. RSI > 65 for BULL = overbought risk)
-+0.10 if volume > 1.5x average (strong conviction in the move)
--0.10 if volume < 0.7x average (weak conviction)
-+0.10 if news sentiment STRONGLY supports (multiple headlines in same direction)
-+0.05 if news sentiment mildly supports
--0.10 if news is mixed or contradicts
-+0.05 if no S/R obstacle within 5% in trade direction (clear runway)
--0.05 if VIX > 25
--0.10 if VIX > 30 (extreme fear — reduce all confidence)
++0.12 if SMA alignment is perfect stack (bullish_stack or bearish_stack)
++0.07 if SMA bias supports but not perfect stack (e.g. 2 of 3 SMAs aligned)
++0.08 if MACD histogram supports direction AND recent crossover
++0.05 if MACD histogram supports but no recent crossover
++0.08 if daily AND weekly timeframes aligned
+-0.10 if daily and weekly timeframes CONFLICT
++0.05 if RSI supports (50-65 for BULL, 35-50 for BEAR)
++0.07 if RSI in extreme reversal zone (< 30 oversold bounce, > 70 overbought sell)
+-0.08 if RSI contradicts direction
++0.08 if volume > 1.5x average (strong conviction)
++0.03 if volume 1.0-1.5x (normal)
+-0.05 if volume < 0.7x (weak)
++0.08 if news strongly supports
++0.04 if news mildly supports
+-0.07 if news contradicts
++0.05 if Bollinger position supports (e.g. below lower for bounce, in band trending)
+-0.05 if price at opposite Bollinger extreme
++0.05 if clear S/R runway (> 3% to next obstacle)
+-0.03 if VIX > 25
+-0.07 if VIX > 30
 
-Final confidence MUST be between 0.30 and 0.90. Round to 2 decimals.
-If your calculated confidence is below 0.55 → change verdict to NO_TRADE.
-Each asset WILL score differently — do NOT default to the same number.
-Show your math in the analysis field (e.g. "Base 0.40 + SMA bullish stack +0.15 + weekly aligned +0.10 + strong news +0.10 = 0.75").
+Final confidence MUST be 0.30-0.90. Round to 2 decimals.
+Below 0.55 → change verdict to NO_TRADE.
+Show your math in the analysis field.
 
 Return ONLY valid JSON:
 {{
   "verdict": "BUY_BULL" or "BUY_BEAR" or "NO_TRADE",
   "confidence": 0.0 to 1.0,
-  "analysis": "2-4 sentences: explain WHY, referencing specific data points including S/R levels",
+  "analysis": "2-4 sentences with confidence math, referencing specific indicators and S/R levels",
   "key_factors": ["factor 1", "factor 2", "factor 3"],
   "risks": ["specific risk 1", "specific risk 2"],
-  "stop_loss_reasoning": "1 sentence: where to place stop-loss and why (reference S/R or ATR)",
-  "take_profit_reasoning": "1 sentence: where to take profit and why (reference S/R levels)",
-  "outlook": "1 sentence: what event or level to watch next"
+  "stop_loss_reasoning": "1 sentence: where to place stop-loss and why",
+  "take_profit_reasoning": "1 sentence: where to take profit and why",
+  "outlook": "1 sentence: what to watch next"
 }}"""
 
 
@@ -504,31 +518,27 @@ def _format_sr_text(
     return "\n".join(lines)
 
 
-@st.cache_data(ttl=14400, show_spinner=False)
-def run_full_analysis(
-    asset_name: str,
-    price: float,
-    sma_20: float,
-    sma_50: float,
-    sma_200: float,
-    price_vs_sma: str,
-    sma_50w: float | None,
-    price_vs_weekly_sma: str,
-    sma_alignment: str,
-    rsi: float,
-    atr: float,
-    rsi_trend: float,
-    atr_ratio: float,
-    volume_ratio: float,
-    vix_value: float | None,
-    vix_level: str,
-    supports_json: str,
-    resistances_json: str,
-    near_resistance: bool,
-    near_support: bool,
-    headlines_json: str,
-) -> dict | None:
-    """Run comprehensive AI analysis — the primary decision maker."""
+def _interpret_bb(bb_width: float) -> str:
+    if bb_width < 2:
+        return "very tight squeeze — breakout likely imminent"
+    if bb_width < 4:
+        return "narrow bands — low volatility, potential breakout"
+    if bb_width > 8:
+        return "very wide bands — high volatility, trend in motion"
+    return "normal band width"
+
+
+def _build_prompt_kwargs(
+    asset_name, price, sma_20, sma_50, sma_200, price_vs_sma,
+    sma_50w, price_vs_weekly_sma, sma_alignment, sma_bias,
+    rsi, atr, rsi_trend, atr_ratio, volume_ratio,
+    vix_value, vix_level,
+    supports_json, resistances_json, near_resistance, near_support,
+    headlines_json,
+    macd_value, macd_signal, macd_histogram, macd_cross,
+    bb_upper, bb_lower, bb_middle, bb_position, bb_width,
+) -> dict:
+    """Build the common format kwargs for the analysis prompt."""
     headlines = json.loads(headlines_json)
     supports = json.loads(supports_json)
     resistances = json.loads(resistances_json)
@@ -536,7 +546,6 @@ def run_full_analysis(
         f"{i+1}. {h['headline']}" for i, h in enumerate(headlines)
     ) if headlines else "No recent headlines available."
 
-    # Multi-timeframe alignment
     if price_vs_sma == price_vs_weekly_sma and price_vs_sma != "at":
         timeframe_alignment = f"ALIGNED — price is {price_vs_sma} both daily and weekly trends (strong)"
     elif price_vs_weekly_sma == "unavailable":
@@ -548,7 +557,7 @@ def run_full_analysis(
 
     sr_text = _format_sr_text(supports, resistances, price, near_resistance, near_support)
 
-    prompt = FULL_ANALYSIS_PROMPT.format(
+    return dict(
         asset_name=asset_name,
         price=f"{price:,.2f}",
         sma_20=f"{sma_20:,.2f}",
@@ -558,6 +567,7 @@ def run_full_analysis(
         sma_50w=f"{sma_50w:,.2f}" if sma_50w else "unavailable",
         price_vs_weekly_sma=price_vs_weekly_sma if price_vs_weekly_sma != "unavailable" else "N/A",
         sma_alignment=_interpret_sma_alignment(sma_alignment),
+        sma_bias=sma_bias.upper(),
         timeframe_alignment=timeframe_alignment,
         sr_text=sr_text,
         rsi=f"{rsi:.1f}",
@@ -572,7 +582,52 @@ def run_full_analysis(
         vix_value=f"{vix_value:.1f}" if vix_value else "unavailable",
         vix_interpretation=_interpret_vix(vix_value, vix_level),
         headlines_text=headlines_text,
+        macd_value=f"{macd_value:.4f}",
+        macd_signal=f"{macd_signal:.4f}",
+        macd_histogram=f"{macd_histogram:+.4f}",
+        macd_cross=macd_cross.replace("_", " ").upper() if macd_cross != "none" else "No recent crossover",
+        bb_upper=f"{bb_upper:,.2f}",
+        bb_lower=f"{bb_lower:,.2f}",
+        bb_middle=f"{bb_middle:,.2f}",
+        bb_position=bb_position.replace("_", " "),
+        bb_width=f"{bb_width:.1f}",
+        bb_interpretation=_interpret_bb(bb_width),
     )
+
+
+_ANALYSIS_EXTRA_PARAMS = [
+    "sma_bias", "macd_value", "macd_signal", "macd_histogram", "macd_cross",
+    "bb_upper", "bb_lower", "bb_middle", "bb_position", "bb_width",
+]
+
+
+@st.cache_data(ttl=14400, show_spinner=False)
+def run_full_analysis(
+    asset_name: str, price: float,
+    sma_20: float, sma_50: float, sma_200: float, price_vs_sma: str,
+    sma_50w: float | None, price_vs_weekly_sma: str, sma_alignment: str,
+    sma_bias: str,
+    rsi: float, atr: float, rsi_trend: float, atr_ratio: float,
+    volume_ratio: float, vix_value: float | None, vix_level: str,
+    supports_json: str, resistances_json: str,
+    near_resistance: bool, near_support: bool, headlines_json: str,
+    macd_value: float = 0, macd_signal: float = 0, macd_histogram: float = 0,
+    macd_cross: str = "none",
+    bb_upper: float = 0, bb_lower: float = 0, bb_middle: float = 0,
+    bb_position: str = "in_band", bb_width: float = 0,
+) -> dict | None:
+    """Run comprehensive AI analysis — the primary decision maker."""
+    kwargs = _build_prompt_kwargs(
+        asset_name, price, sma_20, sma_50, sma_200, price_vs_sma,
+        sma_50w, price_vs_weekly_sma, sma_alignment, sma_bias,
+        rsi, atr, rsi_trend, atr_ratio, volume_ratio,
+        vix_value, vix_level,
+        supports_json, resistances_json, near_resistance, near_support,
+        headlines_json,
+        macd_value, macd_signal, macd_histogram, macd_cross,
+        bb_upper, bb_lower, bb_middle, bb_position, bb_width,
+    )
+    prompt = FULL_ANALYSIS_PROMPT.format(**kwargs)
 
     raw, provider = _call_ai_with_fallback(prompt)
     if not raw:
@@ -595,73 +650,31 @@ def run_full_analysis(
 
 @st.cache_data(ttl=14400, show_spinner=False)
 def run_analysis_with_provider(
-    provider: str,
-    asset_name: str,
-    price: float,
-    sma_20: float,
-    sma_50: float,
-    sma_200: float,
-    price_vs_sma: str,
-    sma_50w: float | None,
-    price_vs_weekly_sma: str,
-    sma_alignment: str,
-    rsi: float,
-    atr: float,
-    rsi_trend: float,
-    atr_ratio: float,
-    volume_ratio: float,
-    vix_value: float | None,
-    vix_level: str,
-    supports_json: str,
-    resistances_json: str,
-    near_resistance: bool,
-    near_support: bool,
-    headlines_json: str,
+    provider: str, asset_name: str, price: float,
+    sma_20: float, sma_50: float, sma_200: float, price_vs_sma: str,
+    sma_50w: float | None, price_vs_weekly_sma: str, sma_alignment: str,
+    sma_bias: str,
+    rsi: float, atr: float, rsi_trend: float, atr_ratio: float,
+    volume_ratio: float, vix_value: float | None, vix_level: str,
+    supports_json: str, resistances_json: str,
+    near_resistance: bool, near_support: bool, headlines_json: str,
+    macd_value: float = 0, macd_signal: float = 0, macd_histogram: float = 0,
+    macd_cross: str = "none",
+    bb_upper: float = 0, bb_lower: float = 0, bb_middle: float = 0,
+    bb_position: str = "in_band", bb_width: float = 0,
 ) -> dict | None:
-    """Run full analysis forcing a specific AI provider (Groq, Gemini, etc.)."""
-    headlines = json.loads(headlines_json)
-    supports = json.loads(supports_json)
-    resistances = json.loads(resistances_json)
-    headlines_text = "\n".join(
-        f"{i+1}. {h['headline']}" for i, h in enumerate(headlines)
-    ) if headlines else "No recent headlines available."
-
-    if price_vs_sma == price_vs_weekly_sma and price_vs_sma != "at":
-        timeframe_alignment = f"ALIGNED — price is {price_vs_sma} both daily and weekly trends (strong)"
-    elif price_vs_weekly_sma == "unavailable":
-        timeframe_alignment = "Weekly data unavailable — rely on daily trend only"
-    elif price_vs_sma == "at" or price_vs_weekly_sma == "at":
-        timeframe_alignment = "One timeframe is neutral — signal is moderate"
-    else:
-        timeframe_alignment = f"CONFLICTING — daily: {price_vs_sma}, weekly: {price_vs_weekly_sma} (weak)"
-
-    sr_text = _format_sr_text(supports, resistances, price, near_resistance, near_support)
-
-    prompt = FULL_ANALYSIS_PROMPT.format(
-        asset_name=asset_name,
-        price=f"{price:,.2f}",
-        sma_20=f"{sma_20:,.2f}",
-        sma_50=f"{sma_50:,.2f}",
-        sma_200=f"{sma_200:,.2f}",
-        price_vs_sma=price_vs_sma,
-        sma_50w=f"{sma_50w:,.2f}" if sma_50w else "unavailable",
-        price_vs_weekly_sma=price_vs_weekly_sma if price_vs_weekly_sma != "unavailable" else "N/A",
-        sma_alignment=_interpret_sma_alignment(sma_alignment),
-        timeframe_alignment=timeframe_alignment,
-        sr_text=sr_text,
-        rsi=f"{rsi:.1f}",
-        rsi_interpretation=_interpret_rsi(rsi),
-        rsi_trend=f"{rsi_trend:+.1f}",
-        rsi_momentum="accelerating upward" if rsi_trend > 3 else ("accelerating downward" if rsi_trend < -3 else "stable"),
-        atr=f"{atr:,.2f}",
-        atr_ratio=f"{atr_ratio:.1f}",
-        volatility_interpretation=_interpret_volatility(atr_ratio),
-        volume_ratio=f"{volume_ratio:.1f}",
-        volume_interpretation=_interpret_volume(volume_ratio),
-        vix_value=f"{vix_value:.1f}" if vix_value else "unavailable",
-        vix_interpretation=_interpret_vix(vix_value, vix_level),
-        headlines_text=headlines_text,
+    """Run full analysis forcing a specific AI provider."""
+    kwargs = _build_prompt_kwargs(
+        asset_name, price, sma_20, sma_50, sma_200, price_vs_sma,
+        sma_50w, price_vs_weekly_sma, sma_alignment, sma_bias,
+        rsi, atr, rsi_trend, atr_ratio, volume_ratio,
+        vix_value, vix_level,
+        supports_json, resistances_json, near_resistance, near_support,
+        headlines_json,
+        macd_value, macd_signal, macd_histogram, macd_cross,
+        bb_upper, bb_lower, bb_middle, bb_position, bb_width,
     )
+    prompt = FULL_ANALYSIS_PROMPT.format(**kwargs)
 
     raw = _call_specific_provider(prompt, provider)
     if not raw:

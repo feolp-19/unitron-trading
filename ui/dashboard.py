@@ -76,6 +76,7 @@ def render_dashboard(asset: Asset):
             sma_50w=tech.sma_50w,
             price_vs_weekly_sma=tech.price_vs_weekly_sma,
             sma_alignment=tech.sma_alignment,
+            sma_bias=tech.sma_bias,
             rsi=tech.rsi_value,
             atr=tech.atr_value,
             rsi_trend=tech.rsi_trend_2d,
@@ -88,6 +89,15 @@ def render_dashboard(asset: Asset):
             near_resistance=tech.near_resistance,
             near_support=tech.near_support,
             headlines_json=headlines_json,
+            macd_value=tech.macd_value,
+            macd_signal=tech.macd_signal,
+            macd_histogram=tech.macd_histogram,
+            macd_cross=tech.macd_cross,
+            bb_upper=tech.bb_upper,
+            bb_lower=tech.bb_lower,
+            bb_middle=tech.bb_middle,
+            bb_position=tech.bb_position,
+            bb_width=tech.bb_width,
         )
 
     if ai_analysis:
