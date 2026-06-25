@@ -1,8 +1,8 @@
 {
-  "scan_date": "2026-06-24",
-  "scan_time": "09:57",
-  "vix_value": 19.209999084472656,
-  "dxy_value": 101.62300109863281,
+  "scan_date": "2026-06-25",
+  "scan_time": "09:48",
+  "vix_value": 18.09000015258789,
+  "dxy_value": 101.50399780273438,
   "us10y_value": 4.451000213623047,
   "market_regime": "TRANSITION",
   "regime_report": "{}",
@@ -11,90 +11,38 @@
     {
       "name": "DAX 40",
       "ticker": "^GDAXI",
-      "score": 4.0,
+      "score": 5.0,
       "direction": "NEUTRAL",
-      "confidence": 0.4,
+      "confidence": 0.5,
       "summary": "",
-      "lenses": {
-        "momentum": {
-          "score": 3,
-          "direction": "NEUTRAL",
-          "analysis": "The MACD histogram is negative and trending down, indicating weakening bearish momentum. RSI is neutral, and volume is not confirming any trend.",
-          "key_level": 24819.75
-        },
-        "volatility": {
-          "score": 5,
-          "direction": "NEUTRAL",
-          "analysis": "The DAX 40 exhibits a mixed trend alignment and a neutral RSI, suggesting a period of consolidation. The Bollinger Band width is moderate, and the ATR ratio is 0.9x, indicating no immediate strong volatility expansion or contraction.",
-          "key_level": 24266.33
-        }
-      }
+      "lenses": {}
     },
     {
       "name": "OMXS30",
       "ticker": "^OMX",
-      "score": 7.5,
+      "score": 5.0,
       "direction": "NEUTRAL",
-      "confidence": 0.75,
+      "confidence": 0.5,
       "summary": "",
-      "lenses": {
-        "momentum": {
-          "score": 8,
-          "direction": "BULL",
-          "analysis": "Strong bullish alignment across SMAs with a positive and widening MACD histogram. RSI is in the neutral zone but trending upwards, suggesting sustained bullish momentum.",
-          "key_level": 3145.62
-        },
-        "volatility": {
-          "score": 7,
-          "direction": "BULL",
-          "analysis": "The OMXS30 shows a strong bullish uptrend with a bullish stack and a neutral RSI. The Bollinger Band width is moderate at 4.6%, and the ATR ratio is 0.9x, suggesting potential for continued upward movement with contained volatility.",
-          "key_level": 3205.24
-        }
-      }
+      "lenses": {}
     },
     {
       "name": "S&P 500",
       "ticker": "^GSPC",
-      "score": 4.0,
+      "score": 5.0,
       "direction": "NEUTRAL",
-      "confidence": 0.4,
+      "confidence": 0.5,
       "summary": "",
-      "lenses": {
-        "momentum": {
-          "score": 4,
-          "direction": "NEUTRAL",
-          "analysis": "MACD histogram is negative and trending down, signaling bearish momentum. RSI is below 50, and volume is average, offering no clear directional conviction.",
-          "key_level": 7339.57
-        },
-        "volatility": {
-          "score": 4,
-          "direction": "NEUTRAL",
-          "analysis": "The S&P 500 has mixed trend alignment and a neutral RSI, indicating uncertainty. The Bollinger Band width is 5.1%, and the ATR ratio is 1.5x with average volume, suggesting a moderate level of volatility without a clear directional bias.",
-          "key_level": 6536.35
-        }
-      }
+      "lenses": {}
     },
     {
       "name": "Nasdaq",
       "ticker": "^IXIC",
-      "score": 4.0,
+      "score": 5.0,
       "direction": "NEUTRAL",
-      "confidence": 0.4,
+      "confidence": 0.5,
       "summary": "",
-      "lenses": {
-        "momentum": {
-          "score": 2,
-          "direction": "BEAR",
-          "analysis": "The MACD histogram is significantly negative and trending down, indicating strong bearish momentum. RSI is below 50 and falling, with higher volume on down days.",
-          "key_level": 25672.88
-        },
-        "volatility": {
-          "score": 6,
-          "direction": "BEAR",
-          "analysis": "The Nasdaq shows a bearish SMA bias and mixed trend alignment with a neutral RSI. The Bollinger Band width is relatively wide at 9.0%, and the ATR ratio is 1.5x with above-average volume, indicating significant volatility and potential for a downward move.",
-          "key_level": 21898.29
-        }
-      }
+      "lenses": {}
     },
     {
       "name": "FTSE 100",
@@ -107,30 +55,14 @@
         "volatility": {
           "score": 5,
           "direction": "NEUTRAL",
-          "analysis": "The Bollinger Band width is relatively narrow (2.8%), suggesting potential for a breakout. ATR is at 0.9x, indicating moderate volatility, but the mixed SMA alignment warrants caution.",
-          "key_level": 10532.42
+          "analysis": "The Bollinger Band width is relatively narrow (3.0%), suggesting potential for a breakout. However, the ATR ratio is low (0.9x) and the RSI is neutral, indicating a lack of strong directional momentum. The mixed alignment of SMAs also adds to the uncertainty.",
+          "key_level": 10546.97
         }
       }
     },
     {
       "name": "Nikkei 225",
       "ticker": "^N225",
-      "score": 7.0,
-      "direction": "NEUTRAL",
-      "confidence": 0.7,
-      "summary": "",
-      "lenses": {
-        "volatility": {
-          "score": 7,
-          "direction": "BULL",
-          "analysis": "The Bollinger Bands are widening (14.7%), and the ATR ratio is above 1x, indicating expanding volatility in a strong uptrend. This suggests continued upward momentum, with potential for further price appreciation.",
-          "key_level": 72744.79
-        }
-      }
-    },
-    {
-      "name": "Hang Seng",
-      "ticker": "^HSI",
       "score": 6.0,
       "direction": "NEUTRAL",
       "confidence": 0.6,
@@ -138,25 +70,41 @@
       "lenses": {
         "volatility": {
           "score": 6,
+          "direction": "BULL",
+          "analysis": "The Nikkei 225 exhibits a strong bullish uptrend with a bullish stack of SMAs and an RSI approaching overbought territory. The Bollinger Band width is moderate (14.6%), and while not a tight squeeze, it suggests room for price expansion within the trend. The ATR ratio is elevated (1.3x), indicating current volatility is higher than average.",
+          "key_level": 73338.71
+        }
+      }
+    },
+    {
+      "name": "Hang Seng",
+      "ticker": "^HSI",
+      "score": 7.0,
+      "direction": "NEUTRAL",
+      "confidence": 0.7,
+      "summary": "",
+      "lenses": {
+        "volatility": {
+          "score": 7,
           "direction": "BEAR",
-          "analysis": "The Bollinger Bands are moderately wide (12.2%), and the ATR ratio is above 1x, indicating significant volatility in a strong downtrend. The RSI is oversold, suggesting a potential for a short-term bounce, but the overall trend is bearish.",
-          "key_level": 23242.49
+          "analysis": "The Hang Seng is in a strong bearish downtrend with an oversold RSI, suggesting a potential for a bounce. The Bollinger Band width is significant (13.6%), and the ATR ratio is elevated (1.1x), indicating substantial current volatility. The proximity to the lower Bollinger Band and oversold RSI points to a potential short-term reversal or consolidation.",
+          "key_level": 22998.39
         }
       }
     },
     {
       "name": "Guld",
       "ticker": "GC=F",
-      "score": 4.0,
+      "score": 8.0,
       "direction": "NEUTRAL",
-      "confidence": 0.4,
+      "confidence": 0.8,
       "summary": "",
       "lenses": {
         "volatility": {
-          "score": 4,
+          "score": 8,
           "direction": "BEAR",
-          "analysis": "The Bollinger Bands are wide (14.7%), and the ATR ratio is above 1x, indicating significant volatility. However, the mixed SMA alignment and bearish MACD cross suggest a lack of clear directional conviction, with a bearish bias.",
-          "key_level": 4017.66
+          "analysis": "Gold (GC=F) shows a wide Bollinger Band width (17.0%) and a high ATR ratio (1.4x), indicating significant current volatility and potential for large price swings. The RSI is approaching oversold, and the price is near the lower Bollinger Band, suggesting a potential for a bounce or a continuation of the bearish trend with high volatility.",
+          "key_level": 3951.91
         }
       }
     },
@@ -168,43 +116,43 @@
       "confidence": 0.6,
       "summary": "",
       "lenses": {
-        "reversal": {
+        "volatility": {
           "score": 6,
           "direction": "NEUTRAL",
-          "analysis": "Silver is approaching oversold territory with RSI at 31.2 and trading below its weekly SMA50. While there are no immediate reversal candles or divergences, the proximity to support at 61.09 suggests a potential for a bounce.",
-          "key_level": 61.09
+          "analysis": "Silver exhibits a wide Bollinger Band width (38.5%) and a relatively high ATR (2.64), suggesting potential for significant price movement. The RSI is oversold, hinting at a possible upward reversal, but the bearish SMA bias and mixed alignment warrant caution.",
+          "key_level": 57.3
         }
       }
     },
     {
       "name": "Olja (WTI)",
       "ticker": "CL=F",
-      "score": 7.0,
+      "score": 5.0,
       "direction": "NEUTRAL",
-      "confidence": 0.7,
+      "confidence": 0.5,
       "summary": "",
       "lenses": {
-        "reversal": {
-          "score": 7,
+        "volatility": {
+          "score": 5,
           "direction": "NEUTRAL",
-          "analysis": "WTI crude oil is deeply oversold with RSI at 27.2 and trading near its lower Bollinger Band. The price is also at its weekly SMA50, indicating a potential for a short-term reversal, though the bearish SMA bias and mixed alignment warrant caution.",
-          "key_level": 71.87
+          "analysis": "WTI crude oil shows a very wide Bollinger Band width (48.9%) and a high ATR (4.53), indicating substantial volatility. The RSI is deeply oversold, suggesting a potential bounce, but the bearish SMA bias and mixed alignment suggest uncertainty and a need for confirmation.",
+          "key_level": 67.12
         }
       }
     },
     {
       "name": "Naturgas",
       "ticker": "NG=F",
-      "score": 4.0,
+      "score": 7.0,
       "direction": "NEUTRAL",
-      "confidence": 0.4,
+      "confidence": 0.7,
       "summary": "",
       "lenses": {
-        "reversal": {
-          "score": 4,
-          "direction": "NEUTRAL",
-          "analysis": "Natural gas shows mixed signals with a bullish SMA bias but a neutral RSI and price trading within a tight Bollinger Band. The lack of clear oversold conditions or bearish momentum suggests limited immediate reversal potential in either direction.",
-          "key_level": 3.21
+        "volatility": {
+          "score": 7,
+          "direction": "BULL",
+          "analysis": "Natural gas presents a tight Bollinger Band width (8.4%) and a low ATR (0.13), indicating consolidation and a potential for a breakout. The RSI is approaching overbought territory, and the bullish SMA bias, despite mixed alignment, suggests upward momentum could be building.",
+          "key_level": 3.34
         }
       }
     },
@@ -216,105 +164,33 @@
       "confidence": 0.5,
       "summary": "",
       "lenses": {
-        "reversal": {
+        "volatility": {
           "score": 5,
           "direction": "NEUTRAL",
-          "analysis": "Platinum is approaching oversold conditions with RSI at 31.5 and trading below its weekly SMA50. The bearish SMA bias and significant distance from its upper Bollinger Band suggest a potential for a bounce, but the lack of clear capitulation volume or divergences limits the immediate reversal signal.",
-          "key_level": 1630.4
+          "analysis": "Platinum has a moderate Bollinger Band width (28.6%) and a high ATR (46.98), suggesting significant price swings. The RSI is approaching oversold levels, but the strong bearish SMA bias and mixed alignment indicate a lack of clear direction and potential for continued downside pressure.",
+          "key_level": 1540.62
         }
       }
     },
     {
       "name": "Koppar",
       "ticker": "HG=F",
-      "score": 4.5,
+      "score": 3.0,
       "direction": "NEUTRAL",
-      "confidence": 0.45,
+      "confidence": 0.3,
       "summary": "",
       "lenses": {
         "trend": {
-          "score": 4,
+          "score": 3,
           "direction": "NEUTRAL",
-          "analysis": "Koppar exhibits a bearish SMA bias with mixed alignment, indicating a lack of clear trend direction. The price is currently below the SMA20 and SMA50, but above the SMA200, suggesting consolidation or a potential shift.",
-          "key_level": 6.51
-        },
-        "volatility": {
-          "score": 5,
-          "direction": "NEUTRAL",
-          "analysis": "Bollinger Bands are relatively narrow (8.8%), suggesting potential for a move. ATR is at 0.8x average, indicating moderate volatility, but no clear trend is present.",
-          "key_level": 6.51
+          "analysis": "The asset exhibits a mixed SMA alignment with the price below the 20-day and 50-day SMAs but above the 200-day SMA, suggesting a lack of clear directional conviction. The RSI is in the neutral zone, further indicating a ranging or consolidating trend.",
+          "key_level": 5.6
         }
       }
     },
     {
       "name": "Bitcoin",
       "ticker": "BTC-USD",
-      "score": 4.0,
-      "direction": "NEUTRAL",
-      "confidence": 0.4,
-      "summary": "",
-      "lenses": {
-        "trend": {
-          "score": 2,
-          "direction": "BEAR",
-          "analysis": "Bitcoin is in a strong bearish downtrend, characterized by a bearish stack across all SMAs (Price < SMA20 < SMA50 < SMA200). The price is below the weekly SMA50, reinforcing the bearish sentiment.",
-          "key_level": 60074.2
-        },
-        "volatility": {
-          "score": 6,
-          "direction": "BEAR",
-          "analysis": "Bollinger Bands are moderately wide (9.6%) with price near the lower band, indicating some selling pressure. ATR is at 0.8x average, suggesting current volatility is not extreme but the strong bearish alignment points to potential downside continuation.",
-          "key_level": 60074.2
-        }
-      }
-    },
-    {
-      "name": "Ethereum",
-      "ticker": "ETH-USD",
-      "score": 4.5,
-      "direction": "NEUTRAL",
-      "confidence": 0.45,
-      "summary": "",
-      "lenses": {
-        "trend": {
-          "score": 2,
-          "direction": "BEAR",
-          "analysis": "Ethereum is in a strong bearish downtrend, mirroring Bitcoin with a bearish stack across all SMAs (Price < SMA20 < SMA50 < SMA200). The price is significantly below the weekly SMA50, indicating a pronounced bearish trend.",
-          "key_level": 1386.8
-        },
-        "volatility": {
-          "score": 7,
-          "direction": "BEAR",
-          "analysis": "Bollinger Bands are relatively wide (14.3%) with price near the lower band, suggesting increased downside pressure. ATR is at 0.8x average, but the strong bearish alignment and approaching oversold RSI indicate a higher probability of further downside volatility.",
-          "key_level": 1386.8
-        }
-      }
-    },
-    {
-      "name": "Solana",
-      "ticker": "SOL-USD",
-      "score": 5.5,
-      "direction": "NEUTRAL",
-      "confidence": 0.55,
-      "summary": "",
-      "lenses": {
-        "trend": {
-          "score": 3,
-          "direction": "BEAR",
-          "analysis": "Solana shows a bearish SMA bias but with mixed alignment, suggesting some underlying weakness without a definitive trend. The price is below the SMA50 and SMA200, but above the SMA20, indicating potential short-term choppiness within a broader bearish context.",
-          "key_level": 68.69
-        },
-        "volatility": {
-          "score": 8,
-          "direction": "NEUTRAL",
-          "analysis": "Bollinger Bands are very wide (20.8%), indicating high current volatility and a potential for a significant breakout. ATR is at 0.9x average, confirming elevated volatility, and the mixed trend alignment suggests a directional move is imminent.",
-          "key_level": 68.69
-        }
-      }
-    },
-    {
-      "name": "XRP",
-      "ticker": "XRP-USD",
       "score": 2.0,
       "direction": "NEUTRAL",
       "confidence": 0.2,
@@ -323,381 +199,117 @@
         "trend": {
           "score": 2,
           "direction": "BEAR",
-          "analysis": "XRP is in a strong downtrend, indicated by the bearish stack of SMAs and price below all key moving averages. The RSI approaching oversold suggests potential for a short-term bounce, but the overall trend remains bearish.",
-          "key_level": 1.51
-        },
-        "momentum": {
-          "score": 2,
-          "direction": "BEAR",
-          "analysis": "XRP exhibits strong bearish momentum, with price below all SMAs in a bearish stack. The MACD histogram is slightly positive but has been declining, and RSI is approaching oversold territory, suggesting potential for a bounce but no confirmed bullish momentum yet.",
-          "key_level": 1.07
+          "analysis": "Bitcoin is in a strong downtrend, evidenced by a bearish stack where price is below all short, medium, and long-term SMAs (20, 50, 200). The RSI is approaching oversold territory, suggesting potential for a short-term bounce but the primary trend remains bearish.",
+          "key_level": 76163.91
         }
       }
+    },
+    {
+      "name": "Ethereum",
+      "ticker": "ETH-USD",
+      "score": 2.0,
+      "direction": "NEUTRAL",
+      "confidence": 0.2,
+      "summary": "",
+      "lenses": {
+        "trend": {
+          "score": 2,
+          "direction": "BEAR",
+          "analysis": "Ethereum is also in a pronounced downtrend, mirroring Bitcoin's structure with price below the 20, 50, and 200-day SMAs. The RSI is nearing oversold conditions, but the strong bearish alignment of SMAs points to continued downward pressure.",
+          "key_level": 2335.77
+        }
+      }
+    },
+    {
+      "name": "Solana",
+      "ticker": "SOL-USD",
+      "score": 2.0,
+      "direction": "NEUTRAL",
+      "confidence": 0.2,
+      "summary": "",
+      "lenses": {
+        "trend": {
+          "score": 2,
+          "direction": "BEAR",
+          "analysis": "Solana displays a clear bearish stack with price below its 20, 50, and 200-day SMAs, indicating a strong downtrend. While the RSI is in the neutral zone, the consistent downward progression of the SMAs suggests the bearish trend is dominant.",
+          "key_level": 96.12
+        }
+      }
+    },
+    {
+      "name": "XRP",
+      "ticker": "XRP-USD",
+      "score": 5.0,
+      "direction": "NEUTRAL",
+      "confidence": 0.5,
+      "summary": "",
+      "lenses": {}
     }
   ],
   "top5": [
     {
       "asset": {
-        "ticker": "^OMX",
-        "display_name": "OMXS30",
+        "ticker": "GC=F",
+        "display_name": "Guld",
         "news_keywords": [
-          "OMXS30",
-          "Stockholm börsen",
-          "Swedish economy"
-        ],
-        "asset_type": "index",
-        "category": "Index"
-      },
-      "tech": {
-        "current_price": 3145.62,
-        "rsi_value": 53.78,
-        "sma_20": 3127.79,
-        "sma_50": 3111.83,
-        "sma_200": 2933.54,
-        "sma_50w": 2890.76,
-        "atr_value": 43.72,
-        "price_vs_sma": "above",
-        "price_vs_weekly_sma": "above",
-        "sma_alignment": "bullish_stack",
-        "sma_bias": "bullish",
-        "rsi_trend_2d": -8.36,
-        "atr_ratio": 0.94,
-        "volume_ratio": 0.0,
-        "vix_value": 19.21,
-        "vix_level": "normal",
-        "near_resistance": true,
-        "near_support": false,
-        "supports": [
-          2783.9,
-          2655.36,
-          2436.87
-        ],
-        "resistances": [
-          3205.24
-        ],
-        "macd_value": 15.4982,
-        "macd_signal": 11.8278,
-        "macd_histogram": 3.6704,
-        "macd_cross": "none",
-        "bb_upper": 3199.91,
-        "bb_lower": 3055.67,
-        "bb_middle": 3127.79,
-        "bb_position": "in_band",
-        "bb_width": 4.59
-      },
-      "stage2": {
-        "lenses": {
-          "momentum": {
-            "score": 8,
-            "direction": "BULL",
-            "analysis": "Strong bullish alignment across SMAs with a positive and widening MACD histogram. RSI is in the neutral zone but trending upwards, suggesting sustained bullish momentum.",
-            "key_level": 3145.62
-          },
-          "volatility": {
-            "score": 7,
-            "direction": "BULL",
-            "analysis": "The OMXS30 shows a strong bullish uptrend with a bullish stack and a neutral RSI. The Bollinger Band width is moderate at 4.6%, and the ATR ratio is 0.9x, suggesting potential for continued upward movement with contained volatility.",
-            "key_level": 3205.24
-          }
-        },
-        "composite_score": 7.5,
-        "consensus_direction": "NEUTRAL",
-        "confidence": 0.75
-      },
-      "stage5": {
-        "A": null,
-        "B": null,
-        "C": null,
-        "D": null
-      },
-      "stage6": null,
-      "stage7": null,
-      "synthesis": null,
-      "headlines": [
-        {
-          "headline": "OMX Stockholm 30 Index Today (OMXS30) - Investing.com",
-          "source": "www.investing.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.investing.com/indices/omx-stockholm-30",
-          "summary": "Assess the OMX Stockholm 30 stock price and overall performance. How Is The OMX Stockholm 30 Doing Today? The OMX Stockholm 30 live stock price is 3,147.45."
-        },
-        {
-          "headline": "Overview for OMXS30 - Nasdaq GIW",
-          "source": "indexes.nasdaqomx.com",
-          "datetime": "2026-06-24",
-          "url": "https://indexes.nasdaqomx.com/Index/Overview/OMXS30",
-          "summary": "OMX Stockholm 30 Index ; Today's High 3,160.09 ; Today's Low 3,134.33 ; Last, 3,158.42 ; Net Change, -32.82 ; Net Change(%), -1.01%."
-        },
-        {
-          "headline": "OMX Stockholm 30 Index Stock Market News (Nasdaq Stockholm)",
-          "source": "www.marketscreener.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.marketscreener.com/quote/index/OMX-STOCKHOLM-30-INDEX-7399/news",
-          "summary": "Stockholm Market Rebounds on Thursday, OMXS30 Index Gains 0.3 Percent ... Systemair defies trend on Stockholm Stock Exchange, OMXS30 index retreats 0.5 percent."
-        },
-        {
-          "headline": "OMX Stockholm 30 (OMXS30) - Technical Analysis - Investtech",
-          "source": "www.investtech.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.investtech.com/main/market.php?CompanyID=46100009",
-          "summary": "OMX Stockholm 30 is in a rising trend channel in the medium long term. Rising trends indicate that the market experiences positive development"
-        },
-        {
-          "headline": "Swedish (OMX) Market Analysis & Valuation - Updated Today",
-          "source": "simplywall.st",
-          "datetime": "2026-06-24",
-          "url": "https://simplywall.st/markets/se",
-          "summary": "In the last week, the market has been flat, the market is actually up 16% over the past year. earnings are expected to grow by 8.4% per annum."
-        },
-        {
-          "headline": "OMX Stockholm 30 Index (^OMX) Charts, Data & News",
-          "source": "finance.yahoo.com",
-          "datetime": "2026-06-24",
-          "url": "https://finance.yahoo.com/quote/%5EOMX",
-          "summary": "Stockholm 30 Index (^OMX) 3,145.66 -45.06 (-1.41%) At close: June 23 at 5:35:00 PM GMT+2. YTD 9.11% 1Y 29.77% 5Y 40.29% All 429.47%"
-        },
-        {
-          "headline": "OMX Stockholm 30 Index (OMXS30) - Nasdaq",
-          "source": "www.nasdaq.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.nasdaq.com/market-activity/index/omxs30",
-          "summary": "Find the latest information on OMX Stockholm 30 Index (OMXS30), including data, charts, related news, and more from Nasdaq.com."
-        },
-        {
-          "headline": "Sweden Stock Market Index - Quote - Chart - Historical Data - News",
-          "source": "tradingeconomics.com",
-          "datetime": "2026-06-24",
-          "url": "https://tradingeconomics.com/sweden/stock-market",
-          "summary": "Stockholm 30 increased to an all-time high of 3042.00 Index Points. Over the past 4 weeks, Sweden Stock Market Index (Stockholm 30) gained 5.61%, and in the"
-        },
-        {
-          "headline": "OMXS30, OBX25, OMXH25: Price Forecast and Analysis ... - YouTube",
-          "source": "www.youtube.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.youtube.com/watch?v=afbXjaQlgUY",
-          "summary": "The indices in Scandinavia continue to look strong, in a “backdoor” way to play the European strength that we have seen for some time."
-        },
-        {
-          "headline": "Nasdaq Stockholm - Wikipedia",
-          "source": "en.wikipedia.org",
-          "datetime": "2026-06-24",
-          "url": "https://en.wikipedia.org/wiki/Nasdaq_Stockholm",
-          "summary": "As of March 2021, a total of 832 companies are listed on Nasdaq Stockholm with 385 companies on the main market and additional 447 listed on secondary markets."
-        }
-      ],
-      "final_verdict": "NO_TRADE",
-      "final_confidence": 0,
-      "trading_plan": null
-    },
-    {
-      "asset": {
-        "ticker": "^N225",
-        "display_name": "Nikkei 225",
-        "news_keywords": [
-          "Nikkei",
-          "Japan economy",
-          "Tokyo Stock Exchange"
-        ],
-        "asset_type": "index",
-        "category": "Index"
-      },
-      "tech": {
-        "current_price": 69174.97,
-        "rsi_value": 58.65,
-        "sma_20": 67662.75,
-        "sma_50": 63518.96,
-        "sma_200": 53990.91,
-        "sma_50w": 52722.07,
-        "atr_value": 2001.19,
-        "price_vs_sma": "above",
-        "price_vs_weekly_sma": "above",
-        "sma_alignment": "bullish_stack",
-        "sma_bias": "bullish",
-        "rsi_trend_2d": -14.4,
-        "atr_ratio": 1.27,
-        "volume_ratio": 0.0,
-        "vix_value": 19.21,
-        "vix_level": "normal",
-        "near_resistance": false,
-        "near_support": false,
-        "supports": [
-          50558.91,
-          48235.3,
-          37928.65
-        ],
-        "resistances": [],
-        "macd_value": 2104.0722,
-        "macd_signal": 2011.1246,
-        "macd_histogram": 92.9477,
-        "macd_cross": "none",
-        "bb_upper": 72744.79,
-        "bb_lower": 62580.71,
-        "bb_middle": 67662.75,
-        "bb_position": "in_band",
-        "bb_width": 14.69
-      },
-      "stage2": {
-        "lenses": {
-          "volatility": {
-            "score": 7,
-            "direction": "BULL",
-            "analysis": "The Bollinger Bands are widening (14.7%), and the ATR ratio is above 1x, indicating expanding volatility in a strong uptrend. This suggests continued upward momentum, with potential for further price appreciation.",
-            "key_level": 72744.79
-          }
-        },
-        "composite_score": 7.0,
-        "consensus_direction": "NEUTRAL",
-        "confidence": 0.7
-      },
-      "stage5": {
-        "A": null,
-        "B": null,
-        "C": null,
-        "D": null
-      },
-      "stage6": null,
-      "stage7": null,
-      "synthesis": null,
-      "headlines": [
-        {
-          "headline": "Japanese (NIKKEI) Market Analysis & Valuation - Updated Today",
-          "source": "simplywall.st",
-          "datetime": "2026-06-24",
-          "url": "https://simplywall.st/markets/jp",
-          "summary": "Stock is up 443% over the past year. The company is forecast to post earnings per share of JP¥134 for next year compared to JP¥94.93 last year."
-        },
-        {
-          "headline": "[PDF] Outlook for Japanese Stock Market & Economy - January 2025",
-          "source": "www.smd-am.co.jp",
-          "datetime": "2026-06-24",
-          "url": "https://www.smd-am.co.jp/english/market_information/monthly/2025/JanStockMktOutlook202501.pdf",
-          "summary": "We expect the Nikkei 225 will reach to 45,400 and TOPIX to 3,190 by the end of 2025. • Although foreign investors' appetite for Japanese stocks appears sluggish"
-        },
-        {
-          "headline": "Nikkei 225 Index Today (N225) - Investing.com",
-          "source": "www.investing.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.investing.com/indices/japan-ni225",
-          "summary": "Today, the Nikkei 225 opened at 69,575.00. What is the trading volume for Nikkei 225? The current volume for Nikkei 225 is 0."
-        },
-        {
-          "headline": "Nikkei Asia - Business, Politics, Economy and Tech News & Analysis",
-          "source": "asia.nikkei.com",
-          "datetime": "2026-06-24",
-          "url": "https://asia.nikkei.com",
-          "summary": "Japan, China, India and Southeast Asia news and expert analysis published by Nikkei, an award-winning independent provider of quality journalism."
-        },
-        {
-          "headline": "Japan 225, Daily Ideas — SPREADEX:NIKKEI - TradingView",
-          "source": "www.tradingview.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.tradingview.com/symbols/SPREADEX-NIKKEI/ideas",
-          "summary": "The Nikkei has reached its highest level since 1989, surpassing the 70,000 mark. It received a 1.0% rate hike from the BOJ but absorbed the news well as it went"
-        },
-        {
-          "headline": "Japan Stock Market Index (JP225) - Quote - Chart - Historical Data",
-          "source": "tradingeconomics.com",
-          "datetime": "2026-06-24",
-          "url": "https://tradingeconomics.com/japan/stock-market",
-          "summary": "The Nikkei 225 Index dropped 1854 points or 2.56 percent on Tuesday to close at 70500 points. Losses were led by Furukawa Electric (-15.59%), Mitsui Mining &"
-        },
-        {
-          "headline": "Nikkei 225 (^N225) Charts, Data & News - Yahoo Finance",
-          "source": "finance.yahoo.com",
-          "datetime": "2026-06-24",
-          "url": "https://finance.yahoo.com/quote/%5EN225",
-          "summary": "Find the latest information on Nikkei 225 (^N225) including data, charts, related news and more from Yahoo Finance."
-        },
-        {
-          "headline": "NIK | NIKKEI 225 Index Overview - MarketWatch",
-          "source": "www.marketwatch.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.marketwatch.com/investing/index/nik?countrycode=jp&eafs_enabled=false",
-          "summary": "NIKKEI 225 Index ; Day Range 68,461.10 - 70,218.71 ; 52 Week Range 38,711.11 - 72,831.73 ; 5 Day. -0.72% ; 1 Month. 6.77% ; 3 Month. 29.11%."
-        },
-        {
-          "headline": "N225: Nikkei 225 Index - Stock Price, Quote and News - CNBC",
-          "source": "www.cnbc.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.cnbc.com/quotes/.N225",
-          "summary": "Get Nikkei 225 Index (.N225:Nihon Keizai Shinbun) real-time stock quotes, news, price and financial information from CNBC."
-        },
-        {
-          "headline": "Stock Market LIVE | Japan's Nikkei Recorded Biggest Loss - YouTube",
-          "source": "www.youtube.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.youtube.com/watch?v=VbZTUxLJS9g",
-          "summary": "Japanese stocks have recorded their biggest losses since October 1987, extending last week's sell-off spurred by concerns the United States"
-        }
-      ],
-      "final_verdict": "NO_TRADE",
-      "final_confidence": 0,
-      "trading_plan": null
-    },
-    {
-      "asset": {
-        "ticker": "CL=F",
-        "display_name": "Olja (WTI)",
-        "news_keywords": [
-          "oil price",
-          "crude oil",
-          "WTI",
-          "OPEC"
+          "gold price",
+          "gold market",
+          "precious metals"
         ],
         "asset_type": "commodity",
         "category": "Råvaror"
       },
       "tech": {
-        "current_price": 71.87,
-        "rsi_value": 27.18,
-        "sma_20": 85.13,
-        "sma_50": 92.85,
-        "sma_200": 73.82,
-        "sma_50w": 72.44,
-        "atr_value": 4.59,
+        "current_price": 4009.3,
+        "rsi_value": 30.89,
+        "sma_20": 4291.82,
+        "sma_50": 4502.1,
+        "sma_200": 4445.92,
+        "sma_50w": 4271.9,
+        "atr_value": 111.96,
         "price_vs_sma": "below",
-        "price_vs_weekly_sma": "at",
+        "price_vs_weekly_sma": "below",
         "sma_alignment": "mixed",
         "sma_bias": "bearish",
-        "rsi_trend_2d": -2.52,
-        "atr_ratio": 0.82,
-        "volume_ratio": 0.16,
-        "vix_value": 19.21,
+        "rsi_trend_2d": -3.69,
+        "atr_ratio": 1.35,
+        "volume_ratio": 11.25,
+        "vix_value": 18.09,
         "vix_level": "normal",
-        "near_resistance": true,
+        "near_resistance": false,
         "near_support": false,
         "supports": [
-          66.61,
-          65.24,
-          56.35
+          3263.9,
+          3125.0,
+          2568.15
         ],
         "resistances": [
-          72.28,
-          78.43,
-          80.77
+          4358.0,
+          4879.7,
+          5586.2
         ],
-        "macd_value": -5.9936,
-        "macd_signal": -4.4927,
-        "macd_histogram": -1.5009,
+        "macd_value": -123.2652,
+        "macd_signal": -103.2215,
+        "macd_histogram": -20.0437,
         "macd_cross": "none",
-        "bb_upper": 100.44,
-        "bb_lower": 69.83,
-        "bb_middle": 85.13,
+        "bb_upper": 4631.73,
+        "bb_lower": 3951.91,
+        "bb_middle": 4291.82,
         "bb_position": "in_band",
-        "bb_width": 42.59
+        "bb_width": 16.96
       },
       "stage2": {
         "lenses": {
-          "reversal": {
-            "score": 7,
-            "direction": "NEUTRAL",
-            "analysis": "WTI crude oil is deeply oversold with RSI at 27.2 and trading near its lower Bollinger Band. The price is also at its weekly SMA50, indicating a potential for a short-term reversal, though the bearish SMA bias and mixed alignment warrant caution.",
-            "key_level": 71.87
+          "volatility": {
+            "score": 8,
+            "direction": "BEAR",
+            "analysis": "Gold (GC=F) shows a wide Bollinger Band width (17.0%) and a high ATR ratio (1.4x), indicating significant current volatility and potential for large price swings. The RSI is approaching oversold, and the price is near the lower Bollinger Band, suggesting a potential for a bounce or a continuation of the bearish trend with high volatility.",
+            "key_level": 3951.91
           }
         },
-        "composite_score": 7.0,
+        "composite_score": 8.0,
         "consensus_direction": "NEUTRAL",
-        "confidence": 0.7
+        "confidence": 0.8
       },
       "stage5": {
         "A": null,
@@ -710,74 +322,74 @@
       "synthesis": null,
       "headlines": [
         {
-          "headline": "Crude Oil - Price - Chart - Historical Data - News - Trading Economics",
-          "source": "tradingeconomics.com",
-          "datetime": "2026-06-24",
-          "url": "https://tradingeconomics.com/commodity/crude-oil",
-          "summary": "Crude Oil is expected to trade at 77.70 USD/BBL by the end of this quarter, according to Trading Economics global macro models and analysts expectations."
+          "headline": "Gold (XAU/USD) Price Forecast for Today, Tomorrow, Next Week ...",
+          "source": "www.litefinance.org",
+          "datetime": "2026-06-25",
+          "url": "https://www.litefinance.org/blog/analysts-opinions/gold-price-prediction-forecast/daily-and-weekly",
+          "summary": "Analysts expect the metal to trade within the $4,186.00–$4,933.00 range. Key drivers include the Fed's interest rate decisions, inflation risks,"
         },
         {
-          "headline": "Oil Market Report - May 2026 – Analysis - IEA",
-          "source": "www.iea.org",
-          "datetime": "2026-06-24",
-          "url": "https://www.iea.org/reports/oil-market-report-may-2026",
-          "summary": "World oil demand is forecast to contract by 420 kb/d y-o-y in 2026, to 104 mb/d, 1.3 mb/d less than our pre-war forecast. · Global oil supply"
-        },
-        {
-          "headline": "Oil Price Forecast for 2026 | J.P. Morgan Global Research",
-          "source": "www.jpmorgan.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.jpmorgan.com/insights/global-research/commodities/oil-prices",
-          "summary": "Despite a recent spike in oil prices, J.P. Morgan Global Research expects to see Brent crude averaging around $60/bbl in 2026. This bearish forecast is"
-        },
-        {
-          "headline": "Short-Term Energy Outlook - EIA",
-          "source": "www.eia.gov",
-          "datetime": "2026-06-24",
-          "url": "https://www.eia.gov/outlooks/steo",
-          "summary": "Crude oil price forecast. Despite production outages and lower oil inventories, the Brent crude oil spot price fell in May following reductions in oil demand"
-        },
-        {
-          "headline": "Crude Oil Market Prices, Data, and Analysis | S&P Global",
+          "headline": "Gold Market Outlook - S&P Global",
           "source": "www.spglobal.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.spglobal.com/energy/en/commodity/oil/crude",
-          "summary": "Crude Oil prices, market data, news, events and forward-looking intelligence for energy traders, analysts, utilities, and investment professionals."
+          "datetime": "2026-06-25",
+          "url": "https://www.spglobal.com/market-intelligence/en/news-insights/research/gold-market-outlook",
+          "summary": "Global gold mined supply is forecast to increase approximately 4.6% year over year in 2022. According to S&P Global Market Intelligence's new monthly Commodity"
         },
         {
-          "headline": "Short-Term Energy Outlook: Global oil markets - EIA",
-          "source": "www.eia.gov",
-          "datetime": "2026-06-24",
-          "url": "https://www.eia.gov/outlooks/steo/report/global_oil.php",
-          "summary": "We assume oil demand will rebound next year once prices drop and supply flows return later in 2026, with oil demand growing by 2.5 million b/d in 2027 to 105.3"
+          "headline": "Gold Forecast, News and Analysis (XAU/USD) - FXStreet",
+          "source": "www.fxstreet.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.fxstreet.com/markets/commodities/metals/gold",
+          "summary": "Gold rebounds from the vicinity of the lowest level since November 2025, set the previous day, and trades near the $4,000 psychological mark."
         },
         {
-          "headline": "Crude Oil Prices Today | OilPrice.com",
-          "source": "oilprice.com",
-          "datetime": "2026-06-24",
-          "url": "https://oilprice.com",
-          "summary": "Crude oil prices & gas price charts. Oil price charts for Brent Crude, WTI & oil futures. Energy news covering oil, petroleum, natural gas and investment"
+          "headline": "Gold Price Today | Gold Spot Price Charts - APMEX",
+          "source": "www.apmex.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.apmex.com/gold-price",
+          "summary": "Gold's current record high was achieved on January 28, 2026, at $5,602.22 per troy ounce. This follows a trend of new record-setting highs for gold in recent"
         },
         {
-          "headline": "Crude Oil Futures Price Today (WTI) - Investing.com",
-          "source": "www.investing.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.investing.com/commodities/crude-oil",
-          "summary": "The current price of Crude Oil WTI futures is 71.83, with a previous close of 73.21. What Is the Daily Trading Range for Crude Oil WTI Futures?"
+          "headline": "Gold - Price - Chart - Historical Data - News - Trading Economics",
+          "source": "tradingeconomics.com",
+          "datetime": "2026-06-25",
+          "url": "https://tradingeconomics.com/commodity/gold",
+          "summary": "Gold fell to 3,994.40 USD/t.oz on June 25, 2026, down 0.13% from the previous day. Over the past month, Gold's price has fallen 11.44%, but it is still 20.01%"
         },
         {
-          "headline": "Crude Oil Price Forecast, Technical Analysis (June 1) - YouTube",
+          "headline": "Gold Price Predictions for 2026 and 2027 I J.P. Morgan Global ...",
+          "source": "www.jpmorgan.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.jpmorgan.com/insights/global-research/commodities/gold-prices",
+          "summary": "J.P. Morgan Global Research forecasts prices per ounce to average $6,000/oz by the final quarter of 2026, rising toward $6,300/oz by the end of 2027. Yet Greg"
+        },
+        {
+          "headline": "Gold price forecast for 2026, 2030, and 2040 | GoldRepublic",
+          "source": "www.goldrepublic.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.goldrepublic.com/en-us/gold-price/forecast",
+          "summary": "Long term forecasts for the gold price towards 2030 vary widely but the trend over recent decades shows an average annual increase of around 8 percent."
+        },
+        {
+          "headline": "Gold Trade Ideas — OANDA:XAUUSD — TradingView",
+          "source": "www.tradingview.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.tradingview.com/symbols/XAUUSD/ideas?sort=recent",
+          "summary": "Gold is projected to immediately fall, breaking through $3,950 towards $3,910. - Flat/Lower PCE Scenario: If PCE data shows a sharp decline following the trend"
+        },
+        {
+          "headline": "Gold Price at $3500: What Does Record High Signal for Markets?",
           "source": "www.youtube.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.youtube.com/watch?v=EZZjeXNYJkU",
-          "summary": "Crude oil markets continue to look for momentum on Monday, as we are at the bottom of a massive consolidation range in both grades."
+          "datetime": "2026-06-25",
+          "url": "https://www.youtube.com/watch?v=oW5Wx1DAWEU",
+          "summary": "... Markets & Finance: https://tinyurl.com/ysu5b8a9 Visit http://www.bloomberg.com for business news & analysis, up-to-the-minute market data"
         },
         {
-          "headline": "Energy - Bloomberg - Bloomberg Markets",
-          "source": "www.bloomberg.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.bloomberg.com/energy",
-          "summary": "Get updated data about energy and oil prices. Find natural gas, emissions, and crude oil price changes."
+          "headline": "XAU=: Gold / US Dollar Spot - Stock Price, Quote and News - CNBC",
+          "source": "www.cnbc.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.cnbc.com/quotes/XAU=",
+          "summary": "Latest On Gold / US Dollar Spot ; Central banks are buying more gold — and bringing the bullion back home June 17, 2026 ; Chow Tai Fook's shares rise 15% as"
         }
       ],
       "final_verdict": "NO_TRADE",
@@ -797,23 +409,23 @@
         "category": "Index"
       },
       "tech": {
-        "current_price": 23412.18,
-        "rsi_value": 29.64,
-        "sma_20": 24674.54,
-        "sma_50": 25487.28,
-        "sma_200": 25963.68,
-        "sma_50w": 25764.37,
-        "atr_value": 424.08,
+        "current_price": 23076.91,
+        "rsi_value": 26.9,
+        "sma_20": 24561.97,
+        "sma_50": 25435.6,
+        "sma_200": 25954.07,
+        "sma_50w": 25757.66,
+        "atr_value": 423.25,
         "price_vs_sma": "below",
         "price_vs_weekly_sma": "below",
         "sma_alignment": "bearish_stack",
         "sma_bias": "bearish",
-        "rsi_trend_2d": -2.14,
-        "atr_ratio": 1.08,
+        "rsi_trend_2d": -1.2,
+        "atr_ratio": 1.07,
         "volume_ratio": 0.0,
-        "vix_value": 19.21,
+        "vix_value": 18.09,
         "vix_level": "normal",
-        "near_resistance": false,
+        "near_resistance": true,
         "near_support": false,
         "supports": [
           19157.31,
@@ -821,27 +433,320 @@
           16441.44
         ],
         "resistances": [
+          23241.74,
           24874.39,
-          27138.48,
-          28056.1
+          27138.48
         ],
-        "macd_value": -540.9953,
-        "macd_signal": -413.2807,
-        "macd_histogram": -127.7147,
+        "macd_value": -589.2937,
+        "macd_signal": -448.4833,
+        "macd_histogram": -140.8104,
         "macd_cross": "none",
-        "bb_upper": 26106.58,
-        "bb_lower": 23242.49,
-        "bb_middle": 24674.54,
+        "bb_upper": 26125.55,
+        "bb_lower": 22998.39,
+        "bb_middle": 24561.97,
         "bb_position": "in_band",
-        "bb_width": 12.23
+        "bb_width": 13.55
+      },
+      "stage2": {
+        "lenses": {
+          "volatility": {
+            "score": 7,
+            "direction": "BEAR",
+            "analysis": "The Hang Seng is in a strong bearish downtrend with an oversold RSI, suggesting a potential for a bounce. The Bollinger Band width is significant (13.6%), and the ATR ratio is elevated (1.1x), indicating substantial current volatility. The proximity to the lower Bollinger Band and oversold RSI points to a potential short-term reversal or consolidation.",
+            "key_level": 22998.39
+          }
+        },
+        "composite_score": 7.0,
+        "consensus_direction": "NEUTRAL",
+        "confidence": 0.7
+      },
+      "stage5": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null
+      },
+      "stage6": null,
+      "stage7": null,
+      "synthesis": null,
+      "headlines": [
+        {
+          "headline": "Hong Kong stock market: Latest News and Updates",
+          "source": "www.scmp.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.scmp.com/topics/hong-kong-stock-market",
+          "summary": "Hang Seng Index review to boost market capitalisation by 4.5%: analysts Tencent, BeOne Medicines, Baidu and NetEase may lure fund inflows between US$200"
+        },
+        {
+          "headline": "Market Commentary - Hang Seng Bank",
+          "source": "www.hangseng.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.hangseng.com/en-hk/investmentcorner/marketoutlook",
+          "summary": "HK and Mainland China Stock Market Outlook. Hong Kong Equity Market Update - Stabilizing signal from Xi-Trump talk bodes well for HK equities (Chinese only)Read"
+        },
+        {
+          "headline": "HSI: Hang Seng Index - Stock Price, Quote and News - CNBC",
+          "source": "www.cnbc.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.cnbc.com/quotes/.HSI",
+          "summary": "Hang Seng Index .HSI:Hong Kong Stock Exchange ; Open23,388.50 ; Day High23,388.50 ; Day Low23,004.75 ; Prev Close23,412.18 ; 52 Week High28,056.10"
+        },
+        {
+          "headline": "Hang Seng Index Today (HSI) - Investing.com",
+          "source": "www.investing.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.investing.com/indices/hang-sen-40",
+          "summary": "The Hang Seng stock price has ranged from 22,986.00 to 28,056.10 over the past 52 weeks. From a Technical Analysis Perspective, Is Hang Seng a Buy or Sell?"
+        },
+        {
+          "headline": "Hong Kong Stock Market Index (HK50) - Quote - Chart - Historical Data",
+          "source": "tradingeconomics.com",
+          "datetime": "2026-06-25",
+          "url": "https://tradingeconomics.com/hong-kong/stock-market",
+          "summary": "The Hang Seng Index fell 305 points, or 1.3%, to 23,106 on Thursday, retreating from gains in the previous session and touching its lowest level since June"
+        },
+        {
+          "headline": "Hang Seng: Market overview - Hargreaves Lansdown",
+          "source": "www.hl.co.uk",
+          "datetime": "2026-06-25",
+          "url": "https://www.hl.co.uk/shares/stock-market-summary/hang-seng",
+          "summary": "The Hong Kong stock market's regular trading hours are Monday to Friday from 9:30am to 12pm and 1pm to 4pm HKST (1:30am to 8am GMT). Companies listed on the"
+        },
+        {
+          "headline": "Hang Seng Index Drops as Tech Stocks Weigh on Market - YouTube",
+          "source": "www.youtube.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.youtube.com/watch?v=vBtPPL27bBU",
+          "summary": "MetroTV, Hong Kong's stock market ended mixed on Thursday. The Hang Seng Index dropped 0.29%, closing at 26752.59 points, while the Hang"
+        },
+        {
+          "headline": "HKEX",
+          "source": "www.hkex.com.hk?sc_lang=en",
+          "datetime": "2026-06-25",
+          "url": "https://www.hkex.com.hk?sc_lang=en",
+          "summary": "Hang Seng Index 23,051.78 -360.40 (-1.54%) Index 3,830.61 -8.48 (-0.22%) +23.36 (+0.81%) Hong Kong's market infrastructure."
+        },
+        {
+          "headline": "HANG SENG INDEX (^HSI) Charts, Data & News - Yahoo Finance",
+          "source": "finance.yahoo.com",
+          "datetime": "2026-06-25",
+          "url": "https://finance.yahoo.com/quote/%5EHSI",
+          "summary": "HANG SENG INDEX 23,045.57 -1.57% Summary 61 (-1.57%) As of 3:35:52 PM GMT+8. Week Range 22,978.59 - 28,056.10. Nasdaq closes down more than 2% as global tech"
+        },
+        {
+          "headline": "Hang Seng Indexes Homepage - A leading index compiler covering ...",
+          "source": "www.hsi.com.hk",
+          "datetime": "2026-06-25",
+          "url": "https://www.hsi.com.hk",
+          "summary": "Hang Seng Index 23,768.52 0.65% track market trends and analyse movements with precision."
+        }
+      ],
+      "final_verdict": "NO_TRADE",
+      "final_confidence": 0,
+      "trading_plan": null
+    },
+    {
+      "asset": {
+        "ticker": "NG=F",
+        "display_name": "Naturgas",
+        "news_keywords": [
+          "natural gas price",
+          "energy market"
+        ],
+        "asset_type": "commodity",
+        "category": "Råvaror"
+      },
+      "tech": {
+        "current_price": 3.33,
+        "rsi_value": 60.29,
+        "sma_20": 3.2,
+        "sma_50": 2.96,
+        "sma_200": 3.45,
+        "sma_50w": 3.38,
+        "atr_value": 0.13,
+        "price_vs_sma": "below",
+        "price_vs_weekly_sma": "below",
+        "sma_alignment": "mixed",
+        "sma_bias": "bullish",
+        "rsi_trend_2d": 8.2,
+        "atr_ratio": 0.95,
+        "volume_ratio": 0.08,
+        "vix_value": 18.09,
+        "vix_level": "normal",
+        "near_resistance": false,
+        "near_support": false,
+        "supports": [
+          3.0,
+          2.86,
+          2.78
+        ],
+        "resistances": [
+          3.84,
+          4.15,
+          4.37
+        ],
+        "macd_value": 0.068,
+        "macd_signal": 0.07,
+        "macd_histogram": -0.002,
+        "macd_cross": "none",
+        "bb_upper": 3.34,
+        "bb_lower": 3.06,
+        "bb_middle": 3.2,
+        "bb_position": "in_band",
+        "bb_width": 8.39
+      },
+      "stage2": {
+        "lenses": {
+          "volatility": {
+            "score": 7,
+            "direction": "BULL",
+            "analysis": "Natural gas presents a tight Bollinger Band width (8.4%) and a low ATR (0.13), indicating consolidation and a potential for a breakout. The RSI is approaching overbought territory, and the bullish SMA bias, despite mixed alignment, suggests upward momentum could be building.",
+            "key_level": 3.34
+          }
+        },
+        "composite_score": 7.0,
+        "consensus_direction": "NEUTRAL",
+        "confidence": 0.7
+      },
+      "stage5": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null
+      },
+      "stage6": null,
+      "stage7": null,
+      "synthesis": null,
+      "headlines": [
+        {
+          "headline": "Daily energy market updates | NRG Energy",
+          "source": "www.nrg.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.nrg.com/resources/energy-tools/daily-market-updates.html",
+          "summary": "Total demand for natural gas is forecasted to decrease today ... Bearishness continued in the natural gas market last week as prices across the board saw downward"
+        },
+        {
+          "headline": "Natural gas - Price - Chart - Historical Data - News",
+          "source": "tradingeconomics.com",
+          "datetime": "2026-06-25",
+          "url": "https://tradingeconomics.com/commodity/natural-gas",
+          "summary": "Natural gas is expected to trade at 3.22 USD/MMBtu by the end of this quarter, according to Trading Economics global macro models and analysts expectations."
+        },
+        {
+          "headline": "U.S Natural Gas Outlook and Forecast Through 2030 - ICF",
+          "source": "www.icf.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.icf.com/insights/energy/future-forecast-price-of-natural-gas",
+          "summary": "U.S. natural gas demand is projected to increase 25% by 2030 relative to 2024, reaching approximately 138 Bcf/d. Nearly 60% of this growth comes from LNG"
+        },
+        {
+          "headline": "Natural Gas Price Forecast Today, Technical Analysis (April 23)",
+          "source": "www.youtube.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.youtube.com/watch?v=6Bd7rmYoZ4s",
+          "summary": "The natural gas markets are down again on Thursday, as traders price in the lack of demand coming from the United States at the moment,"
+        },
+        {
+          "headline": "Natural Gas Market Prices, Data, and Analysis | S&P Global",
+          "source": "www.spglobal.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.spglobal.com/energy/en/commodity/natural-gas",
+          "summary": "Natural Gas prices, market data, news, events and forward-looking intelligence for energy traders, analysts, utilities, and investment professionals."
+        },
+        {
+          "headline": "Short-Term Energy Outlook: Natural Gas - EIA",
+          "source": "www.eia.gov",
+          "datetime": "2026-06-25",
+          "url": "https://www.eia.gov/outlooks/steo/report/natgas.php",
+          "summary": "Despite expectations of rising demand, prices are lower in our outlook than we had forecast earlier this year. We now expect more natural gas will be held in"
+        },
+        {
+          "headline": "Natural Gas Prices and Natural Gas Futures Prices - Barchart.com",
+          "source": "www.barchart.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.barchart.com/futures/quotes/NG*0/futures-prices",
+          "summary": "Nat-gas prices moved higher on Wednesday as US weather forecasts shifted to hotter, potentially boosting nat-gas demand from electricity providers to power air-"
+        },
+        {
+          "headline": "Natural Gas Intelligence - Key natural gas price index data and news",
+          "source": "naturalgasintel.com",
+          "datetime": "2026-06-25",
+          "url": "https://naturalgasintel.com",
+          "summary": "Natural gas price transparency and key news, insights, and price index data for the North American energy markets."
+        },
+        {
+          "headline": "Short-Term Energy Outlook - EIA",
+          "source": "www.eia.gov",
+          "datetime": "2026-06-25",
+          "url": "https://www.eia.gov/outlooks/steo",
+          "summary": "Despite the rising demand, natural gas prices remain relatively flat in 2026 as supply growth outpaces demand. Rising crude oil prices drive crude oil"
+        },
+        {
+          "headline": "Natural gas – Global Energy Review 2025 – Analysis - IEA",
+          "source": "www.iea.org",
+          "datetime": "2026-06-25",
+          "url": "https://www.iea.org/reports/global-energy-review-2025/natural-gas",
+          "summary": "Following the supply shock of 2022 and 2023, natural gas markets moved towards a gradual rebalancing and returned to structural growth in 2024."
+        }
+      ],
+      "final_verdict": "NO_TRADE",
+      "final_confidence": 0,
+      "trading_plan": null
+    },
+    {
+      "asset": {
+        "ticker": "^N225",
+        "display_name": "Nikkei 225",
+        "news_keywords": [
+          "Nikkei",
+          "Japan economy",
+          "Tokyo Stock Exchange"
+        ],
+        "asset_type": "index",
+        "category": "Index"
+      },
+      "tech": {
+        "current_price": 72366.34,
+        "rsi_value": 66.27,
+        "sma_20": 68046.41,
+        "sma_50": 63827.81,
+        "sma_200": 54140.15,
+        "sma_50w": 52785.9,
+        "atr_value": 2130.53,
+        "price_vs_sma": "above",
+        "price_vs_weekly_sma": "above",
+        "sma_alignment": "bullish_stack",
+        "sma_bias": "bullish",
+        "rsi_trend_2d": 5.16,
+        "atr_ratio": 1.32,
+        "volume_ratio": 0.0,
+        "vix_value": 18.09,
+        "vix_level": "normal",
+        "near_resistance": false,
+        "near_support": false,
+        "supports": [
+          50558.91,
+          48235.3,
+          37928.65
+        ],
+        "resistances": [],
+        "macd_value": 2218.8644,
+        "macd_signal": 2052.6725,
+        "macd_histogram": 166.1918,
+        "macd_cross": "none",
+        "bb_upper": 73338.71,
+        "bb_lower": 62754.12,
+        "bb_middle": 68046.41,
+        "bb_position": "in_band",
+        "bb_width": 14.63
       },
       "stage2": {
         "lenses": {
           "volatility": {
             "score": 6,
-            "direction": "BEAR",
-            "analysis": "The Bollinger Bands are moderately wide (12.2%), and the ATR ratio is above 1x, indicating significant volatility in a strong downtrend. The RSI is oversold, suggesting a potential for a short-term bounce, but the overall trend is bearish.",
-            "key_level": 23242.49
+            "direction": "BULL",
+            "analysis": "The Nikkei 225 exhibits a strong bullish uptrend with a bullish stack of SMAs and an RSI approaching overbought territory. The Bollinger Band width is moderate (14.6%), and while not a tight squeeze, it suggests room for price expansion within the trend. The ATR ratio is elevated (1.3x), indicating current volatility is higher than average.",
+            "key_level": 73338.71
           }
         },
         "composite_score": 6.0,
@@ -859,74 +764,74 @@
       "synthesis": null,
       "headlines": [
         {
-          "headline": "Hong Kong stock market: Latest News and Updates",
-          "source": "www.scmp.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.scmp.com/topics/hong-kong-stock-market",
-          "summary": "Hong Kong stocks waver after overnight sell-offs in US Hang Seng Index swings after 3.3 per cent plunge in Nasdaq 100 on concerns about frothy s stock market,"
+          "headline": "Japanese (NIKKEI) Market Analysis & Valuation - Updated Today",
+          "source": "simplywall.st",
+          "datetime": "2026-06-25",
+          "url": "https://simplywall.st/markets/jp",
+          "summary": "New target price is 9.6% below last closing price of JP¥108,600. Stock is up 4,655% over the past year. The company is forecast to post earnings per share of JP"
         },
         {
-          "headline": "HANG SENG INDEX (^HSI) Charts, Data & News - Yahoo Finance",
+          "headline": "Nikkei 225 (^N225) Charts, Data & News - Yahoo Finance",
           "source": "finance.yahoo.com",
-          "datetime": "2026-06-24",
-          "url": "https://finance.yahoo.com/quote/%5EHSI",
-          "summary": "HANG SENG INDEX (^HSI) 23,443.88 +107.60 (+0.46%) As of 2:03:32 PM GMT+8. Market Open. Close 23,336.28 Open 23,420.70 Volume 0 Day's Range 23,248.87 - 23,565."
+          "datetime": "2026-06-25",
+          "url": "https://finance.yahoo.com/quote/%5EN225",
+          "summary": "Osaka - Delayed Quote • JPY. Nikkei 225 (^N225). 72,558.66 +3,383.69 (+4.89%). At close: 3:21:25 PM GMT+9. Get Latest Stock Picks. Chart Range Bar."
         },
         {
-          "headline": "Hong Kong Stock Market Index (HK50) - Quote - Chart - Historical Data",
-          "source": "tradingeconomics.com",
-          "datetime": "2026-06-24",
-          "url": "https://tradingeconomics.com/hong-kong/stock-market",
-          "summary": "The Hong Kong Stock Market Index (HK50) is expected to trade at 23842.40 points by the end of this quarter, according to Trading Economics global macro models"
-        },
-        {
-          "headline": "Market Commentary - Hang Seng Bank",
-          "source": "www.hangseng.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.hangseng.com/en-hk/investmentcorner/marketoutlook",
-          "summary": "Real-time basic quote is provided for free. Data content includes nominal/last traded price, closing price, today's high/low prices, trading volume, turnover"
-        },
-        {
-          "headline": "Hang Seng Index Today (HSI) - Investing.com",
+          "headline": "Nikkei 225 Index Today (N225) - Investing.com",
           "source": "www.investing.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.investing.com/indices/hang-sen-40",
-          "summary": "Today, the Hang Seng opened at 23,474.00. What is the trading volume for Hang Seng? The current volume for Hang Seng is 1,613,452,655."
+          "datetime": "2026-06-25",
+          "url": "https://www.investing.com/indices/japan-ni225",
+          "summary": "The Nikkei 225 stock price has ranged from 39,056.14 to 72,831.73 over the past 52 weeks. From a Technical Analysis Perspective, Is Nikkei 225 a Buy or Sell?"
         },
         {
-          "headline": "HSI: Hang Seng Index - Stock Price, Quote and News - CNBC",
+          "headline": "Japan Stock Market Index (JP225) - Quote - Chart - Historical Data",
+          "source": "tradingeconomics.com",
+          "datetime": "2026-06-25",
+          "url": "https://tradingeconomics.com/japan/stock-market",
+          "summary": "The Nikkei 225 Index fell 405 points or 0.58 percent on Wednesday to close at 69384 points. Leading the losses are T&D Holdings (-6.01%), Dai-ichi Life (-4.50%)"
+        },
+        {
+          "headline": "Nikkei Asia - Business, Politics, Economy and Tech News & Analysis",
+          "source": "asia.nikkei.com",
+          "datetime": "2026-06-25",
+          "url": "https://asia.nikkei.com",
+          "summary": "Japan, China, India and Southeast Asia news and expert analysis published by Nikkei, an award-winning independent provider of quality"
+        },
+        {
+          "headline": "Markets - Nikkei Asia",
+          "source": "asia.nikkei.com",
+          "datetime": "2026-06-25",
+          "url": "https://asia.nikkei.com/business/markets",
+          "summary": "Japan, China, India and Southeast Asia news and expert analysis published by Nikkei, an award-winning independent provider of quality journalism."
+        },
+        {
+          "headline": "Nikkei 225 Index Price, Chart & News (LIVE DATA)",
+          "source": "www.morningstar.com.au",
+          "datetime": "2026-06-25",
+          "url": "https://www.morningstar.com.au/investments/security/index/100000018",
+          "summary": "View Nikkei 225 index today's real-time price, chart, news, analysis and holdings of the index to help you make informed investment decisions."
+        },
+        {
+          "headline": "N225: Nikkei 225 Index - Stock Price, Quote and News - CNBC",
           "source": "www.cnbc.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.cnbc.com/quotes/.HSI",
-          "summary": "Hang Seng Index .HSI:Hong Kong Stock Exchange ; Open23,420.70 ; Day High23,521.52 ; Day Low23,248.87 ; Prev Close23,336.28 ; 52 Week High28,056.10"
+          "datetime": "2026-06-25",
+          "url": "https://www.cnbc.com/quotes/.N225",
+          "summary": "Nikkei 225 Index .N225:Nihon Keizai Shinbun ; Open70,114.09 ; Day High72,434.60 ; Day Low69,982.67 ; Prev Close69,174.97 ; 52 Week High72,831.73"
         },
         {
-          "headline": "Hang Seng: Market overview - Hargreaves Lansdown",
-          "source": "www.hl.co.uk",
-          "datetime": "2026-06-24",
-          "url": "https://www.hl.co.uk/shares/stock-market-summary/hang-seng",
-          "summary": "Market overview 23,332.68 -435.84 (-1.83%) Day high. The Hang Seng is a stock market index based in Hong Kong. Hong Kong stock market's regular trading hours"
+          "headline": "NIK | NIKKEI 225 Index Overview - MarketWatch",
+          "source": "www.marketwatch.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.marketwatch.com/investing/index/nik?countrycode=jp",
+          "summary": "NIK | A complete NIKKEI 225 Index index overview by MarketWatch. View stock market news, stock market data and trading information."
         },
         {
-          "headline": "Hong Kong's Hang Seng Index Heading for Bull Market - YouTube",
+          "headline": "Stock Market LIVE | Japan's Nikkei Recorded Biggest Loss - YouTube",
           "source": "www.youtube.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.youtube.com/watch?v=SKM6rJts_PU",
-          "summary": "... Markets & Finance: https://tinyurl.com/ysu5b8a9 Visit http://www.bloomberg.com for business news & analysis, up-to-the-minute market data"
-        },
-        {
-          "headline": "HKEX",
-          "source": "www.hkex.com.hk?sc_lang=en",
-          "datetime": "2026-06-24",
-          "url": "https://www.hkex.com.hk?sc_lang=en",
-          "summary": "High Low Hang Seng Index 23,336.28. Hang Seng TECH Index 4,399.22 (-) Hang Seng Biotech Index 11,998.06 (-) Updated: 23 Jun 2026. Find out how the city's"
-        },
-        {
-          "headline": "Hang Seng Indexes Homepage - A leading index compiler covering ...",
-          "source": "www.hsi.com.hk",
-          "datetime": "2026-06-24",
-          "url": "https://www.hsi.com.hk",
-          "summary": "Hang Seng Index. 23,320.61. 0.07% ; Hang Seng China Enterprises Index. 7,742.22. 0.22% ; Hang Seng TECH Index. 4,454.65. 1.26% ; Hang Seng Biotech Index. 12,353.65."
+          "datetime": "2026-06-25",
+          "url": "https://www.youtube.com/watch?v=VbZTUxLJS9g",
+          "summary": "Japanese stocks have recorded their biggest losses since October 1987, extending last week's sell-off spurred by concerns the United States"
         }
       ],
       "final_verdict": "NO_TRADE",
@@ -946,50 +851,50 @@
         "category": "Råvaror"
       },
       "tech": {
-        "current_price": 61.22,
-        "rsi_value": 31.16,
-        "sma_20": 69.4,
-        "sma_50": 74.47,
-        "sma_200": 68.1,
-        "sma_50w": 63.12,
-        "atr_value": 2.38,
+        "current_price": 57.61,
+        "rsi_value": 27.25,
+        "sma_20": 68.39,
+        "sma_50": 73.97,
+        "sma_200": 68.17,
+        "sma_50w": 63.05,
+        "atr_value": 2.64,
         "price_vs_sma": "below",
         "price_vs_weekly_sma": "below",
         "sma_alignment": "mixed",
         "sma_bias": "bearish",
-        "rsi_trend_2d": -5.93,
-        "atr_ratio": 0.84,
-        "volume_ratio": 18.4,
-        "vix_value": 19.21,
+        "rsi_trend_2d": -4.93,
+        "atr_ratio": 0.93,
+        "volume_ratio": 19.11,
+        "vix_value": 18.09,
         "vix_level": "normal",
         "near_resistance": false,
-        "near_support": true,
+        "near_support": false,
         "supports": [
-          61.09,
           31.08,
-          28.58
+          28.58,
+          26.69
         ],
         "resistances": [
           88.89,
           121.3
         ],
-        "macd_value": -3.2153,
-        "macd_signal": -2.6263,
-        "macd_histogram": -0.5889,
+        "macd_value": -3.8988,
+        "macd_signal": -2.9213,
+        "macd_histogram": -0.9775,
         "macd_cross": "none",
-        "bb_upper": 78.92,
-        "bb_lower": 59.87,
-        "bb_middle": 69.4,
+        "bb_upper": 79.48,
+        "bb_lower": 57.3,
+        "bb_middle": 68.39,
         "bb_position": "in_band",
-        "bb_width": 31.12
+        "bb_width": 38.51
       },
       "stage2": {
         "lenses": {
-          "reversal": {
+          "volatility": {
             "score": 6,
             "direction": "NEUTRAL",
-            "analysis": "Silver is approaching oversold territory with RSI at 31.2 and trading below its weekly SMA50. While there are no immediate reversal candles or divergences, the proximity to support at 61.09 suggests a potential for a bounce.",
-            "key_level": 61.09
+            "analysis": "Silver exhibits a wide Bollinger Band width (38.5%) and a relatively high ATR (2.64), suggesting potential for significant price movement. The RSI is oversold, hinting at a possible upward reversal, but the bearish SMA bias and mixed alignment warrant caution.",
+            "key_level": 57.3
           }
         },
         "composite_score": 6.0,
@@ -1009,70 +914,70 @@
         {
           "headline": "Silver Price Predictions 2026: After a 144% Surge, What's Next?",
           "source": "goldsilver.com",
-          "datetime": "2026-06-24",
+          "datetime": "2026-06-25",
           "url": "https://goldsilver.com/industry-news/article/silver-price-forecast-predictions",
-          "summary": "The silver market remains in a multiyear structural deficit, with demand exceeding mine supply by roughly 160–200 million ounces in 2025."
+          "summary": "GoldSilver's Lead Analyst Alan Hibbard expects silver to trade above $100 in 2026 as supply deficits deepen and industrial demand accelerates."
         },
         {
-          "headline": "Silver Price Today - Live Silver Spot Price Charts - JM Bullion",
-          "source": "www.jmbullion.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.jmbullion.com/charts/silver-prices",
-          "summary": "Silver is trading at approximately $62.92 per troy ounce this morning, easing slightly from Monday's strong rebound to $66.42 as markets weigh the Federal"
-        },
-        {
-          "headline": "2026 Silver Prices Forecast - Bullion by Post",
-          "source": "www.bullionbypost.co.uk",
-          "datetime": "2026-06-24",
-          "url": "https://www.bullionbypost.co.uk/index/silver/silver-prices-forecast",
-          "summary": "The general consensus among analysts is that silver could hit $30 per ounce this year, and from there could jump higher quite quickly, as has happened in the"
+          "headline": "Silver Price - Historical Chart - 2026 Forecast - How to Buy",
+          "source": "strategicmetalsinvest.com",
+          "datetime": "2026-06-25",
+          "url": "https://strategicmetalsinvest.com/silver-prices",
+          "summary": "At today's price of $2,011.14 per kilo, silver changed –16.78% in value so far this year. It is up +106.59% since the start of last year, and +148.18% since the"
         },
         {
           "headline": "Silver - Price - Chart - Historical Data - News - Trading Economics",
           "source": "tradingeconomics.com",
-          "datetime": "2026-06-24",
+          "datetime": "2026-06-25",
           "url": "https://tradingeconomics.com/commodity/silver",
-          "summary": "Silver fell to 61.54 USD/t.oz on June 24, 2026, down 0.02% from the previous day. Over the past month, Silver's price has fallen 21.18%, but it is still 69.67%"
+          "summary": "Silver rose to 57.37 USD/t.oz on June 25, 2026, up 0.02% from the previous day. Over the past month, Silver's price has fallen 25.44%, but it is still 56.50%"
         },
         {
-          "headline": "SILVER SUPPLY & DEMAND - The Silver Institute",
-          "source": "silverinstitute.org",
-          "datetime": "2026-06-24",
-          "url": "https://silverinstitute.org/silver-supply-demand",
-          "summary": "Total silver demand fell by 3 percent to 1.16 billion ounces (Boz) in 2024. The decline was primarily driven by weakness in physical investment and slightly"
-        },
-        {
-          "headline": "$309 Silver Right Now: The Forecast That Actually Makes Sense",
-          "source": "www.youtube.com",
-          "datetime": "2026-06-24",
-          "url": "https://www.youtube.com/watch?v=EDSWRbrLueY",
-          "summary": "Bank of America sees silver at $309. Here is why that number is built on structural market mechanics not speculation. In this video"
+          "headline": "The silver price forecast for 2026, 2030 and 2040 - Gold Republic",
+          "source": "www.goldrepublic.com",
+          "datetime": "2026-06-25",
+          "url": "https://www.goldrepublic.com/en-us/silver-price/forecast",
+          "summary": "InvestingHaven also anticipates a price of approximately $80 per troy ounce in 2027, while the silver price could climb back up to $140 per troy ounce by 2030."
         },
         {
           "headline": "Silver Price Today | Silver Spot Price Charts - APMEX",
           "source": "www.apmex.com",
-          "datetime": "2026-06-24",
+          "datetime": "2026-06-25",
           "url": "https://www.apmex.com/silver-price",
-          "summary": "The two-year Treasury yield dropped 8.9 basis points, and prices of gold and silver both surged. The silver spot price increased 4.21% from the start of the"
+          "summary": "Silver's current, nominal all-time high is $121.67, set on January 29, 2026. Silver recently breached a key milestone for the first time in history - $50 per"
+        },
+        {
+          "headline": "2026 Silver Prices Forecast - Bullion by Post",
+          "source": "www.bullionbypost.co.uk",
+          "datetime": "2026-06-25",
+          "url": "https://www.bullionbypost.co.uk/index/silver/silver-prices-forecast",
+          "summary": "The general consensus among analysts is that silver could hit $30 per ounce this year, and from there could jump higher quite quickly, as has happened in the"
+        },
+        {
+          "headline": "SILVER SUPPLY & DEMAND - The Silver Institute",
+          "source": "silverinstitute.org",
+          "datetime": "2026-06-25",
+          "url": "https://silverinstitute.org/silver-supply-demand",
+          "summary": "Total silver demand fell by 3 percent to 1.16 billion ounces (Boz) in 2024. The decline was primarily driven by weakness in physical investment and slightly"
         },
         {
           "headline": "How Will Silver Prices Fare in 2026? I J.P. Morgan Global Research",
           "source": "www.jpmorgan.com",
-          "datetime": "2026-06-24",
+          "datetime": "2026-06-25",
           "url": "https://www.jpmorgan.com/insights/global-research/commodities/silver-prices",
           "summary": "Silver prices rose by more than 130% over 2025, fueled by industrial demand and uncertainty over tariff regulations that were partially resolved in mid-January."
         },
         {
           "headline": "Silver price predictions: What to expect over the next 10 years",
           "source": "finance.yahoo.com",
-          "datetime": "2026-06-24",
+          "datetime": "2026-06-25",
           "url": "https://finance.yahoo.com/personal-finance/investing/article/silver-price-predictions-what-to-expect-over-the-next-10-years-130000808.html",
           "summary": "By the end of 2026, experts predict silver's price will surpass $80 per ounce, and it could reach $100 per ounce by 2030. Does that mean you"
         },
         {
           "headline": "Gold & Silver: Prices, Volatility, What's Next | BlackRock",
           "source": "www.blackrock.com",
-          "datetime": "2026-06-24",
+          "datetime": "2026-06-25",
           "url": "https://www.blackrock.com/us/financial-professionals/insights/gold-silver-prices-volatility",
           "summary": "Silver: Silver rose by 148% in 2025, adding another 19% in January – even after accounting for the 26% decline on Jan 30th.3 The surge has"
         }
@@ -1085,12 +990,12 @@
   "final_picks": [],
   "yesterday_review": null,
   "log": [
-    "**Unitron 8-Stegs Djupanalys** — 17 tillgångar, 09:42",
+    "**Unitron 8-Stegs Djupanalys** — 17 tillgångar, 09:34",
     "",
     "### Steg 0: Datafundament",
     "Hämtar marknadsdata och makroindikatorer...",
-    "VIX: 19.2",
-    "DXY: 101.62",
+    "VIX: 18.1",
+    "DXY: 101.50",
     "US 10Y: 4.45%",
     "Data: DAX 40 (1/17)",
     "Data: OMXS30 (2/17)",
@@ -1124,75 +1029,59 @@
     "Lins: MOMENTUM (17 tillgångar)",
     "Lins: VOLATILITY (17 tillgångar)",
     "Lins: RISK_REWARD (17 tillgångar)",
-    "[~] DAX 40: 4.0/10 NEUTRAL",
-    "[+] OMXS30: 7.5/10 NEUTRAL",
-    "[~] S&P 500: 4.0/10 NEUTRAL",
-    "[~] Nasdaq: 4.0/10 NEUTRAL",
+    "[~] DAX 40: 5.0/10 NEUTRAL",
+    "[~] OMXS30: 5.0/10 NEUTRAL",
+    "[~] S&P 500: 5.0/10 NEUTRAL",
+    "[~] Nasdaq: 5.0/10 NEUTRAL",
     "[~] FTSE 100: 5.0/10 NEUTRAL",
-    "[+] Nikkei 225: 7.0/10 NEUTRAL",
-    "[+] Hang Seng: 6.0/10 NEUTRAL",
-    "[~] Guld: 4.0/10 NEUTRAL",
+    "[+] Nikkei 225: 6.0/10 NEUTRAL",
+    "[+] Hang Seng: 7.0/10 NEUTRAL",
+    "[+] Guld: 8.0/10 NEUTRAL",
     "[+] Silver: 6.0/10 NEUTRAL",
-    "[+] Olja (WTI): 7.0/10 NEUTRAL",
-    "[~] Naturgas: 4.0/10 NEUTRAL",
+    "[~] Olja (WTI): 5.0/10 NEUTRAL",
+    "[+] Naturgas: 7.0/10 NEUTRAL",
     "[~] Platina: 5.0/10 NEUTRAL",
-    "[~] Koppar: 4.5/10 NEUTRAL",
-    "[~] Bitcoin: 4.0/10 NEUTRAL",
-    "[~] Ethereum: 4.5/10 NEUTRAL",
-    "[~] Solana: 5.5/10 NEUTRAL",
-    "[-] XRP: 2.0/10 NEUTRAL",
+    "[-] Koppar: 3.0/10 NEUTRAL",
+    "[-] Bitcoin: 2.0/10 NEUTRAL",
+    "[-] Ethereum: 2.0/10 NEUTRAL",
+    "[-] Solana: 2.0/10 NEUTRAL",
+    "[~] XRP: 5.0/10 NEUTRAL",
     "",
     "### Steg 3-4: Ranking & Premium-Nyheter",
-    "OMXS30: 7.5/10 NEUTRAL",
-    "Nikkei 225: 7.0/10 NEUTRAL",
-    "Olja (WTI): 7.0/10 NEUTRAL",
-    "Hang Seng: 6.0/10 NEUTRAL",
+    "Guld: 8.0/10 NEUTRAL",
+    "Hang Seng: 7.0/10 NEUTRAL",
+    "Naturgas: 7.0/10 NEUTRAL",
+    "Nikkei 225: 6.0/10 NEUTRAL",
     "Silver: 6.0/10 NEUTRAL",
-    "Solana: 5.5/10 NEUTRAL",
+    "DAX 40: 5.0/10 NEUTRAL",
+    "OMXS30: 5.0/10 NEUTRAL",
+    "S&P 500: 5.0/10 NEUTRAL",
+    "Nasdaq: 5.0/10 NEUTRAL",
     "FTSE 100: 5.0/10 NEUTRAL",
+    "Olja (WTI): 5.0/10 NEUTRAL",
     "Platina: 5.0/10 NEUTRAL",
-    "Koppar: 4.5/10 NEUTRAL",
-    "Ethereum: 4.5/10 NEUTRAL",
-    "DAX 40: 4.0/10 NEUTRAL",
-    "S&P 500: 4.0/10 NEUTRAL",
-    "Nasdaq: 4.0/10 NEUTRAL",
-    "Guld: 4.0/10 NEUTRAL",
-    "Naturgas: 4.0/10 NEUTRAL",
-    "Bitcoin: 4.0/10 NEUTRAL",
-    "XRP: 2.0/10 NEUTRAL",
+    "XRP: 5.0/10 NEUTRAL",
+    "Koppar: 3.0/10 NEUTRAL",
+    "Bitcoin: 2.0/10 NEUTRAL",
+    "Ethereum: 2.0/10 NEUTRAL",
+    "Solana: 2.0/10 NEUTRAL",
     "Topp 5 vidare till djupanalys",
     "Hämtar premium-nyheter (Tavily) för 5 finalister...",
-    "OMXS30: 10 artiklar",
-    "Nikkei 225: 10 artiklar",
-    "Olja (WTI): 10 artiklar",
+    "Guld: 10 artiklar",
     "Hang Seng: 10 artiklar",
+    "Naturgas: 10 artiklar",
+    "Nikkei 225: 10 artiklar",
     "Silver: 10 artiklar",
     "**5 finalister vidare till djupanalys**",
     "",
     "### Steg 5: Högdimensionell Djupanalys (Gemini)",
-    "Modul A: Historiska Analogier — OMXS30",
+    "Modul A: Historiska Analogier — Guld",
     "  Modul A misslyckades",
-    "Modul B: Intermarknadsanalys — OMXS30",
+    "Modul B: Intermarknadsanalys — Guld",
     "  Modul B misslyckades",
-    "Modul C: Utbud/Efterfrågan & Geopolitik — OMXS30",
+    "Modul C: Utbud/Efterfrågan & Geopolitik — Guld",
     "  Modul C misslyckades",
-    "Modul D: Scenariostresstest — OMXS30",
-    "  Modul D misslyckades",
-    "Modul A: Historiska Analogier — Nikkei 225",
-    "  Modul A misslyckades",
-    "Modul B: Intermarknadsanalys — Nikkei 225",
-    "  Modul B misslyckades",
-    "Modul C: Utbud/Efterfrågan & Geopolitik — Nikkei 225",
-    "  Modul C misslyckades",
-    "Modul D: Scenariostresstest — Nikkei 225",
-    "  Modul D misslyckades",
-    "Modul A: Historiska Analogier — Olja (WTI)",
-    "  Modul A misslyckades",
-    "Modul B: Intermarknadsanalys — Olja (WTI)",
-    "  Modul B misslyckades",
-    "Modul C: Utbud/Efterfrågan & Geopolitik — Olja (WTI)",
-    "  Modul C misslyckades",
-    "Modul D: Scenariostresstest — Olja (WTI)",
+    "Modul D: Scenariostresstest — Guld",
     "  Modul D misslyckades",
     "Modul A: Historiska Analogier — Hang Seng",
     "  Modul A misslyckades",
@@ -1201,6 +1090,22 @@
     "Modul C: Utbud/Efterfrågan & Geopolitik — Hang Seng",
     "  Modul C misslyckades",
     "Modul D: Scenariostresstest — Hang Seng",
+    "  Modul D misslyckades",
+    "Modul A: Historiska Analogier — Naturgas",
+    "  Modul A misslyckades",
+    "Modul B: Intermarknadsanalys — Naturgas",
+    "  Modul B misslyckades",
+    "Modul C: Utbud/Efterfrågan & Geopolitik — Naturgas",
+    "  Modul C misslyckades",
+    "Modul D: Scenariostresstest — Naturgas",
+    "  Modul D misslyckades",
+    "Modul A: Historiska Analogier — Nikkei 225",
+    "  Modul A misslyckades",
+    "Modul B: Intermarknadsanalys — Nikkei 225",
+    "  Modul B misslyckades",
+    "Modul C: Utbud/Efterfrågan & Geopolitik — Nikkei 225",
+    "  Modul C misslyckades",
+    "Modul D: Scenariostresstest — Nikkei 225",
     "  Modul D misslyckades",
     "Modul A: Historiska Analogier — Silver",
     "  Modul A misslyckades",
@@ -1212,38 +1117,38 @@
     "  Modul D misslyckades",
     "",
     "### Steg 6: Djävulens Advokat (Gemini)",
-    "Djävulens Advokat: OMXS30",
-    "OMXS30: Devil's Advocate misslyckades",
-    "Djävulens Advokat: Nikkei 225",
-    "Nikkei 225: Devil's Advocate misslyckades",
-    "Djävulens Advokat: Olja (WTI)",
-    "Olja (WTI): Devil's Advocate misslyckades",
+    "Djävulens Advokat: Guld",
+    "Guld: Devil's Advocate misslyckades",
     "Djävulens Advokat: Hang Seng",
     "Hang Seng: Devil's Advocate misslyckades",
+    "Djävulens Advokat: Naturgas",
+    "Naturgas: Devil's Advocate misslyckades",
+    "Djävulens Advokat: Nikkei 225",
+    "Nikkei 225: Devil's Advocate misslyckades",
     "Djävulens Advokat: Silver",
     "Silver: Devil's Advocate misslyckades",
     "",
     "### Steg 7: Korsvalidering (Groq)",
-    "Korsvalidering: OMXS30",
-    "OMXS30: Korsvalidering misslyckades",
-    "Korsvalidering: Nikkei 225",
-    "Nikkei 225: Korsvalidering misslyckades",
-    "Korsvalidering: Olja (WTI)",
-    "Olja (WTI): Korsvalidering misslyckades",
+    "Korsvalidering: Guld",
+    "Guld: Korsvalidering misslyckades",
     "Korsvalidering: Hang Seng",
     "Hang Seng: Korsvalidering misslyckades",
+    "Korsvalidering: Naturgas",
+    "Naturgas: Korsvalidering misslyckades",
+    "Korsvalidering: Nikkei 225",
+    "Nikkei 225: Korsvalidering misslyckades",
     "Korsvalidering: Silver",
     "Silver: Korsvalidering misslyckades",
     "",
     "### Slutgiltig Syntes & Handelsplan",
-    "Slutgiltig syntes: OMXS30",
-    "OMXS30: Syntes misslyckades",
-    "Slutgiltig syntes: Nikkei 225",
-    "Nikkei 225: Syntes misslyckades",
-    "Slutgiltig syntes: Olja (WTI)",
-    "Olja (WTI): Syntes misslyckades",
+    "Slutgiltig syntes: Guld",
+    "Guld: Syntes misslyckades",
     "Slutgiltig syntes: Hang Seng",
     "Hang Seng: Syntes misslyckades",
+    "Slutgiltig syntes: Naturgas",
+    "Naturgas: Syntes misslyckades",
+    "Slutgiltig syntes: Nikkei 225",
+    "Nikkei 225: Syntes misslyckades",
     "Slutgiltig syntes: Silver",
     "Silver: Syntes misslyckades",
     "",
