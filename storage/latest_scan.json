@@ -1,304 +1,176 @@
 {
-  "scan_date": "2026-09-18",
-  "scan_time": "11:13",
-  "vix_value": 15.260000228881836,
-  "dxy_value": 100.44100189208984,
-  "us10y_value": 4.947000026702881,
+  "scan_date": "2026-09-21",
+  "scan_time": "12:47",
+  "vix_value": 14.850000381469727,
+  "dxy_value": 100.2239990234375,
+  "us10y_value": 4.998000144958496,
   "market_regime": "TRANSITION",
-  "regime_report": "{\n  \"regime\": \"TRANSITION\",\n  \"regime_description\": \"The current environment exhibits mixed signals. While the VIX is relatively low, suggesting some risk appetite, the elevated US 10-Year Treasury yield and a stable Dollar Index point to ongoing concerns about inflation and monetary policy. This combination prevents a clear risk-on or risk-off stance.\",\n  \"asset_biases\": {\n    \"equities\": \"neutral\",\n    \"commodities\": \"neutral\",\n    \"crypto\": \"neutral\",\n    \"safe_havens\": \"neutral\"\n  },\n  \"macro_risks\": [\n    \"Unexpectedly strong US inflation data could push yields higher and strengthen the dollar, increasing risk aversion.\",\n    \"Geopolitical escalation in any major region could trigger a sudden flight to safety, impacting all risk assets.\",\n    \"Central bank commentary, particularly from the Federal Reserve, could shift market expectations regarding future interest rate policy.\"\n  ],\n  \"key_levels\": {\n    \"vix_watch\": \"VIX below 15 could signal increasing risk appetite, while a move above 20 would indicate rising fear.\",\n    \"dxy_watch\": \"A sustained move above 101 could signal renewed dollar strength and a risk-off sentiment, while a break below 99 might indicate dollar weakness and risk-on.\",\n    \"yield_watch\": \"US 10-Year Treasury yields approaching 5.00% could act as a psychological barrier and trigger further selling in risk assets, while a dip below 4.80% might offer some relief.\"\n  }\n}",
-  "global_sentiment": "Normalt marknadsläge. Neutral dollarstyrka. Hög ränta (4.95%). Regim: TRANSITION",
+  "regime_report": "{}",
+  "global_sentiment": "Lugn marknad (VIX < 15). Neutral dollarstyrka. Hög ränta (5.00%). Regim: TRANSITION",
   "all_scores": [
     {
       "name": "DAX 40",
       "ticker": "^GDAXI",
-      "score": 4.0,
+      "score": 3.8,
       "direction": "BEAR",
-      "confidence": 0.4,
+      "confidence": 0.38,
       "summary": "",
       "lenses": {
         "trend": {
           "score": 3,
           "direction": "BEAR",
-          "analysis": "The DAX 40 exhibits a bearish SMA bias with the price below its short-term SMAs (20 and 50). While the 200-day SMA is still below price, the overall alignment is weak and suggests a lack of conviction.",
-          "key_level": 24772.7
+          "analysis": "The DAX 40 exhibits a bearish SMA bias with the price below its short-term SMAs, indicating a weakening trend. The mixed alignment and neutral RSI suggest a lack of conviction.",
+          "key_level": 24781.04
         },
         "reversal": {
-          "score": 6,
+          "score": 5,
           "direction": "BEAR",
-          "analysis": "The DAX 40 shows a bearish SMA bias with the price below its short-term SMAs. While RSI is neutral, the lack of strong bullish confirmation and the bearish SMA setup suggest potential for a downward reversal if key support levels break.",
-          "key_level": 25893.76
+          "analysis": "The DAX 40 shows a bearish SMA bias and mixed alignment, with RSI in the neutral zone. The MACD is negative and trending lower, suggesting potential for further downside or a reversal from recent gains.",
+          "key_level": 25856.52
         },
         "momentum": {
           "score": 3,
           "direction": "BEAR",
-          "analysis": "The MACD histogram is negative and widening, indicating weakening momentum. RSI is in the neutral zone and trending down, suggesting a lack of buying conviction.",
-          "key_level": 25893.76
+          "analysis": "The DAX 40 exhibits bearish momentum with a negative MACD histogram and price below its short-term SMAs. RSI is neutral, but the overall picture suggests a lack of upward conviction.",
+          "key_level": 25856.52
+        },
+        "volatility": {
+          "score": 4,
+          "direction": "NEUTRAL",
+          "analysis": "The DAX 40 exhibits a bearish SMA bias and mixed alignment, with Bollinger Bands at 5.9% width suggesting moderate potential for a breakout. The ATR ratio of 1.1x indicates current volatility is slightly above average, but without a clear directional bias, it suggests consolidation.",
+          "key_level": 25105.84
+        },
+        "risk_reward": {
+          "score": 4,
+          "direction": "NEUTRAL",
+          "analysis": "The DAX 40 is in a bearish SMA bias with mixed alignment, indicating caution. The distance to the nearest support is significantly larger than the distance to resistance, suggesting a less favorable risk-reward profile.",
+          "key_level": 24266.33
         }
       }
     },
     {
       "name": "OMXS30",
       "ticker": "^OMX",
-      "score": 7.7,
+      "score": 7.8,
       "direction": "BULL",
-      "confidence": 0.77,
+      "confidence": 0.78,
       "summary": "",
       "lenses": {
         "trend": {
           "score": 8,
           "direction": "BULL",
-          "analysis": "The OMXS30 displays a strong bullish trend with a perfect SMA alignment (Price > SMA20 > SMA50 > SMA200). The price is comfortably above the weekly SMA50, reinforcing the positive momentum.",
-          "key_level": 3253.4
+          "analysis": "The OMXS30 shows a strong bullish trend characterized by a bullish stack of SMAs and price above all key moving averages. The bullish MACD cross further reinforces this positive momentum.",
+          "key_level": 3255.99
         },
         "reversal": {
           "score": 8,
           "direction": "BULL",
-          "analysis": "The OMXS30 exhibits a strong bullish stack across its SMAs, indicating an established uptrend. RSI is in the neutral zone, and there are no immediate signs of exhaustion or divergence, suggesting continued upward momentum is more likely than a reversal.",
-          "key_level": 3284.43
+          "analysis": "The OMXS30 exhibits a strong bullish SMA bias and alignment, with RSI in the neutral zone and a bullish MACD cross. The asset is trading within its Bollinger Bands, indicating continued upward momentum with no immediate reversal signals.",
+          "key_level": 3316.77
         },
         "momentum": {
+          "score": 8,
+          "direction": "BULL",
+          "analysis": "The OMXS30 shows strong bullish momentum, characterized by a bullish MACD crossover, price above all SMAs in a bullish stack, and a rising RSI. Volume is average, but the trend is clearly upward.",
+          "key_level": 3280.26
+        },
+        "volatility": {
           "score": 7,
           "direction": "BULL",
-          "analysis": "The OMXS30 exhibits a strong bullish stack across SMAs, indicating a confirmed uptrend. While RSI is neutral, the MACD histogram is showing signs of stabilization after a recent dip, suggesting sustained upward momentum.",
-          "key_level": 3279.97
+          "analysis": "The OMXS30 shows a strong bullish trend with a tight Bollinger Band width of 4.2%, indicating a potential for a significant upward move. The bullish MACD cross and ATR ratio of 1.3x suggest increasing volatility supporting the uptrend.",
+          "key_level": 3350.76
+        },
+        "risk_reward": {
+          "score": 8,
+          "direction": "BULL",
+          "analysis": "The OMXS30 exhibits a strong bullish trend with a bullish stack and a bullish MACD cross. The upside potential to resistance is slightly greater than the downside risk to support, offering a favorable risk-reward.",
+          "key_level": 3349.2
         }
       }
     },
     {
       "name": "S&P 500",
       "ticker": "^GSPC",
-      "score": 5.3,
+      "score": 5.2,
       "direction": "NEUTRAL",
-      "confidence": 0.53,
+      "confidence": 0.52,
       "summary": "",
       "lenses": {
         "trend": {
           "score": 5,
           "direction": "NEUTRAL",
-          "analysis": "The S&P 500 shows a mixed trend alignment, with the price hovering around the 50-day SMA and the 20-day SMA slightly below price. While the 200-day SMA is supportive, the lack of clear short-term direction indicates a ranging or consolidating phase.",
-          "key_level": 7615.1
+          "analysis": "The S&P 500 is in a neutral trend with a bullish SMA bias but mixed alignment, suggesting indecision. The price is hovering around the SMA20, and the RSI is at a neutral 50.7.",
+          "key_level": 7617.24
         },
         "reversal": {
-          "score": 7,
+          "score": 6,
           "direction": "NEUTRAL",
-          "analysis": "The S&P 500 has a bullish SMA bias but mixed alignment, with the price hovering around the SMA50. RSI is neutral, and the Bollinger Band width is narrow, indicating a lack of strong directional conviction and a moderate risk of a short-term reversal in either direction.",
-          "key_level": 7615.1
+          "analysis": "The S&P 500 has a bullish SMA bias but mixed alignment, with RSI at 50.7, indicating a lack of clear direction. The MACD is negative and trending lower, suggesting caution against strong bullish continuation.",
+          "key_level": 7658.89
         },
         "momentum": {
-          "score": 4,
+          "score": 5,
           "direction": "NEUTRAL",
-          "analysis": "The S&P 500 shows mixed SMA alignment and a neutral RSI. The MACD histogram is negative and widening, pointing to a loss of bullish momentum, but the price remains near the SMA20.",
-          "key_level": 7658.42
+          "analysis": "The S&P 500 is in a neutral momentum state. While price is above its longer-term SMAs, short-term SMAs are mixed, and the MACD histogram is negative. RSI is at a neutral 50.7.",
+          "key_level": 7617.24
+        },
+        "volatility": {
+          "score": 5,
+          "direction": "NEUTRAL",
+          "analysis": "The S&P 500 has a bullish SMA bias but mixed alignment, with very narrow Bollinger Bands at 2.6% width, signaling a high probability of an imminent breakout. The ATR ratio of 1.0x suggests current volatility is in line with its average, but the squeeze points to a potential increase.",
+          "key_level": 7560.5
+        },
+        "risk_reward": {
+          "score": 5,
+          "direction": "NEUTRAL",
+          "analysis": "The S&P 500 shows a bullish SMA bias but mixed alignment, requiring caution. The distance to nearest support and resistance are relatively balanced, resulting in a moderate risk-reward ratio.",
+          "key_level": 7816.7
         }
       }
     },
     {
       "name": "Nasdaq",
       "ticker": "^IXIC",
-      "score": 8.3,
+      "score": 7.0,
       "direction": "BULL",
-      "confidence": 0.83,
+      "confidence": 0.7,
       "summary": "",
       "lenses": {
         "trend": {
-          "score": 9,
+          "score": 8,
           "direction": "BULL",
-          "analysis": "The Nasdaq exhibits a very strong bullish trend with a clear SMA stack (Price > SMA20 > SMA50 > SMA200). The price is well above the weekly SMA50, and the Bollinger Bands show moderate width, suggesting healthy upward momentum.",
-          "key_level": 26065.26
+          "analysis": "The Nasdaq displays a robust bullish trend with a clear bullish stack of SMAs and price trading above all averages. The RSI is in the upper neutral zone, indicating positive sentiment.",
+          "key_level": 26071.58
         },
         "reversal": {
-          "score": 8,
+          "score": 7,
           "direction": "BULL",
-          "analysis": "The Nasdaq shows a strong bullish stack across its SMAs, confirming an uptrend. With RSI in the neutral zone and no clear reversal signals like divergences or capitulation volume, the asset appears relatively safe from immediate reversals.",
-          "key_level": 26418.3
+          "analysis": "The Nasdaq shows a strong bullish SMA bias and alignment, with RSI in the neutral zone and positive MACD. The asset is trading near the upper Bollinger Band, but the width is narrow, suggesting potential for continued upward movement without immediate reversal risk.",
+          "key_level": 26267.11
         },
         "momentum": {
-          "score": 8,
+          "score": 7,
           "direction": "BULL",
-          "analysis": "The Nasdaq displays a strong bullish stack across SMAs and a neutral-to-slightly-bullish RSI. The MACD histogram is negative but narrowing, suggesting a potential pause before further upside, with strong underlying trend support.",
-          "key_level": 26244.34
+          "analysis": "The Nasdaq displays solid bullish momentum with price above all SMAs in a bullish stack and a positive MACD. The RSI is in the upper neutral zone, and volume is above average, supporting the upward trend.",
+          "key_level": 26071.58
+        },
+        "volatility": {
+          "score": 6,
+          "direction": "BULL",
+          "analysis": "The Nasdaq displays a strong bullish trend with a tight Bollinger Band width of 3.0%, indicating a high likelihood of an upward breakout. The ATR ratio of 0.9x suggests volatility is slightly below average, but the narrow bands point to a potential increase.",
+          "key_level": 25873.24
+        },
+        "risk_reward": {
+          "score": 7,
+          "direction": "BULL",
+          "analysis": "The Nasdaq is in a strong bullish uptrend with a bullish stack and positive MACD. The upside potential to resistance is slightly greater than the downside risk to support, presenting a good risk-reward scenario.",
+          "key_level": 27032.87
         }
       }
     },
     {
       "name": "FTSE 100",
       "ticker": "^FTSE",
-      "score": 4.2,
-      "direction": "NEUTRAL",
-      "confidence": 0.42,
-      "summary": "",
-      "lenses": {
-        "trend": {
-          "score": 3,
-          "direction": "NEUTRAL",
-          "analysis": "The FTSE 100 shows a bearish SMA bias with mixed alignment, indicating a lack of clear directional conviction. Price is trading within the Bollinger Bands and the RSI is in the neutral zone, suggesting consolidation.",
-          "key_level": 10771.4
-        },
-        "reversal": {
-          "score": 6,
-          "direction": "NEUTRAL",
-          "analysis": "The FTSE 100 is trading near its SMAs with a neutral RSI. No clear reversal signals are present, but the mixed alignment suggests caution.",
-          "key_level": 10771.4
-        },
-        "volatility": {
-          "score": 4,
-          "direction": "NEUTRAL",
-          "analysis": "The Bollinger Bands are relatively narrow (3.0% width), suggesting a potential for a breakout. However, the ATR is not showing significant expansion, and the mixed SMA alignment indicates a lack of clear directional conviction.",
-          "key_level": 10962.2
-        },
-        "risk_reward": {
-          "score": 4,
-          "direction": "NEUTRAL",
-          "analysis": "The FTSE 100 shows a bearish SMA bias but mixed alignment, with price near the SMA20 and SMA50. The R:R is unfavorable due to limited upside potential relative to downside risk.",
-          "key_level": 10962.2
-        }
-      }
-    },
-    {
-      "name": "Nikkei 225",
-      "ticker": "^N225",
-      "score": 5.0,
-      "direction": "NEUTRAL",
-      "confidence": 0.5,
-      "summary": "",
-      "lenses": {
-        "trend": {
-          "score": 3,
-          "direction": "NEUTRAL",
-          "analysis": "The Nikkei 225 exhibits a bearish SMA bias and mixed alignment, pointing to indecision in the trend. The price is within the Bollinger Bands, and the RSI is neutral, reinforcing the lack of a strong directional signal.",
-          "key_level": 65121.1
-        },
-        "reversal": {
-          "score": 7,
-          "direction": "NEUTRAL",
-          "analysis": "The Nikkei 225 shows a bearish SMA bias but is in the neutral RSI zone. The mixed alignment and lack of clear reversal patterns indicate a neutral stance.",
-          "key_level": 65121.1
-        },
-        "volatility": {
-          "score": 5,
-          "direction": "NEUTRAL",
-          "analysis": "The Bollinger Bands are moderately wide (6.2% width), indicating some existing volatility but not an extreme squeeze. The ATR is at a normal ratio (0.9x), and the mixed SMA alignment suggests consolidation rather than an imminent breakout.",
-          "key_level": 69608.24
-        },
-        "risk_reward": {
-          "score": 5,
-          "direction": "NEUTRAL",
-          "analysis": "The Nikkei 225 exhibits a bearish SMA bias and mixed alignment. While the R:R is slightly better than the FTSE 100, the upside potential is still constrained by the nearest resistance.",
-          "key_level": 69608.24
-        }
-      }
-    },
-    {
-      "name": "Hang Seng",
-      "ticker": "^HSI",
-      "score": 3.0,
-      "direction": "BEAR",
-      "confidence": 0.3,
-      "summary": "",
-      "lenses": {
-        "trend": {
-          "score": 2,
-          "direction": "BEAR",
-          "analysis": "The Hang Seng displays a strong bearish trend, evidenced by its bearish SMA alignment (Price < SMA20 < SMA50 < SMA200) and a bearish SMA bias. The RSI is in the neutral zone, but the overall structure points to continued downside pressure.",
-          "key_level": 25216.15
-        },
-        "reversal": {
-          "score": 4,
-          "direction": "BEAR",
-          "analysis": "The Hang Seng exhibits a strong bearish trend with price below all SMAs and a bearish MACD. The RSI is in the neutral zone, but the overall trend suggests potential for further downside rather than a reversal.",
-          "key_level": 25216.15
-        },
-        "volatility": {
-          "score": 3,
-          "direction": "BEAR",
-          "analysis": "The Bollinger Bands are moderately wide (5.8% width), but the strong bearish SMA stack and RSI below 50 suggest a downtrend is in play. The ATR is at a normal ratio (0.9x), indicating consistent volatility within the existing trend.",
-          "key_level": 24874.39
-        },
-        "risk_reward": {
-          "score": 3,
-          "direction": "BEAR",
-          "analysis": "The Hang Seng is in a strong bearish downtrend with a bearish stack and price below its weekly SMA50. The R:R is poor, with significant downside risk and limited immediate upside potential.",
-          "key_level": 24874.39
-        }
-      }
-    },
-    {
-      "name": "Guld",
-      "ticker": "GC=F",
-      "score": 5.2,
-      "direction": "NEUTRAL",
-      "confidence": 0.53,
-      "summary": "",
-      "lenses": {
-        "trend": {
-          "score": 4,
-          "direction": "NEUTRAL",
-          "analysis": "Gold shows a bearish SMA bias but with mixed alignment, suggesting a lack of a defined trend. The price is within the Bollinger Bands, and the RSI is neutral, indicating a period of consolidation rather than a strong directional move.",
-          "key_level": 4491.7
-        },
-        "reversal": {
-          "score": 5,
-          "direction": "NEUTRAL",
-          "analysis": "Gold is trading in the neutral RSI zone with a bearish SMA bias but mixed alignment. The wide Bollinger Bands and lack of clear reversal patterns suggest a neutral outlook with potential for volatility.",
-          "key_level": 4491.7
-        },
-        "volatility": {
-          "score": 6,
-          "direction": "NEUTRAL",
-          "analysis": "The Bollinger Bands are quite wide (11.0% width), indicating significant current volatility. While the ATR is at a normal ratio (1.0x), the wide bands suggest that price action is active, and the mixed SMA alignment could lead to a directional move if volatility expands further.",
-          "key_level": 4917.7
-        },
-        "risk_reward": {
-          "score": 6,
-          "direction": "NEUTRAL",
-          "analysis": "Gold shows a bearish SMA bias but mixed alignment, trading within a wide Bollinger Band. The R:R is moderate, with a reasonable distance to both support and resistance, but the price is currently below its weekly SMA50.",
-          "key_level": 4917.7
-        }
-      }
-    },
-    {
-      "name": "Silver",
-      "ticker": "SI=F",
-      "score": 4.8,
-      "direction": "NEUTRAL",
-      "confidence": 0.48,
-      "summary": "",
-      "lenses": {
-        "trend": {
-          "score": 4,
-          "direction": "NEUTRAL",
-          "analysis": "Silver exhibits a mixed trend. While the short-term SMAs (20 and 50) are bullish, the longer-term SMA (200) is bearish, and the weekly SMA50 is above price, indicating a lack of clear directional conviction.",
-          "key_level": 62.96
-        },
-        "reversal": {
-          "score": 6,
-          "direction": "NEUTRAL",
-          "analysis": "Silver shows a bullish SMA bias but mixed alignment. The RSI is in the neutral zone, and MACD is trending down, suggesting potential for a short-term pullback or consolidation rather than a strong reversal.",
-          "key_level": 61.09
-        },
-        "momentum": {
-          "score": 4,
-          "direction": "NEUTRAL",
-          "analysis": "Silver shows mixed momentum. The MACD histogram is negative and trending down, suggesting weakening bearish momentum, while the RSI is in the neutral zone and the weekly SMA50 is above price, indicating a lack of strong directional conviction.",
-          "key_level": 66.33
-        },
-        "volatility": {
-          "score": 5,
-          "direction": "NEUTRAL",
-          "analysis": "Silver exhibits a moderately wide Bollinger Band (11.6%) and a stable ATR ratio (1.0x), suggesting a period of consolidation rather than an imminent breakout. The mixed SMA alignment and neutral RSI indicate a lack of strong directional conviction.",
-          "key_level": 66.33
-        },
-        "risk_reward": {
-          "score": 5,
-          "direction": "NEUTRAL",
-          "analysis": "Silver shows a bullish SMA bias but mixed trend alignment. The R:R is moderate, with significant upside potential but also substantial downside risk.",
-          "key_level": 61.09
-        }
-      }
-    },
-    {
-      "name": "Olja (WTI)",
-      "ticker": "CL=F",
       "score": 6.8,
       "direction": "BULL",
       "confidence": 0.68,
@@ -307,112 +179,264 @@
         "trend": {
           "score": 8,
           "direction": "BULL",
-          "analysis": "WTI Crude Oil shows a strong bullish trend, evidenced by the bullish SMA alignment (Price > SMA20 > SMA50 > SMA200) and the weekly SMA50 being below price. This suggests sustained upward momentum.",
-          "key_level": 80.66
+          "analysis": "The FTSE 100 exhibits a strong bullish trend, evidenced by a bullish stack across all SMAs and price trading above the weekly SMA50. The RSI is neutral, suggesting room for further upward momentum.",
+          "key_level": 10962.2
+        },
+        "reversal": {
+          "score": 7,
+          "direction": "NEUTRAL",
+          "analysis": "The FTSE 100 is in a strong uptrend, but the RSI is in the neutral zone, suggesting a lack of immediate reversal pressure. No clear double tops/bottoms or exhaustion volume are evident.",
+          "key_level": 10962.2
+        },
+        "momentum": {
+          "score": 7,
+          "direction": "BULL",
+          "analysis": "The FTSE 100 exhibits strong bullish momentum with a bullish stack of SMAs and price above all key moving averages. While RSI is neutral, the MACD histogram is trending upwards, suggesting potential for further gains.",
+          "key_level": 10962.2
+        },
+        "volatility": {
+          "score": 6,
+          "direction": "BULL",
+          "analysis": "The FTSE 100 shows a strong uptrend with a bullish stack and a relatively narrow Bollinger Band width (3.1%), suggesting potential for continued upward momentum or a breakout. ATR is at 1.2x average, indicating moderate volatility.",
+          "key_level": 10962.2
+        },
+        "risk_reward": {
+          "score": 6,
+          "direction": "BULL",
+          "analysis": "The FTSE 100 is in a strong uptrend with a bullish stack of SMAs. While the RSI is neutral, the proximity to resistance suggests a moderate risk-reward for new long positions.",
+          "key_level": 10962.2
+        }
+      }
+    },
+    {
+      "name": "Nikkei 225",
+      "ticker": "^N225",
+      "score": 3.8,
+      "direction": "NEUTRAL",
+      "confidence": 0.38,
+      "summary": "",
+      "lenses": {
+        "trend": {
+          "score": 3,
+          "direction": "NEUTRAL",
+          "analysis": "The Nikkei 225 shows a mixed SMA alignment and a neutral RSI, indicating a lack of clear trend direction. Price is above the weekly SMA50, but short-term SMAs suggest caution.",
+          "key_level": 69608.24
+        },
+        "reversal": {
+          "score": 5,
+          "direction": "NEUTRAL",
+          "analysis": "The Nikkei 225 shows mixed SMA alignment and a neutral RSI, indicating potential for a reversal but without strong confirmation. The Bollinger Band width is moderate, and volume is slightly above average.",
+          "key_level": 69608.24
+        },
+        "momentum": {
+          "score": 3,
+          "direction": "NEUTRAL",
+          "analysis": "The Nikkei 225 shows mixed momentum with a bearish SMA bias but a bullish weekly SMA50. The MACD histogram is negative and falling, indicating weakening momentum, and RSI is in the neutral zone.",
+          "key_level": 60448.9
+        },
+        "volatility": {
+          "score": 4,
+          "direction": "NEUTRAL",
+          "analysis": "The Nikkei 225 exhibits mixed SMA alignment and a neutral RSI, indicating a lack of clear trend. The Bollinger Band width is moderate (6.2%), and ATR is at 0.9x average, suggesting consolidation rather than a strong volatility event.",
+          "key_level": 69608.24
+        },
+        "risk_reward": {
+          "score": 4,
+          "direction": "NEUTRAL",
+          "analysis": "The Nikkei 225 exhibits mixed SMA alignment and a neutral RSI, indicating a lack of clear trend. The risk-reward is unfavorable due to the narrow gap between current price and resistance.",
+          "key_level": 69608.24
+        }
+      }
+    },
+    {
+      "name": "Hang Seng",
+      "ticker": "^HSI",
+      "score": 3.2,
+      "direction": "BEAR",
+      "confidence": 0.32,
+      "summary": "",
+      "lenses": {
+        "trend": {
+          "score": 2,
+          "direction": "BEAR",
+          "analysis": "The Hang Seng is in a strong bearish trend with a bearish stack across all SMAs and price below the weekly SMA50. The RSI is in the neutral zone, but the bearish structure is dominant.",
+          "key_level": 26187.57
         },
         "reversal": {
           "score": 4,
           "direction": "BEAR",
-          "analysis": "WTI exhibits a strong bullish SMA bias and alignment, but the RSI is in the neutral zone and the MACD histogram is showing a slight decrease. This could indicate a potential for a short-term reversal or profit-taking after a strong run.",
-          "key_level": 80.56
+          "analysis": "The Hang Seng is in a strong downtrend with a neutral RSI, which could signal a potential bottom if price starts to hold above support. However, the current trend is bearish, and no clear reversal signals are present yet.",
+          "key_level": 24203.54
         },
         "momentum": {
+          "score": 2,
+          "direction": "BEAR",
+          "analysis": "The Hang Seng is in a strong downtrend, confirmed by a bearish stack of SMAs and price below all key moving averages. The MACD histogram is negative and falling, reinforcing bearish sentiment, with RSI in the neutral zone but trending down.",
+          "key_level": 24203.54
+        },
+        "volatility": {
+          "score": 5,
+          "direction": "BEAR",
+          "analysis": "The Hang Seng is in a strong downtrend with a bearish stack and a neutral RSI. The Bollinger Band width is moderate (5.7%), and ATR is at 0.9x average, suggesting potential for continued downside pressure but not an immediate breakout.",
+          "key_level": 26187.57
+        },
+        "risk_reward": {
+          "score": 3,
+          "direction": "BEAR",
+          "analysis": "The Hang Seng is in a strong downtrend with a bearish SMA stack and a neutral-to-bearish RSI. The limited upside potential relative to downside risk makes it unattractive for new positions.",
+          "key_level": 26187.57
+        }
+      }
+    },
+    {
+      "name": "Guld",
+      "ticker": "GC=F",
+      "score": 4.6,
+      "direction": "NEUTRAL",
+      "confidence": 0.46,
+      "summary": "",
+      "lenses": {
+        "trend": {
+          "score": 3,
+          "direction": "NEUTRAL",
+          "analysis": "Gold (GC=F) displays a mixed SMA alignment and a neutral RSI, suggesting a lack of a defined trend. Price is below the weekly SMA50, and the Bollinger Band width indicates potential for volatility.",
+          "key_level": 4917.7
+        },
+        "reversal": {
+          "score": 5,
+          "direction": "NEUTRAL",
+          "analysis": "Gold is in a mixed trend with a neutral RSI, suggesting a potential for a reversal in either direction. The wide Bollinger Band width and moderate ATR indicate some volatility, but no strong reversal signals are apparent.",
+          "key_level": 4917.7
+        },
+        "momentum": {
+          "score": 3,
+          "direction": "NEUTRAL",
+          "analysis": "Gold (GC=F) displays mixed momentum, with a bearish SMA bias and price below the SMA20 and SMA200. The MACD histogram is negative and falling, indicating bearish pressure, and RSI is in the neutral zone.",
+          "key_level": 4100.0
+        },
+        "volatility": {
+          "score": 7,
+          "direction": "NEUTRAL",
+          "analysis": "Gold (GC=F) displays a wide Bollinger Band width (10.4%) and a neutral RSI, indicating potential for significant price movement. The ATR is at 1.0x average, suggesting current volatility is in line with its historical average, but the wide bands hint at an impending breakout.",
+          "key_level": 4917.7
+        },
+        "risk_reward": {
+          "score": 5,
+          "direction": "NEUTRAL",
+          "analysis": "Gold (GC=F) shows mixed SMA alignment and a neutral RSI, suggesting consolidation. The wide Bollinger Band width and moderate distance to resistance offer a balanced, albeit not exceptional, risk-reward.",
+          "key_level": 4917.7
+        }
+      }
+    },
+    {
+      "name": "Silver",
+      "ticker": "SI=F",
+      "score": 4.7,
+      "direction": "NEUTRAL",
+      "confidence": 0.47,
+      "summary": "",
+      "lenses": {
+        "trend": {
+          "score": 4,
+          "direction": "NEUTRAL",
+          "analysis": "Silver exhibits a mixed SMA alignment with the price below the long-term SMA200, suggesting a lack of clear directional conviction. The weekly SMA50 is also above the current price, reinforcing a potentially bearish undertone on longer timeframes.",
+          "key_level": 72.53
+        },
+        "momentum": {
+          "score": 4,
+          "direction": "NEUTRAL",
+          "analysis": "Silver shows mixed signals with a bullish SMA bias but mixed alignment. The MACD histogram is negative and falling, while RSI is neutral. Volume is elevated but not clearly trending with price.",
+          "key_level": 66.17
+        },
+        "volatility": {
+          "score": 6,
+          "direction": "NEUTRAL",
+          "analysis": "Silver exhibits a moderately wide Bollinger Band (10.7%) and a neutral RSI, suggesting potential for a breakout but lacking strong directional conviction. The ATR ratio of 0.9x indicates current volatility is in line with its average, with no immediate signs of significant expansion or contraction.",
+          "key_level": 69.76
+        }
+      }
+    },
+    {
+      "name": "Olja (WTI)",
+      "ticker": "CL=F",
+      "score": 7.3,
+      "direction": "BULL",
+      "confidence": 0.73,
+      "summary": "",
+      "lenses": {
+        "trend": {
           "score": 8,
           "direction": "BULL",
-          "analysis": "WTI crude oil exhibits strong bullish momentum. The MACD histogram is positive and expanding, the RSI is in the neutral zone but trending up, and the price is well above all SMAs, confirming an uptrend. Volume is currently below average, which is a slight caution.",
-          "key_level": 92.62
+          "analysis": "WTI crude oil displays a strong bullish trend with price above all SMAs (20, 50, 200) in a bullish stack. The weekly SMA50 is also above the current price, confirming upward momentum.",
+          "key_level": 93.16
+        },
+        "momentum": {
+          "score": 7,
+          "direction": "BULL",
+          "analysis": "WTI exhibits strong bullish momentum with a bullish stack of SMAs and a positive, albeit small, MACD histogram. RSI is neutral, and volume is below average, suggesting potential for further upside if volume picks up.",
+          "key_level": 93.16
         },
         "volatility": {
           "score": 7,
           "direction": "BULL",
-          "analysis": "WTI Crude Oil shows a wide Bollinger Band (32.3%) and an expanding ATR ratio (1.3x), indicating significant volatility and a potential for further price movement within its strong bullish uptrend. The bullish stack of SMAs supports this upward momentum.",
-          "key_level": 92.62
-        },
-        "risk_reward": {
-          "score": 7,
-          "direction": "BULL",
-          "analysis": "WTI exhibits a strong bullish uptrend with all SMAs aligned. The R:R is favorable, offering good upside potential relative to immediate downside risk.",
-          "key_level": 80.56
+          "analysis": "WTI Crude Oil shows a wide Bollinger Band (33.3%) and a strong bullish SMA alignment, indicating a trending environment with room for further price expansion. The ATR ratio of 1.3x suggests volatility is currently elevated and supporting the uptrend, though the RSI is neutral.",
+          "key_level": 93.5
         }
       }
     },
     {
       "name": "Naturgas",
       "ticker": "NG=F",
-      "score": 4.2,
-      "direction": "BEAR",
-      "confidence": 0.42,
+      "score": 3.7,
+      "direction": "NEUTRAL",
+      "confidence": 0.37,
       "summary": "",
       "lenses": {
         "trend": {
           "score": 3,
           "direction": "BEAR",
-          "analysis": "Natural Gas is in a bearish trend, with the SMA20 below the SMA50 and the SMA200 above price. The bearish MACD cross and the weekly SMA50 being above price further reinforce this weak directional bias.",
-          "key_level": 3.23
-        },
-        "reversal": {
-          "score": 7,
-          "direction": "NEUTRAL",
-          "analysis": "Natural Gas has a bearish SMA bias and mixed alignment. The RSI is neutral, and the MACD has just experienced a bearish cross, but the price is still within the Bollinger Bands. This suggests a potential for further downside but not an immediate strong reversal.",
-          "key_level": 2.78
+          "analysis": "Natural gas shows a bearish SMA bias with the price below the SMA200, and a bearish MACD cross. The weekly SMA50 is above the current price, indicating a prevailing downtrend.",
+          "key_level": 3.22
         },
         "momentum": {
           "score": 3,
           "direction": "BEAR",
-          "analysis": "Natural gas displays weak bearish momentum. The MACD has just experienced a bearish cross, and the histogram is negative and slightly contracting. The RSI is below 50, and the price is below the SMA20 and weekly SMA50, indicating downward pressure.",
+          "analysis": "Natural Gas shows weak bearish momentum. The MACD has a bearish cross and a negative histogram, and the weekly SMA50 is above price. RSI is neutral, and volume is significantly below average.",
           "key_level": 2.88
         },
         "volatility": {
-          "score": 4,
+          "score": 5,
           "direction": "NEUTRAL",
-          "analysis": "Natural Gas presents a narrow Bollinger Band (8.3%) and a stable ATR ratio (1.0x), suggesting a period of low volatility and consolidation. The bearish MACD cross and mixed SMA alignment point to potential downside risk or continued sideways movement.",
-          "key_level": 2.88
-        },
-        "risk_reward": {
-          "score": 4,
-          "direction": "BEAR",
-          "analysis": "Natural Gas has a bearish SMA bias and mixed trend alignment, with a recent bearish MACD cross. The R:R is unfavorable, with limited upside and significant downside risk.",
-          "key_level": 2.78
+          "analysis": "Natural Gas presents a tight Bollinger Band (7.7%), signaling a potential volatility expansion or breakout. However, the mixed SMA alignment and neutral RSI suggest uncertainty about the direction of this potential move. The ATR ratio of 1.0x indicates current volatility is average.",
+          "key_level": 2.99
         }
       }
     },
     {
       "name": "Platina",
       "ticker": "PL=F",
-      "score": 4.4,
+      "score": 4.7,
       "direction": "NEUTRAL",
-      "confidence": 0.44,
+      "confidence": 0.47,
       "summary": "",
       "lenses": {
         "trend": {
           "score": 4,
           "direction": "NEUTRAL",
-          "analysis": "Platinum displays a mixed trend with a bearish SMA bias. The short-term SMAs are bullish, but the SMA200 is bearish, and the weekly SMA50 is above price, indicating a lack of a clear, sustained trend.",
-          "key_level": 1735.11
-        },
-        "reversal": {
-          "score": 5,
-          "direction": "BEAR",
-          "analysis": "Platinum has a bearish SMA bias and mixed alignment. The RSI is neutral, but the MACD histogram is significantly negative, indicating strong downward momentum. The price is approaching the lower Bollinger Band, suggesting a potential for a bounce, but the overall trend is bearish.",
-          "key_level": 1518.45
+          "analysis": "Platinum has a bearish SMA bias with the price below the SMA200, but the short-term SMAs are mixed. The weekly SMA50 is above the current price, suggesting potential resistance and a lack of clear trend.",
+          "key_level": 1946.58
         },
         "momentum": {
-          "score": 2,
-          "direction": "BEAR",
-          "analysis": "Platinum shows weak bearish momentum. The MACD histogram is significantly negative and trending down, indicating strong bearish momentum. The RSI is in the neutral zone, but the price is below the SMA20 and weekly SMA50, suggesting a bearish bias.",
-          "key_level": 1820.08
+          "score": 4,
+          "direction": "NEUTRAL",
+          "analysis": "Platinum displays mixed momentum. While the SMA bias is bearish, alignment is mixed. The MACD histogram is strongly negative and falling, but RSI is in the neutral zone. Volume is exceptionally high, indicating significant market interest but unclear direction.",
+          "key_level": 1815.69
         },
         "volatility": {
           "score": 6,
           "direction": "NEUTRAL",
-          "analysis": "Platinum displays a moderately narrow Bollinger Band (9.6%) and a slightly elevated ATR ratio (1.1x), hinting at potential for a breakout but with current consolidation. The bearish SMA bias and negative MACD histogram suggest caution, despite a neutral RSI.",
-          "key_level": 1820.08
-        },
-        "risk_reward": {
-          "score": 5,
-          "direction": "NEUTRAL",
-          "analysis": "Platinum has a bearish SMA bias but mixed trend alignment, and is currently trading within its Bollinger Bands. The R:R is moderate, with substantial upside potential but also considerable downside risk.",
-          "key_level": 1518.45
+          "analysis": "Platinum displays a narrow Bollinger Band (9.0%), hinting at an impending volatility event. The high volume (19.6x avg) suggests significant market interest, but the mixed SMA alignment and neutral RSI offer no clear directional bias. The ATR ratio of 0.9x shows volatility is currently in line with its average.",
+          "key_level": 1897.29
         }
       }
     },
@@ -427,326 +451,143 @@
         "trend": {
           "score": 8,
           "direction": "BULL",
-          "analysis": "The asset exhibits a strong bullish trend, evidenced by a bullish stack across all SMAs (20, 50, 200) with price above all. The weekly SMA50 is also comfortably above, reinforcing the positive momentum.",
-          "key_level": 6.05
+          "analysis": "Koppar exhibits a strong bullish trend with a perfect bullish stack across SMAs and price trading above the weekly SMA50. The RSI is approaching overbought, suggesting potential for a short-term consolidation, but the underlying trend remains robust.",
+          "key_level": 6.84
         },
         "reversal": {
           "score": 7,
           "direction": "BULL",
-          "analysis": "Koppar exhibits a strong bullish uptrend with all SMAs aligned. RSI is in the neutral zone, and no clear reversal patterns or exhaustion signals are present, suggesting continued upward momentum is more likely than a reversal.",
-          "key_level": 6.8
-        },
-        "momentum": {
-          "score": 7,
-          "direction": "BULL",
-          "analysis": "Koppar exhibits a strong bullish uptrend with its price above all key SMAs. While RSI is neutral, the bullish stack and elevated volume suggest continued upward momentum.",
-          "key_level": 6.65
+          "analysis": "Koppar is in a strong uptrend with bullish alignment. RSI is approaching overbought, but no clear divergence or reversal patterns are evident yet. The price trading above the upper Bollinger Band suggests potential for a short-term pause or consolidation rather than an immediate reversal.",
+          "key_level": 6.84
         },
         "volatility": {
           "score": 6,
           "direction": "BULL",
-          "analysis": "Bollinger Bands are relatively wide (7.0%), suggesting current volatility is not exceptionally suppressed. ATR is at 1.4x average, indicating a healthy level of price movement supporting the uptrend, but not a squeeze setup.",
-          "key_level": 6.8
+          "analysis": "Bollinger Bands are widening (7.7% width), suggesting increasing volatility in line with the strong uptrend. ATR ratio of 1.5x indicates above-average volatility expansion.",
+          "key_level": 6.84
         }
       }
     },
     {
       "name": "Bitcoin",
       "ticker": "BTC-USD",
-      "score": 7.0,
-      "direction": "BULL",
-      "confidence": 0.7,
+      "score": 6.3,
+      "direction": "NEUTRAL",
+      "confidence": 0.63,
       "summary": "",
       "lenses": {
         "trend": {
           "score": 9,
           "direction": "BULL",
-          "analysis": "Bitcoin displays a very strong bullish trend with price well above the bullishly aligned SMAs (20, 50, 200). It is currently trading at the weekly SMA50, indicating strong support at this level.",
-          "key_level": 70383.92
+          "analysis": "Bitcoin is in a very strong bullish trend, evidenced by the bullish stack and price significantly above all SMAs, including the weekly SMA50. The RSI is in overbought territory, indicating a high probability of a near-term pullback, but the trend strength is exceptional.",
+          "key_level": 85176.73
         },
         "reversal": {
-          "score": 6,
-          "direction": "BULL",
-          "analysis": "Bitcoin is in a strong uptrend, with price above all SMAs and RSI in the neutral zone. While the Bollinger Band width is moderate, there are no immediate signs of a bearish reversal, though the current price is approaching the upper band.",
-          "key_level": 80965.62
-        },
-        "momentum": {
-          "score": 8,
-          "direction": "BULL",
-          "analysis": "Bitcoin shows a robust bullish stack across SMAs, indicating a strong uptrend. The RSI is in the neutral zone, and while MACD histogram is negative, the overall price action and volume support continued bullish momentum.",
-          "key_level": 78194.59
+          "score": 3,
+          "direction": "BEAR",
+          "analysis": "Bitcoin exhibits strong bullish momentum but is significantly overbought (RSI 71.8) and trading above the upper Bollinger Band. While the MACD shows a bullish cross, the extreme overbought condition and price extension increase the probability of a pullback or consolidation. The volume is elevated but not indicative of capitulation.",
+          "key_level": 85176.73
         },
         "volatility": {
-          "score": 5,
+          "score": 7,
           "direction": "BULL",
-          "analysis": "Bollinger Bands are moderately wide (7.6%), and the ATR ratio is 0.8x average, indicating no significant volatility compression. The asset is trading within its bands, suggesting continued but not explosive price action.",
-          "key_level": 80965.62
+          "analysis": "Bollinger Bands are expanding (11.1% width) and the price is above the upper band, indicating high and potentially unsustainable volatility. ATR ratio of 0.9x suggests volatility is not excessively expanding relative to its average, but the overall setup is highly volatile.",
+          "key_level": 85176.73
         }
       }
     },
     {
       "name": "Ethereum",
       "ticker": "ETH-USD",
-      "score": 6.5,
-      "direction": "BULL",
-      "confidence": 0.65,
+      "score": 6.0,
+      "direction": "NEUTRAL",
+      "confidence": 0.6,
       "summary": "",
       "lenses": {
         "trend": {
           "score": 8,
           "direction": "BULL",
-          "analysis": "Ethereum is in a clear bullish uptrend, with price trading above a bullishly stacked SMA sequence (20, 50, 200). The weekly SMA50 is also below the current price, confirming the bullish structure.",
-          "key_level": 2069.8
+          "analysis": "Ethereum displays a strong bullish trend with a clear bullish stack and price trading above the weekly SMA50. Similar to Bitcoin, the RSI is overbought, signaling a potential for a correction, but the overall trend structure is very healthy.",
+          "key_level": 2727.06
         },
         "reversal": {
-          "score": 6,
-          "direction": "BULL",
-          "analysis": "Ethereum shows a robust bullish uptrend with a bullish SMA stack and RSI in the neutral zone. The price is trading within the Bollinger Bands, and there are no clear indicators of an imminent reversal, suggesting the trend is likely to persist.",
-          "key_level": 2551.74
-        },
-        "momentum": {
-          "score": 7,
-          "direction": "BULL",
-          "analysis": "Ethereum displays a clear bullish stack with price above all SMAs, signaling a strong uptrend. RSI is in the neutral zone, and despite a negative MACD histogram, the consistent price action and average volume suggest sustained bullish momentum.",
-          "key_level": 2510.68
+          "score": 3,
+          "direction": "BEAR",
+          "analysis": "Similar to Bitcoin, Ethereum is in a strong uptrend but is overbought (RSI 70.2) and trading above its upper Bollinger Band. The bullish MACD cross is present, but the extended price action and overbought conditions suggest a higher risk of a short-term reversal or significant correction. Volume is slightly above average, not signaling exhaustion.",
+          "key_level": 2727.06
         },
         "volatility": {
-          "score": 5,
+          "score": 7,
           "direction": "BULL",
-          "analysis": "With Bollinger Band width at 6.8% and an ATR ratio of 0.9x average, volatility is present but not indicating an imminent squeeze. The asset is trading near the upper band, suggesting upward momentum within current volatility levels.",
-          "key_level": 2551.74
+          "analysis": "Bollinger Bands are significantly expanding (12.7% width) with the price trading above the upper band, signaling elevated volatility. ATR ratio of 1.0x indicates volatility is in line with its average, but the overall context is highly volatile.",
+          "key_level": 2727.06
         }
       }
     },
     {
       "name": "Solana",
       "ticker": "SOL-USD",
-      "score": 6.8,
-      "direction": "BULL",
-      "confidence": 0.68,
+      "score": 6.3,
+      "direction": "NEUTRAL",
+      "confidence": 0.63,
       "summary": "",
       "lenses": {
         "trend": {
           "score": 7,
           "direction": "BULL",
-          "analysis": "Solana shows a strong bullish trend with price above the bullishly aligned SMAs (20, 50, 200). While RSI is approaching overbought, the overall trend structure remains robust, with the weekly SMA50 just below the current price.",
-          "key_level": 83.51
+          "analysis": "Solana is in a bullish trend with a strong bullish stack and price trading above the weekly SMA50. While the RSI is approaching overbought, and the Bollinger Band width is wide, the trend remains intact. The price is trading above the upper Bollinger Band, indicating potential for a short-term pause.",
+          "key_level": 116.7
         },
         "reversal": {
-          "score": 5,
-          "direction": "BULL",
-          "analysis": "Solana is in a strong uptrend, but its RSI is approaching overbought territory, and the price is at the upper Bollinger Band. This combination, along with the wider Bollinger Band width, suggests a slightly increased risk of a short-term pullback or consolidation, though a full reversal is not yet indicated.",
-          "key_level": 106.73
-        },
-        "momentum": {
-          "score": 8,
-          "direction": "BULL",
-          "analysis": "Solana demonstrates a strong bullish stack and is trading near its upper Bollinger Band, indicating significant upward momentum. The RSI is approaching overbought territory, and the elevated volume supports the bullish trend.",
-          "key_level": 106.17
+          "score": 4,
+          "direction": "BEAR",
+          "analysis": "Solana shows a strong uptrend with bullish alignment, but it is approaching overbought territory (RSI 68.7) and trading above its upper Bollinger Band. The wide Bollinger Band width (17.8%) indicates significant volatility, and the price extension suggests a potential for a short-term reversal or consolidation. Volume is elevated but not extreme.",
+          "key_level": 116.7
         },
         "volatility": {
-          "score": 7,
+          "score": 8,
           "direction": "BULL",
-          "analysis": "Bollinger Bands are relatively wide (9.1%), and the ATR ratio is 0.8x average, indicating active volatility. However, the RSI is approaching overbought, and the price is at the upper band, suggesting potential for a short-term consolidation or pullback, despite the strong uptrend.",
-          "key_level": 106.73
+          "analysis": "Bollinger Bands are widest among the assets (17.8% width) and the price is above the upper band, indicating significant volatility expansion. The ATR ratio of 1.0x suggests current volatility is in line with its average, but the wide bands point to potential for further movement.",
+          "key_level": 116.7
         }
       }
     },
     {
       "name": "XRP",
       "ticker": "XRP-USD",
-      "score": 4.5,
+      "score": 5.5,
       "direction": "NEUTRAL",
-      "confidence": 0.45,
+      "confidence": 0.55,
       "summary": "",
       "lenses": {
         "trend": {
-          "score": 4,
-          "direction": "NEUTRAL",
-          "analysis": "XRP shows a mixed trend with the price below the short-term SMA20 but above the longer-term SMA50 and SMA200. The RSI is neutral, and the MACD is showing bearish momentum, indicating a lack of clear directional conviction.",
-          "key_level": 1.28
+          "score": 6,
+          "direction": "BULL",
+          "analysis": "XRP exhibits a bullish short-term trend with the price above both the SMA20 and SMA50, and a bullish MACD cross. However, the mixed SMA alignment and approaching overbought RSI suggest caution and potential for consolidation.",
+          "key_level": 1.51
         },
         "reversal": {
-          "score": 6,
-          "direction": "NEUTRAL",
-          "analysis": "XRP is trading in a neutral RSI zone and shows no clear MACD divergence or recent double top/bottom formations. The price is currently below its weekly SMA50, suggesting potential overhead resistance, but the mixed SMA bias and in-band Bollinger Band position indicate a lack of strong reversal signals.",
-          "key_level": 1.58
+          "score": 4,
+          "direction": "BEAR",
+          "analysis": "RSI is approaching overbought territory, and the price is testing the upper Bollinger Band, suggesting potential for a short-term pullback. The mixed SMA alignment and the weekly SMA50 being above the current price also indicate a lack of strong upward momentum.",
+          "key_level": 1.49
         },
         "momentum": {
-          "score": 3,
-          "direction": "NEUTRAL",
-          "analysis": "XRP exhibits weak momentum. The MACD histogram is negative and falling, indicating bearish pressure, while the RSI is neutral and flat, suggesting a lack of conviction. Volume is at average levels, providing no strong directional signal.",
-          "key_level": 0.0097
+          "score": 7,
+          "direction": "BULL",
+          "analysis": "XRP exhibits bullish momentum with a positive MACD histogram and a recent bullish crossover. The RSI is elevated but not yet overbought, and volume is expanding with price, suggesting continued upward pressure.",
+          "key_level": 1.51
         },
-        "volatility": {
+        "risk_reward": {
           "score": 5,
           "direction": "NEUTRAL",
-          "analysis": "XRP's Bollinger Bands are moderately wide (13.9%), indicating current volatility is not extremely suppressed, but not excessively high either. The ATR ratio is close to average, suggesting no strong trend in volatility expansion or contraction. The neutral RSI and MACD further support a lack of immediate volatility breakout signals.",
-          "key_level": 1.28
+          "analysis": "XRP is showing bullish momentum with SMAs and MACD, but RSI is nearing overbought territory and the weekly SMA50 acts as resistance. The current risk/reward is balanced, suggesting caution.",
+          "key_level": 1.51
         }
       }
     }
   ],
   "top5": [
-    {
-      "asset": {
-        "ticker": "^IXIC",
-        "display_name": "Nasdaq",
-        "news_keywords": [
-          "Nasdaq",
-          "tech stocks",
-          "US technology"
-        ],
-        "asset_type": "index",
-        "category": "Index"
-      },
-      "tech": {
-        "current_price": 26418.3,
-        "rsi_value": 53.92,
-        "sma_20": 26244.34,
-        "sma_50": 26065.26,
-        "sma_200": 24536.97,
-        "sma_50w": 24285.76,
-        "atr_value": 300.83,
-        "price_vs_sma": "above",
-        "price_vs_weekly_sma": "above",
-        "sma_alignment": "bullish_stack",
-        "sma_bias": "bullish",
-        "rsi_trend_2d": 8.65,
-        "atr_ratio": 0.91,
-        "volume_ratio": 1.29,
-        "vix_value": 15.26,
-        "vix_level": "normal",
-        "near_resistance": false,
-        "near_support": false,
-        "supports": [
-          24980.38,
-          24425.34,
-          21898.29
-        ],
-        "resistances": [
-          27032.87
-        ],
-        "macd_value": 12.589,
-        "macd_signal": 43.6111,
-        "macd_histogram": -31.0221,
-        "macd_cross": "none",
-        "bb_upper": 26628.58,
-        "bb_lower": 25860.11,
-        "bb_middle": 26244.34,
-        "bb_position": "in_band",
-        "bb_width": 2.91
-      },
-      "stage2": {
-        "lenses": {
-          "trend": {
-            "score": 9,
-            "direction": "BULL",
-            "analysis": "The Nasdaq exhibits a very strong bullish trend with a clear SMA stack (Price > SMA20 > SMA50 > SMA200). The price is well above the weekly SMA50, and the Bollinger Bands show moderate width, suggesting healthy upward momentum.",
-            "key_level": 26065.26
-          },
-          "reversal": {
-            "score": 8,
-            "direction": "BULL",
-            "analysis": "The Nasdaq shows a strong bullish stack across its SMAs, confirming an uptrend. With RSI in the neutral zone and no clear reversal signals like divergences or capitulation volume, the asset appears relatively safe from immediate reversals.",
-            "key_level": 26418.3
-          },
-          "momentum": {
-            "score": 8,
-            "direction": "BULL",
-            "analysis": "The Nasdaq displays a strong bullish stack across SMAs and a neutral-to-slightly-bullish RSI. The MACD histogram is negative but narrowing, suggesting a potential pause before further upside, with strong underlying trend support.",
-            "key_level": 26244.34
-          }
-        },
-        "composite_score": 8.3,
-        "consensus_direction": "BULL",
-        "confidence": 0.83
-      },
-      "stage5": {
-        "A": null,
-        "B": null,
-        "C": null,
-        "D": null
-      },
-      "stage6": null,
-      "stage7": null,
-      "synthesis": null,
-      "headlines": [
-        {
-          "headline": "Stock Market Outlook: Buy Mega-Cap Tech Stocks As Nasdaq Valuations Dive - Markets Insider",
-          "source": "markets.businessinsider.com",
-          "datetime": "2026-09-18",
-          "url": "https://markets.businessinsider.com/news/stocks/stock-market-outlook-nasdaq-valuation-plunge-dot-com-bubble-fundstrat-2022-6",
-          "summary": "In fact, the Nasdaq's price-to-earnings ratio today is lower now than it was at the depths of its dot-com unwind, when the Nasdaq 100 declined by nearly 80% from its 2000 peak, he added.\n\n\"Nasdaq 100 "
-        },
-        {
-          "headline": "Stock Market Today: Stock Market News And Analysis",
-          "source": "www.investors.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.investors.com/news/stock-market-today-stock-market-news",
-          "summary": "LATEST MARKET UPDATES Dow Jones Futures: S&P 500, Nasdaq Rebound Above Key Level; Moderna, AMD, SpaceX Flash Buy SignalsDow Jones futures were little changed overnight, along with S&P 500 futures and "
-        },
-        {
-          "headline": "Technology Stock Performance",
-          "source": "finance.yahoo.com",
-          "datetime": "2026-09-18",
-          "url": "https://finance.yahoo.com/sectors/technology",
-          "summary": "| Name | Last Price | 1Y Target Est. | Market Weight | Market Cap | Day Change % | YTD Return | Avg. Analyst Rating |\n ---  ---  ---  --- |\n| NVDA  NVIDIA Corporation | 213.90 | 328.66 | 17.60% | 5.16"
-        },
-        {
-          "headline": "Latest Stock Market News - Yahoo Finance",
-          "source": "finance.yahoo.com",
-          "datetime": "2026-09-18",
-          "url": "https://finance.yahoo.com/topic/stock-market-news",
-          "summary": "11.   News • 2 days ago Why a weak Wall Street fee forecast is pulling BofA and peers lower\n12.   News • 2 days ago Stocks slipped as chip stocks sold off and AI worries mounted\n13.   News • 2 days ag"
-        },
-        {
-          "headline": "Market Activity - Nasdaq",
-          "source": "www.nasdaq.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.nasdaq.com/market-activity",
-          "summary": "26,506.99\n\n-77.07\n-0.29%\n\nVolume: 5,963,133,938\n\n26,40026,52026,640\n\n|  |\n\n|  |\n\nData is currently not availableData is currently not available\n\nData as of Sep 6, 2026\n\nNasdaq-100 Reduced Value Index\n"
-        },
-        {
-          "headline": "Stock Market Data with Stock Price Feeds",
-          "source": "www.nasdaq.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.nasdaq.com/market-activity/stocks",
-          "summary": "Nasdaq Global IndexesNasdaq Global Indexes\nAs Index Provider for Today's Economy, Nasdaq is dedicated to designing powerful, relevant index and benchmark families that are in sync with the continually"
-        },
-        {
-          "headline": "Nasdaq – Listings, Market Data & Financial Technology",
-          "source": "www.nasdaq.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.nasdaq.com",
-          "summary": "A 2026 Outlook Survey from Nasdaq asked CEOs, board chairs, C-suite executives, and leaders for their thoughts on AI and the economy.\n\nLearn More About the Survey\n\n|  |\n\n|  |  |  |\n|  |  |  |\n|  |  | "
-        },
-        {
-          "headline": "MarketWatch: Stock Market News - Financial News",
-          "source": "www.marketwatch.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.marketwatch.com",
-          "summary": "# \n\n### Account Settings\n\n## Markets\n\n## Latest News\n\n(Eastern Time Zone)\n\n### The 10-year Treasury is having its worst run in over 100 years. Why investors are buying bonds anyway.\n\n8 hours ago\n\n### "
-        },
-        {
-          "headline": "U.S. Stock Market Headlines | Breaking Stock Market News",
-          "source": "www.reuters.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.reuters.com/markets/us",
-          "summary": "A growing number of brokerages expect the Federal ‌Reserve to raise rates this week after stronger-than-expected inflation readings raised doubts that price pressures would ease without further tighte"
-        },
-        {
-          "headline": "US Markets, Company Earnings, Stock Market Trends ...",
-          "source": "www.morningstar.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.morningstar.com/markets",
-          "summary": "### September Stock Market Outlook: How to Position Your Portfolio During a Risky Stage\n\n### Worried About a Stock Market Bubble? Here Are 5 Ways to Stay Invested\n\n### Markets Brief: Value ETFs Making"
-        }
-      ],
-      "final_verdict": "NO_TRADE",
-      "final_confidence": 0,
-      "trading_plan": null
-    },
     {
       "asset": {
         "ticker": "^OMX",
@@ -760,22 +601,22 @@
         "category": "Index"
       },
       "tech": {
-        "current_price": 3284.43,
-        "rsi_value": 53.4,
-        "sma_20": 3279.97,
-        "sma_50": 3253.4,
-        "sma_200": 3098.74,
-        "sma_50w": 3041.42,
-        "atr_value": 38.87,
+        "current_price": 3316.77,
+        "rsi_value": 57.83,
+        "sma_20": 3280.26,
+        "sma_50": 3255.99,
+        "sma_200": 3101.29,
+        "sma_50w": 3041.02,
+        "atr_value": 40.93,
         "price_vs_sma": "above",
         "price_vs_weekly_sma": "above",
         "sma_alignment": "bullish_stack",
         "sma_bias": "bullish",
-        "rsi_trend_2d": 6.04,
-        "atr_ratio": 1.23,
+        "rsi_trend_2d": 3.06,
+        "atr_ratio": 1.28,
         "volume_ratio": 0.0,
-        "vix_value": 15.26,
-        "vix_level": "normal",
+        "vix_value": 14.85,
+        "vix_level": "low_fear",
         "near_resistance": true,
         "near_support": false,
         "supports": [
@@ -786,40 +627,52 @@
         "resistances": [
           3349.2
         ],
-        "macd_value": -0.8742,
-        "macd_signal": 1.4435,
-        "macd_histogram": -2.3177,
-        "macd_cross": "none",
-        "bb_upper": 3348.25,
-        "bb_lower": 3211.69,
-        "bb_middle": 3279.97,
+        "macd_value": 1.9559,
+        "macd_signal": 1.2895,
+        "macd_histogram": 0.6664,
+        "macd_cross": "bullish_cross",
+        "bb_upper": 3350.76,
+        "bb_lower": 3209.76,
+        "bb_middle": 3280.26,
         "bb_position": "in_band",
-        "bb_width": 4.16
+        "bb_width": 4.25
       },
       "stage2": {
         "lenses": {
           "trend": {
             "score": 8,
             "direction": "BULL",
-            "analysis": "The OMXS30 displays a strong bullish trend with a perfect SMA alignment (Price > SMA20 > SMA50 > SMA200). The price is comfortably above the weekly SMA50, reinforcing the positive momentum.",
-            "key_level": 3253.4
+            "analysis": "The OMXS30 shows a strong bullish trend characterized by a bullish stack of SMAs and price above all key moving averages. The bullish MACD cross further reinforces this positive momentum.",
+            "key_level": 3255.99
           },
           "reversal": {
             "score": 8,
             "direction": "BULL",
-            "analysis": "The OMXS30 exhibits a strong bullish stack across its SMAs, indicating an established uptrend. RSI is in the neutral zone, and there are no immediate signs of exhaustion or divergence, suggesting continued upward momentum is more likely than a reversal.",
-            "key_level": 3284.43
+            "analysis": "The OMXS30 exhibits a strong bullish SMA bias and alignment, with RSI in the neutral zone and a bullish MACD cross. The asset is trading within its Bollinger Bands, indicating continued upward momentum with no immediate reversal signals.",
+            "key_level": 3316.77
           },
           "momentum": {
+            "score": 8,
+            "direction": "BULL",
+            "analysis": "The OMXS30 shows strong bullish momentum, characterized by a bullish MACD crossover, price above all SMAs in a bullish stack, and a rising RSI. Volume is average, but the trend is clearly upward.",
+            "key_level": 3280.26
+          },
+          "volatility": {
             "score": 7,
             "direction": "BULL",
-            "analysis": "The OMXS30 exhibits a strong bullish stack across SMAs, indicating a confirmed uptrend. While RSI is neutral, the MACD histogram is showing signs of stabilization after a recent dip, suggesting sustained upward momentum.",
-            "key_level": 3279.97
+            "analysis": "The OMXS30 shows a strong bullish trend with a tight Bollinger Band width of 4.2%, indicating a potential for a significant upward move. The bullish MACD cross and ATR ratio of 1.3x suggest increasing volatility supporting the uptrend.",
+            "key_level": 3350.76
+          },
+          "risk_reward": {
+            "score": 8,
+            "direction": "BULL",
+            "analysis": "The OMXS30 exhibits a strong bullish trend with a bullish stack and a bullish MACD cross. The upside potential to resistance is slightly greater than the downside risk to support, offering a favorable risk-reward.",
+            "key_level": 3349.2
           }
         },
-        "composite_score": 7.7,
+        "composite_score": 7.8,
         "consensus_direction": "BULL",
-        "confidence": 0.77
+        "confidence": 0.78
       },
       "stage5": {
         "A": null,
@@ -834,402 +687,72 @@
         {
           "headline": "OMX Stockholm 30 Index Today (OMXS30) - Investing.com",
           "source": "www.investing.com",
-          "datetime": "2026-09-18",
+          "datetime": "2026-09-21",
           "url": "https://www.investing.com/indices/omx-stockholm-30",
-          "summary": "## Technical Analysis\n\n## Related Futures\n\n| Name | Month | Last | High | Low | Chg. | Chg. % | Time | Price |  |\n ---  ---  ---  ---  --- |\n| OMXS30Sep 26 | Sep 26 | 3,277.50 | 3,284.00 | 3,263.75 | "
+          "summary": "## Technical Analysis\n\n## Related Futures\n\n| Name | Month | Last | High | Low | Chg. | Chg. % | Time | Price |  |\n ---  ---  ---  ---  --- |\n| OMXS30Sep 26 | Sep 26 | 3,269.44 | 3,298.25 | 3,269.25 | "
         },
         {
-          "headline": "OMX Stockholm 30 News (OMXS30) - Investing.com",
-          "source": "www.investing.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.investing.com/indices/omx-stockholm-30-news/9./6",
-          "summary": "| Name | Last | Upside | Fair Value |\n ---  --- |\n| Aaa Aaa Aaaaaaaaa Aa | 49.45 | +67.63% | 82.89 |\n| Aa Aaaaa | 36.85 | +64.46% | 60.60 |\n| Aaaaa Aa Aaaaa | 250.50 | +60.73% | 402.63 |\n| Aaa Aa | 31"
-        },
-        {
-          "headline": ".OMXS30-SE: OMX Stockholm 30 Index - Stock Price, Quote and News - CNBC",
-          "source": "www.cnbc.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.cnbc.com/quotes/.OMXS30-SE",
-          "summary": "Loading...\n\n Open3,231.75\n Day High3,258.466\n Day Low3,231.741\n Prev Close3,218.941\n 52 Week High3,349.20\n 52 Week High Date08/05/26\n 52 Week Low2,612.55\n 52 Week Low Date09/16/25\n\n## Latest On OMX St"
+          "headline": "OMX Stockholm 30 Index Live Today (OMXS30) - Investing.com IN",
+          "source": "in.investing.com",
+          "datetime": "2026-09-21",
+          "url": "https://in.investing.com/indices/omx-stockholm-30",
+          "summary": "## Technical Analysis\n\n## Related Futures\n\n| Name | Month | Last | High | Low | Chg. | Chg. % | Time | Price |  |\n ---  ---  ---  ---  --- |\n| OMXS30Oct 26 | Oct 26 | 3,296.50 | 3,298.50 | 3,280.75 | "
         },
         {
           "headline": ".OMXS30: OMX Stockholm 30 Index - Stock Price, Quote and News - CNBC",
           "source": "www.cnbc.com",
-          "datetime": "2026-09-18",
+          "datetime": "2026-09-21",
           "url": "https://www.cnbc.com/quotes/.OMXS30",
           "summary": "Loading...\n\n Open3,254.632\n Day High3,269.698\n Day Low3,241.217\n Prev Close3,244.984\n 52 Week High3,349.20\n 52 Week High Date08/05/26\n 52 Week Low2,612.55\n 52 Week Low Date09/16/25\n\n## Latest On OMX S"
         },
         {
-          "headline": "OMXS30-SK: OMX Stockholm 30 Index - Stock Price, Quote and News - CNBC",
-          "source": "www.cnbc.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.cnbc.com/quotes/OMXS30-SK",
-          "summary": "Loading...\n\n Open3,231.75\n Day High3,258.466\n Day Low3,231.741\n Prev Close3,218.941\n 52 Week High3,349.20\n 52 Week High Date08/05/26\n 52 Week Low2,612.55\n 52 Week Low Date09/16/25\n\n## Latest On OMX St"
-        },
-        {
           "headline": "Overview for OMXS30",
           "source": "indexes.nasdaqomx.com",
-          "datetime": "2026-09-18",
+          "datetime": "2026-09-21",
           "url": "https://indexes.nasdaqomx.com/Index/Overview/OMXS30",
           "summary": "# OMX Stockholm 30 Index\n\nOMXS30\n\n3,264.26 -48.92 -1.45%\n\n#### Key Stats\n\n Previous Close   3,312.12   Today’s High   3,304.22   Today’s Low   3,259.83\n\n Overview\n Performance\n Weighting\n Industry Bre"
         },
         {
-          "headline": "OMX Stockholm 30 Price, Real-time Quote & News - Google Finance",
-          "source": "www.google.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.google.com/finance/quote/OMXS30:INDEXNASDAQ",
-          "summary": "| SIXU  Utilities  SIXU  Utilities | SIXU  +0.31% arrow\\_upward | — | 834.39  +0.31% arrow\\_upward | 834.39 | +2.57 arrow\\_upward | +0.31% arrow\\_upward | 831.82 | 833.96 | 840.38 | 831.76 | — | — |\n|"
-        },
-        {
-          "headline": "Sweden Stock Market Index - Quote - Chart - Historical Data - News | Trading Economics",
-          "source": "tradingeconomics.com",
-          "datetime": "2026-09-18",
-          "url": "https://tradingeconomics.com/sweden/stock-market",
-          "summary": "| Indexes | Price |  |  | Day | Month | Year | Date |\n ---  ---  ---  --- |\n| Stockholm 30 | 3,291.30 |  | 40.67 | 1.25% | 1.44% | 24.91% | Sep/17 |"
-        },
-        {
           "headline": "OMXS30 Index Overview: Sweden 30 Futures Prices and News  | IG International",
           "source": "www.ig.com",
-          "datetime": "2026-09-18",
+          "datetime": "2026-09-21",
           "url": "https://www.ig.com/en/indices/markets-indices/sweden-30",
           "summary": "One Pip means 1 Index Point\n\nValue of one Pip SEK 1 (USD 0.10)\n\nMinimum stop distance 3\n\nExpiry date 06/08/27\n\nLast dealing date and time 06/08/27 19:00\n\nSettlement\n\nSettles based on the final settlem"
         },
         {
-          "headline": "OMXS30, OBX25, OMXH25: Price Forecast and Analysis for February 03; Scandinavian Indices Look Strong",
-          "source": "www.youtube.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.youtube.com/watch?v=afbXjaQlgUY",
-          "summary": "of sense as we are hanging around the 3100 Swedish crona level. I think you have the potential for a short-term pullback and then some value chasing. Remember, Sweden is a good way to play the periphe"
-        }
-      ],
-      "final_verdict": "NO_TRADE",
-      "final_confidence": 0,
-      "trading_plan": null
-    },
-    {
-      "asset": {
-        "ticker": "HG=F",
-        "display_name": "Koppar",
-        "news_keywords": [
-          "copper price",
-          "copper market",
-          "industrial metals"
-        ],
-        "asset_type": "commodity",
-        "category": "Råvaror"
-      },
-      "tech": {
-        "current_price": 6.65,
-        "rsi_value": 55.96,
-        "sma_20": 6.56,
-        "sma_50": 6.49,
-        "sma_200": 6.05,
-        "sma_50w": 5.88,
-        "atr_value": 0.13,
-        "price_vs_sma": "above",
-        "price_vs_weekly_sma": "above",
-        "sma_alignment": "bullish_stack",
-        "sma_bias": "bullish",
-        "rsi_trend_2d": 10.42,
-        "atr_ratio": 1.41,
-        "volume_ratio": 3.9,
-        "vix_value": 15.26,
-        "vix_level": "normal",
-        "near_resistance": false,
-        "near_support": false,
-        "supports": [
-          5.93,
-          5.57,
-          5.27
-        ],
-        "resistances": [],
-        "macd_value": 0.0036,
-        "macd_signal": 0.0099,
-        "macd_histogram": -0.0063,
-        "macd_cross": "none",
-        "bb_upper": 6.8,
-        "bb_lower": 6.33,
-        "bb_middle": 6.56,
-        "bb_position": "in_band",
-        "bb_width": 7.02
-      },
-      "stage2": {
-        "lenses": {
-          "trend": {
-            "score": 8,
-            "direction": "BULL",
-            "analysis": "The asset exhibits a strong bullish trend, evidenced by a bullish stack across all SMAs (20, 50, 200) with price above all. The weekly SMA50 is also comfortably above, reinforcing the positive momentum.",
-            "key_level": 6.05
-          },
-          "reversal": {
-            "score": 7,
-            "direction": "BULL",
-            "analysis": "Koppar exhibits a strong bullish uptrend with all SMAs aligned. RSI is in the neutral zone, and no clear reversal patterns or exhaustion signals are present, suggesting continued upward momentum is more likely than a reversal.",
-            "key_level": 6.8
-          },
-          "momentum": {
-            "score": 7,
-            "direction": "BULL",
-            "analysis": "Koppar exhibits a strong bullish uptrend with its price above all key SMAs. While RSI is neutral, the bullish stack and elevated volume suggest continued upward momentum.",
-            "key_level": 6.65
-          },
-          "volatility": {
-            "score": 6,
-            "direction": "BULL",
-            "analysis": "Bollinger Bands are relatively wide (7.0%), suggesting current volatility is not exceptionally suppressed. ATR is at 1.4x average, indicating a healthy level of price movement supporting the uptrend, but not a squeeze setup.",
-            "key_level": 6.8
-          }
-        },
-        "composite_score": 7.0,
-        "consensus_direction": "BULL",
-        "confidence": 0.7
-      },
-      "stage5": {
-        "A": null,
-        "B": null,
-        "C": null,
-        "D": null
-      },
-      "stage6": null,
-      "stage7": null,
-      "synthesis": null,
-      "headlines": [
-        {
-          "headline": "Copper and Gold Market Outlook 2026: Prices, Supply ... - S&P Global",
-          "source": "www.spglobal.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.spglobal.com/market-intelligence/en/news-insights/research/2026/04/copper-gold-market-outlook-2026-prices-supply-mining-costs",
-          "summary": "LME 3M copper price dropped below $12,000/mt on March 20, 2026.\n The 2026 average LME copper price forecast stands at just above $12,100/t.\n Visible global inventories exceeded 1.3 million tonnes in M"
-        },
-        {
-          "headline": "How Realistic Is the Bullish Outlook for Copper Prices?",
-          "source": "internationalbanker.com",
-          "datetime": "2026-09-18",
-          "url": "https://internationalbanker.com/brokerage/how-realistic-is-the-bullish-outlook-for-copper-prices",
-          "summary": "Perhaps the clearest sign of how dramatically perceptions have changed is evident in analysts’ forecasts. Goldman Sachs recently raised its end-2026 copper price forecast to $13,735 per tonne, citing "
-        },
-        {
-          "headline": "Copper - Price - Chart - Historical Data - News",
+          "headline": "Sweden Stock Market Index - Quote - Chart - Historical Data",
           "source": "tradingeconomics.com",
-          "datetime": "2026-09-18",
-          "url": "https://tradingeconomics.com/commodity/copper",
-          "summary": "## Copper rose to 6.54 USD/Lbs on September 17, 2026, up 1.70% from the previous day. Over the past month, Copper's price has risen 0.90%, and is up 44.24% compared to the same time last year, accordi"
+          "datetime": "2026-09-21",
+          "url": "https://tradingeconomics.com/sweden/stock-market",
+          "summary": "| Indexes | Price |  |  | Day | Month | Year | Date |\n ---  ---  ---  --- |\n| Stockholm 30 | 3,264.33 |  | -26.97 | -0.82% | 0.63% | 23.35% | Sep/18 | [...] |  | Actual | Chg | %Chg |\n ---  --- |\n| EU"
         },
         {
-          "headline": "Copper Prices Outlook | J.P. Morgan Global Research",
-          "source": "www.jpmorgan.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.jpmorgan.com/insights/global-research/commodities/copper-outlook",
-          "summary": "in January. However, they came under pressure in March; the ongoing Iran conflict has dampened demand expectations for industrial commodities due to widespread risk-off sentiment and fears of slowing "
+          "headline": "MarketWatch: Stock Market News - Financial News - MarketWatch",
+          "source": "www.marketwatch.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.marketwatch.com",
+          "summary": "Sep 18\n\n### Stocks are failing the ‘breadth’ test, but options traders still see reason to buy\n\nSep 18\n\n## Personal Finance\n\nSee All\n\n### Many young investors can’t afford to invest without their pare"
         },
         {
-          "headline": "Copper Prices & Market Forecasts",
-          "source": "www.benchmarkminerals.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.benchmarkminerals.com/copper",
-          "summary": "Benchmark’s Copper Service offers a monthly forecast report examining supply and demand of copper by region and producer out to 2050, coupled with fundamental updates, forward-looking cost and price a"
+          "headline": "Global Market Headlines | Breaking Stock Market News | Reuters",
+          "source": "www.reuters.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.reuters.com/markets",
+          "summary": "### Commodities\n\nFutureLast% ChangeGold4,360.20--Copper1,394.701.48%Brent Crude Oil103.930.85%CBOT Soybeans1,318.500.09%\n\n### Stocks\n\nIndexLast% ChangeS&P 5007,637.761.14%Euro STOXX 506,322.900.90%FTS"
         },
         {
-          "headline": "Why Record-High Copper Prices Aren't Forecast to Last",
-          "source": "www.goldmansachs.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.goldmansachs.com/insights/articles/why-record-high-copper-prices-arent-forecast-to-last",
-          "summary": "On a fundamental basis, Goldman Sachs Research estimates that copper’s fair price is around $11,500 per tonne, close to their price forecast of $11,200 per tonne for the fourth quarter of 2026.\n\n“We f"
+          "headline": "US Markets, World Markets, and Stock Quotes",
+          "source": "www.cnn.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.cnn.com/markets",
+          "summary": "## Economic calendar\n\nMon · 9/14 Tue · 9/15 Wed · 9/16 Thu · 9/17 Fri · 9/18\n\nTime   Event   Impact   Previous  Forecast  Actual\n\nFriday · Sep 18, 2026\n\n## Commodities\n\nMost active Energy Metals Agric"
         },
         {
-          "headline": "Copper Market Size, Share And Growth Report, 2026-2033",
-          "source": "www.grandviewresearch.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.grandviewresearch.com/industry-analysis/copper-market-report",
-          "summary": "Copper market size was valued at $248.2 Billion in 2025 and is projected to grow from $260.2 Billion in 2026 to $388.8 Billion by 2033, at a CAGR of 5.9%"
-        },
-        {
-          "headline": "Copper Long-Term Forecast: 10-Year Outlook & Price Trends | Fastmarkets",
-          "source": "www.fastmarkets.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.fastmarkets.com/metals-and-mining/battery-raw-materials/long-term-forecasts/copper",
-          "summary": "ContactExisting Customer SupportLogin\n\nFastmarkets\n\n# Copper long-term forecast\n\n## Anticipate global market trends and understand supply/demand balances in the copper market\n\nCopper is critical to th"
-        },
-        {
-          "headline": "Copper Futures Price Today",
-          "source": "www.investing.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.investing.com/commodities/copper",
-          "summary": "| Name | Last | Chg. % | Vol. |  |\n ---  --- \n| LITE | 919.40 | +9.59% | 6.48M |  |\n| ALAB | 269.18 | +6.59% | 3.61M |  |\n| AXON | 468.42 | +5.96% | 2.63M |  |\n| SPCX | 150.88 | +5.15% | 108.77M |  |\n"
-        },
-        {
-          "headline": "Copper prices hit a new record high, but is the metals trade 'stretched'?",
-          "source": "www.youtube.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.youtube.com/watch?v=vh3h7bJJCvk",
-          "summary": "### Description\n6,523 views\nPosted: 2026-01-07\nCopper hit a fresh record high, while gold and silver trade near their highs.\nBloomberg Intelligence senior commodity strategist Mike McGlone and Blue Li"
-        }
-      ],
-      "final_verdict": "NO_TRADE",
-      "final_confidence": 0,
-      "trading_plan": null
-    },
-    {
-      "asset": {
-        "ticker": "BTC-USD",
-        "display_name": "Bitcoin",
-        "news_keywords": [
-          "Bitcoin",
-          "BTC",
-          "cryptocurrency"
-        ],
-        "asset_type": "crypto",
-        "category": "Krypto"
-      },
-      "tech": {
-        "current_price": 78194.59,
-        "rsi_value": 56.93,
-        "sma_20": 78011.35,
-        "sma_50": 72418.56,
-        "sma_200": 70383.92,
-        "sma_50w": 78728.8,
-        "atr_value": 1836.27,
-        "price_vs_sma": "above",
-        "price_vs_weekly_sma": "at",
-        "sma_alignment": "bullish_stack",
-        "sma_bias": "bullish",
-        "rsi_trend_2d": 6.83,
-        "atr_ratio": 0.76,
-        "volume_ratio": 0.99,
-        "vix_value": 15.26,
-        "vix_level": "normal",
-        "near_resistance": false,
-        "near_support": false,
-        "supports": [
-          76624.25,
-          74436.68,
-          64971.71
-        ],
-        "resistances": [
-          82792.21,
-          94601.57,
-          97860.6
-        ],
-        "macd_value": 898.3488,
-        "macd_signal": 1477.5327,
-        "macd_histogram": -579.1839,
-        "macd_cross": "none",
-        "bb_upper": 80965.62,
-        "bb_lower": 75057.08,
-        "bb_middle": 78011.35,
-        "bb_position": "in_band",
-        "bb_width": 7.56
-      },
-      "stage2": {
-        "lenses": {
-          "trend": {
-            "score": 9,
-            "direction": "BULL",
-            "analysis": "Bitcoin displays a very strong bullish trend with price well above the bullishly aligned SMAs (20, 50, 200). It is currently trading at the weekly SMA50, indicating strong support at this level.",
-            "key_level": 70383.92
-          },
-          "reversal": {
-            "score": 6,
-            "direction": "BULL",
-            "analysis": "Bitcoin is in a strong uptrend, with price above all SMAs and RSI in the neutral zone. While the Bollinger Band width is moderate, there are no immediate signs of a bearish reversal, though the current price is approaching the upper band.",
-            "key_level": 80965.62
-          },
-          "momentum": {
-            "score": 8,
-            "direction": "BULL",
-            "analysis": "Bitcoin shows a robust bullish stack across SMAs, indicating a strong uptrend. The RSI is in the neutral zone, and while MACD histogram is negative, the overall price action and volume support continued bullish momentum.",
-            "key_level": 78194.59
-          },
-          "volatility": {
-            "score": 5,
-            "direction": "BULL",
-            "analysis": "Bollinger Bands are moderately wide (7.6%), and the ATR ratio is 0.8x average, indicating no significant volatility compression. The asset is trading within its bands, suggesting continued but not explosive price action.",
-            "key_level": 80965.62
-          }
-        },
-        "composite_score": 7.0,
-        "consensus_direction": "BULL",
-        "confidence": 0.7
-      },
-      "stage5": {
-        "A": null,
-        "B": null,
-        "C": null,
-        "D": null
-      },
-      "stage6": null,
-      "stage7": null,
-      "synthesis": null,
-      "headlines": [
-        {
-          "headline": "Research Crypto & Macro Market Analysis BIT",
-          "source": "www.bit.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.bit.com/research",
-          "summary": "cooling as the Treasury's buyback impulse fades and hike pricing rises, synchronizing with crypto's own consolidation rather than offsetting it. Strategy's latest disclosure remains the 8/24 8-K: zero"
-        },
-        {
-          "headline": "Crypto Market Update: Senate Blocks CLARITY Act in ...",
-          "source": "investingnews.com",
-          "datetime": "2026-09-18",
-          "url": "https://investingnews.com/cryptocurrency-market-recap",
-          "summary": "Get the latest insights on Bitcoin, Ether and altcoins, along with a round-up of key cryptocurrency market news.\n\nHere's a quick recap of the crypto landscape for Wednesday (September 16) as of 10:00 "
-        },
-        {
-          "headline": "Cryptocurrency pricing, market & regulation news",
-          "source": "finance.yahoo.com",
-          "datetime": "2026-09-18",
-          "url": "https://finance.yahoo.com/markets/crypto",
-          "summary": "USDT-USD -0.01%\n ### MicroStrategy Resumes Bitcoin Accumulation After Extended Buying Gap\n\n  99bitcoins • 1h ago \n\n  MSTR -2.05%\n ### Advasa Adds USDC Payment Functionality to Visa Card and Targets RW"
-        },
-        {
-          "headline": "Crypto Fear & Greed Index - Bitcoin Sentiment",
-          "source": "alternative.me",
-          "datetime": "2026-09-18",
-          "url": "https://alternative.me/crypto/fear-and-greed-index",
-          "summary": "Extreme fear can be a sign that investors are too worried. That could be a buying opportunity.\n When Investors are getting too greedy, that means the market is due for a correction.\n\nTherefore, we ana"
-        },
-        {
-          "headline": "Risk-off sentiment hits crypto stocks amid Trump's Iran deadline",
-          "source": "finance.yahoo.com",
-          "datetime": "2026-09-18",
-          "url": "https://finance.yahoo.com/video/risk-off-sentiment-hits-crypto-stocks-amid-trumps-iran-deadline-150600942.html",
-          "summary": "Yahoo Finance Video\n\n# Risk-off sentiment hits crypto stocks amid Trump's Iran deadline\n\nYahoo Finance Video  and Julie Hyman\n\n BTC-USD\n\n  -1.91%\n ETH-USD\n\n  -1.61%\n XRP-USD\n\n  -3.56%\n SOL-USD\n\n  -3.0"
-        },
-        {
-          "headline": "CoinDesk: Bitcoin, Ethereum, XRP, Crypto News and Price Data",
-          "source": "www.coindesk.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.coindesk.com",
-          "summary": "Positive\n\nKevin O’Leary says Congress will revisit Clarity early next year as crypto tax bill advances\n\nThe Shark Tank investor says Congress will face pressure to revive crypto market structure legis"
-        },
-        {
-          "headline": "Crypto Fear and Greed Index: Live Market Sentiment",
-          "source": "delta.app",
-          "datetime": "2026-09-18",
-          "url": "https://delta.app/en/fear-greed-index",
-          "summary": "The Bitcoin Fear and Greed Index offers crucial insights into the cryptocurrency market's emotional state, helping traders and investors navigate the highs and lows with precision. This index analyzes"
-        },
-        {
-          "headline": "Crypto Fear & Greed Index | Bitcoin Sentiment",
-          "source": "www.binance.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.binance.com/en/square/fear-and-greed-index",
-          "summary": "The index ranges from 0 (Extreme Fear) to 100 (Extreme Greed), reflecting crypto market sentiment. A low value signals over-selling, while a high value warns"
-        },
-        {
-          "headline": "Bitcoin's Bear Market Ending? Bull Case in Clarity Act & Fed",
-          "source": "www.youtube.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.youtube.com/watch?v=WoU8f6QTdvo&vl=en",
-          "summary": "### Description\n20360 views\nPosted: 26 Jul 2026\nSam Callahan explains how inflation, Federal Reserve policy, and rising government spending could shape Bitcoin's future and why he believes the crypto "
-        },
-        {
-          "headline": "Crypto Fear and Greed Index | CoinMarketCap",
-          "source": "coinmarketcap.com",
-          "datetime": "2026-09-18",
-          "url": "https://coinmarketcap.com/charts/fear-and-greed-index",
-          "summary": "2. Volatility:  The index incorporates Volmex Implied Volatility Indices (BVIV and EVIV) for Bitcoin (BTC) and Ethereum (ETH), which provide forward-looking measures of expected volatility over the ne"
+          "headline": "Nasdaq – Listings, Market Data & Financial Technology",
+          "source": "www.nasdaq.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.nasdaq.com",
+          "summary": "European Market Data   Nasdaq Global Indexes   Nasdaq Data Link   Earnings Calendar   Economic Calendar   Dividends Calendar   IPO Calendar   Market Holidays   North American Markets   Market Structur"
         }
       ],
       "final_verdict": "NO_TRADE",
@@ -1250,23 +773,23 @@
         "category": "Råvaror"
       },
       "tech": {
-        "current_price": 95.85,
-        "rsi_value": 55.45,
-        "sma_20": 92.62,
-        "sma_50": 86.31,
-        "sma_200": 80.66,
-        "sma_50w": 77.32,
-        "atr_value": 4.79,
+        "current_price": 93.39,
+        "rsi_value": 50.98,
+        "sma_20": 93.16,
+        "sma_50": 86.84,
+        "sma_200": 80.85,
+        "sma_50w": 78.1,
+        "atr_value": 4.89,
         "price_vs_sma": "above",
         "price_vs_weekly_sma": "above",
         "sma_alignment": "bullish_stack",
         "sma_bias": "bullish",
-        "rsi_trend_2d": -13.17,
-        "atr_ratio": 1.26,
-        "volume_ratio": 0.26,
-        "vix_value": 15.26,
-        "vix_level": "normal",
-        "near_resistance": false,
+        "rsi_trend_2d": -16.46,
+        "atr_ratio": 1.29,
+        "volume_ratio": 0.38,
+        "vix_value": 14.85,
+        "vix_level": "low_fear",
+        "near_resistance": true,
         "near_support": false,
         "supports": [
           80.56,
@@ -1274,49 +797,537 @@
           55.48
         ],
         "resistances": [
+          93.5,
           119.48
         ],
-        "macd_value": 4.7643,
-        "macd_signal": 4.2699,
-        "macd_histogram": 0.4944,
+        "macd_value": 4.3648,
+        "macd_signal": 4.3457,
+        "macd_histogram": 0.0191,
         "macd_cross": "none",
-        "bb_upper": 108.09,
-        "bb_lower": 77.15,
-        "bb_middle": 92.62,
+        "bb_upper": 108.71,
+        "bb_lower": 77.6,
+        "bb_middle": 93.16,
         "bb_position": "in_band",
-        "bb_width": 32.28
+        "bb_width": 33.31
       },
       "stage2": {
         "lenses": {
           "trend": {
             "score": 8,
             "direction": "BULL",
-            "analysis": "WTI Crude Oil shows a strong bullish trend, evidenced by the bullish SMA alignment (Price > SMA20 > SMA50 > SMA200) and the weekly SMA50 being below price. This suggests sustained upward momentum.",
-            "key_level": 80.66
-          },
-          "reversal": {
-            "score": 4,
-            "direction": "BEAR",
-            "analysis": "WTI exhibits a strong bullish SMA bias and alignment, but the RSI is in the neutral zone and the MACD histogram is showing a slight decrease. This could indicate a potential for a short-term reversal or profit-taking after a strong run.",
-            "key_level": 80.56
+            "analysis": "WTI crude oil displays a strong bullish trend with price above all SMAs (20, 50, 200) in a bullish stack. The weekly SMA50 is also above the current price, confirming upward momentum.",
+            "key_level": 93.16
           },
           "momentum": {
-            "score": 8,
+            "score": 7,
             "direction": "BULL",
-            "analysis": "WTI crude oil exhibits strong bullish momentum. The MACD histogram is positive and expanding, the RSI is in the neutral zone but trending up, and the price is well above all SMAs, confirming an uptrend. Volume is currently below average, which is a slight caution.",
-            "key_level": 92.62
+            "analysis": "WTI exhibits strong bullish momentum with a bullish stack of SMAs and a positive, albeit small, MACD histogram. RSI is neutral, and volume is below average, suggesting potential for further upside if volume picks up.",
+            "key_level": 93.16
           },
           "volatility": {
             "score": 7,
             "direction": "BULL",
-            "analysis": "WTI Crude Oil shows a wide Bollinger Band (32.3%) and an expanding ATR ratio (1.3x), indicating significant volatility and a potential for further price movement within its strong bullish uptrend. The bullish stack of SMAs supports this upward momentum.",
-            "key_level": 92.62
+            "analysis": "WTI Crude Oil shows a wide Bollinger Band (33.3%) and a strong bullish SMA alignment, indicating a trending environment with room for further price expansion. The ATR ratio of 1.3x suggests volatility is currently elevated and supporting the uptrend, though the RSI is neutral.",
+            "key_level": 93.5
+          }
+        },
+        "composite_score": 7.3,
+        "consensus_direction": "BULL",
+        "confidence": 0.73
+      },
+      "stage5": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null
+      },
+      "stage6": null,
+      "stage7": null,
+      "synthesis": null,
+      "headlines": [
+        {
+          "headline": "Oil (USCrude) Price Forecast for Today, Tomorrow, Next ...",
+          "source": "www.litefinance.org",
+          "datetime": "2026-09-21",
+          "url": "https://www.litefinance.org/blog/analysts-opinions/oil-price-prediction-forecast/daily-and-weekly",
+          "summary": "27.09.2026 82.67 96.95 111.23\n\n## Oil Price Prediction for Next 30 Days\n\nAccording to forecasts, WTI crude oil prices may range between $69.92 and $102.18 in September 2026. The main factors affecting"
+        },
+        {
+          "headline": "Oil Market Report - August 2026 – Analysis",
+          "source": "www.iea.org",
+          "datetime": "2026-09-21",
+          "url": "https://www.iea.org/reports/oil-market-report-august-2026",
+          "summary": "At the same time, our forecast for global oil demand in the second half of 2026 is reduced by roughly 550 kb/d versus last month’s Report, as the continued closure of the Strait of Hormuz disrupts int"
+        },
+        {
+          "headline": "Crude Oil - Price - Chart - Historical Data - News",
+          "source": "tradingeconomics.com",
+          "datetime": "2026-09-21",
+          "url": "https://tradingeconomics.com/commodity/crude-oil",
+          "summary": "## Crude Oil fell to 99.53 USD/Bbl on September 18, 2026, down 2.34% from the previous day. Over the past month, Crude Oil's price has risen 17.94%, and is up 59.50% compared to the same time last yea"
+        },
+        {
+          "headline": "Oil Forecast, News and Analysis (WTI)",
+          "source": "www.fxstreet.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.fxstreet.com/commodities/oil",
+          "summary": "OIL\n\nIn the daily chart, USD/INR trades at 95.7755, keeping a constructive bullish tone as spot holds above the 20-period exponential moving average (EMA) at 95.4582. The pair is extending its recover"
+        },
+        {
+          "headline": "Oil Prices Forecast | J.P. Morgan Global Research",
+          "source": "www.jpmorgan.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.jpmorgan.com/insights/global-research/commodities/oil-prices",
+          "summary": "View text Version\n\nA data table shows crude oil price forecasts from the start of 2026 through the end of 2027. Rows are split by new and old forecasts. Notably, the new projection for price per barre"
+        },
+        {
+          "headline": "Short-Term Energy Outlook, global oil markets - EIA",
+          "source": "www.eia.gov",
+          "datetime": "2026-09-21",
+          "url": "https://www.eia.gov/outlooks/steo/report/global_oil.php",
+          "summary": "Because of the large drawdown in global inventories triggered by continued disruptions in the Strait of Hormuz, we forecast that oil prices will remain elevated until global oil flows return to normal"
+        },
+        {
+          "headline": "Crude Oil Prices Today | OilPrice.com",
+          "source": "oilprice.com",
+          "datetime": "2026-09-21",
+          "url": "https://oilprice.com",
+          "summary": "|  |  |  |  |\n ---  --- |\n| WTI Crude •2 days | 99.40 | -2.51 | -2.46% |\n| Brent Crude •2 days | 103.9 | -0.95 | -0.91% |\n| Murban Crude •16 mins | 117.9 | -3.47 | -2.86% |\n| Natural Gas •2 days | 2.9"
+        },
+        {
+          "headline": "Oil Market Update: Crude Oil Faces a Perfect Storm",
+          "source": "www.youtube.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.youtube.com/watch?v=2JnFvHyy6z4",
+          "summary": "Oil Price Prediction: $125 In 30 Days Or Less · Why Saudi Pipeline Attacks Will Change the Oil Market · Adam Rozencwajg: Oil Crisis Not Over Yet,"
+        },
+        {
+          "headline": "Short-Term Energy Outlook",
+          "source": "www.eia.gov",
+          "datetime": "2026-09-21",
+          "url": "https://www.eia.gov/outlooks/steo",
+          "summary": "| Overview | | | | |\n ---  --- \n|  | 2024 | 2025 | 2026projected | 2027projected |\n|  |  |  |  |  |\n ---  --- \n|  | | | | |\n| Brent crude oil  (dollars per barrel) | 81 | 69 | 91 | 74 |\n| Gasoline ret"
+        },
+        {
+          "headline": "Oil Market Prices, Data, and Analysis",
+          "source": "www.spglobal.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.spglobal.com/energy/en/commodity/oil",
+          "summary": "Oil prices, market data, news, events and forward-looking intelligence for energy traders, analysts, utilities, and investment professionals."
+        }
+      ],
+      "final_verdict": "NO_TRADE",
+      "final_confidence": 0,
+      "trading_plan": null
+    },
+    {
+      "asset": {
+        "ticker": "^IXIC",
+        "display_name": "Nasdaq",
+        "news_keywords": [
+          "Nasdaq",
+          "tech stocks",
+          "US technology"
+        ],
+        "asset_type": "index",
+        "category": "Index"
+      },
+      "tech": {
+        "current_price": 26522.54,
+        "rsi_value": 55.72,
+        "sma_20": 26267.11,
+        "sma_50": 26071.58,
+        "sma_200": 24553.2,
+        "sma_50w": 24287.85,
+        "atr_value": 291.51,
+        "price_vs_sma": "above",
+        "price_vs_weekly_sma": "above",
+        "sma_alignment": "bullish_stack",
+        "sma_bias": "bullish",
+        "rsi_trend_2d": 10.5,
+        "atr_ratio": 0.9,
+        "volume_ratio": 1.68,
+        "vix_value": 14.85,
+        "vix_level": "low_fear",
+        "near_resistance": true,
+        "near_support": false,
+        "supports": [
+          24980.38,
+          24425.34,
+          21898.29
+        ],
+        "resistances": [
+          27032.87
+        ],
+        "macd_value": 34.7716,
+        "macd_signal": 41.8432,
+        "macd_histogram": -7.0716,
+        "macd_cross": "none",
+        "bb_upper": 26660.99,
+        "bb_lower": 25873.24,
+        "bb_middle": 26267.11,
+        "bb_position": "in_band",
+        "bb_width": 2.97
+      },
+      "stage2": {
+        "lenses": {
+          "trend": {
+            "score": 8,
+            "direction": "BULL",
+            "analysis": "The Nasdaq displays a robust bullish trend with a clear bullish stack of SMAs and price trading above all averages. The RSI is in the upper neutral zone, indicating positive sentiment.",
+            "key_level": 26071.58
+          },
+          "reversal": {
+            "score": 7,
+            "direction": "BULL",
+            "analysis": "The Nasdaq shows a strong bullish SMA bias and alignment, with RSI in the neutral zone and positive MACD. The asset is trading near the upper Bollinger Band, but the width is narrow, suggesting potential for continued upward movement without immediate reversal risk.",
+            "key_level": 26267.11
+          },
+          "momentum": {
+            "score": 7,
+            "direction": "BULL",
+            "analysis": "The Nasdaq displays solid bullish momentum with price above all SMAs in a bullish stack and a positive MACD. The RSI is in the upper neutral zone, and volume is above average, supporting the upward trend.",
+            "key_level": 26071.58
+          },
+          "volatility": {
+            "score": 6,
+            "direction": "BULL",
+            "analysis": "The Nasdaq displays a strong bullish trend with a tight Bollinger Band width of 3.0%, indicating a high likelihood of an upward breakout. The ATR ratio of 0.9x suggests volatility is slightly below average, but the narrow bands point to a potential increase.",
+            "key_level": 25873.24
           },
           "risk_reward": {
             "score": 7,
             "direction": "BULL",
-            "analysis": "WTI exhibits a strong bullish uptrend with all SMAs aligned. The R:R is favorable, offering good upside potential relative to immediate downside risk.",
-            "key_level": 80.56
+            "analysis": "The Nasdaq is in a strong bullish uptrend with a bullish stack and positive MACD. The upside potential to resistance is slightly greater than the downside risk to support, presenting a good risk-reward scenario.",
+            "key_level": 27032.87
+          }
+        },
+        "composite_score": 7.0,
+        "consensus_direction": "BULL",
+        "confidence": 0.7
+      },
+      "stage5": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null
+      },
+      "stage6": null,
+      "stage7": null,
+      "synthesis": null,
+      "headlines": [
+        {
+          "headline": "Weekly Trader's Stock Market Outlook",
+          "source": "www.schwab.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.schwab.com/learn/story/weekly-traders-outlook",
+          "summary": "Monday (8/31): Science Applications International Corp. (SAIC), So-Young International Inc. (SY)\n Tuesday (9/1): Credo Technology Group Holding Ltd. (CRDO), Dell Technologies Inc. (DELL), GitLab Inc. "
+        },
+        {
+          "headline": "Nasdaq – Listings, Market Data & Financial Technology",
+          "source": "www.nasdaq.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.nasdaq.com",
+          "summary": "A 2026 Outlook Survey from Nasdaq asked CEOs, board chairs, C-suite executives, and leaders for their thoughts on AI and the economy.\n\nLearn More About the Survey\n\n|  |\n\n|  |  |  |\n|  |  |  |\n|  |  | "
+        },
+        {
+          "headline": "Yahoo Finance - Stock Market Live, Quotes, Business ...",
+          "source": "finance.yahoo.com",
+          "datetime": "2026-09-21",
+          "url": "https://finance.yahoo.com",
+          "summary": "29.   News • 5 days ago Why a weak Wall Street fee forecast is pulling BofA and peers lower\n30.   News • 5 days ago Stocks slipped as chip stocks sold off and AI worries mounted\n31.   News • 6 days ag"
+        },
+        {
+          "headline": "Stock Market Data with Stock Price Feeds",
+          "source": "www.nasdaq.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.nasdaq.com/market-activity/stocks",
+          "summary": "|  |\n\n|  |  |  |\n\nData is currently not available\n\n### Market Events\n\nView more market events and calendars.\n\nSPO Calendar Economic Dividends Stock Splits\n\nNasdaq Global Indexes As Index Provider for "
+        },
+        {
+          "headline": "MarketWatch: Stock Market News - Financial News - MarketWatch",
+          "source": "www.marketwatch.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.marketwatch.com",
+          "summary": "### Warsh’s Fed shows it’s serious about taming inflation. Why Wall Street now believes it.\n\nSep 19\n\n### The Fed hasn’t been this terse since 2007. What a 130-word statement signals for market stabili"
+        },
+        {
+          "headline": "Market Activity",
+          "source": "www.nasdaq.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.nasdaq.com/market-activity",
+          "summary": "Source: Nasdaq. [...] Trading information on Nasdaq is provided using real-time data from Nasdaq Data Link.   \nThe Nasdaq Indices are delayed at least 1 minute. Mutual Funds are updated at the end of "
+        },
+        {
+          "headline": "U.S. Stock Market Headlines | Breaking Stock Market News",
+          "source": "www.reuters.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.reuters.com/markets/us",
+          "summary": "Morgan Stanley has joined other major Wall Street banks ‌in adopting a more hawkish outlook on interest rates, forecasting U.S. Federal Reserve rate hikes and another European Central Bank increase la"
+        },
+        {
+          "headline": "Market Tech (MKT) Share Price, Stock Value, News & Analysis",
+          "source": "www.marketbeat.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.marketbeat.com/stocks/LON/MKT/news",
+          "summary": "MarketBeat home page\nInsiders Are Dumping Crumbling Space Stocks (98% of Investors Are Missing the Real Signal)\nThis Critical Material Just Got a $1.6 Billion Bet (You'll Wish You Knew Sooner)\nThe Fed"
+        },
+        {
+          "headline": "US Markets, Company Earnings, Stock Market Trends ...",
+          "source": "www.morningstar.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.morningstar.com/markets",
+          "summary": "#### What’s Happening in the Markets This Week\n #### Zscaler Stock Fell 5% After Earnings. Is it Undervalued?\n #### Adobe Earnings: Forward-Looking Metrics Under Pressure from Freemium Transition\n ###"
+        },
+        {
+          "headline": "Stock Titan: AI-Powered Tools for Smarter Trading & Investing",
+          "source": "www.stocktitan.net",
+          "datetime": "2026-09-21",
+          "url": "https://www.stocktitan.net",
+          "summary": "BCAT\n\nBlackRock Capital Allocation Term Trust (BCAT) Announces Terms of Rights Offering to Pursue Compelli...\n\nStock SRRK logo\n\nSRRK\n\nScholar Rock Announces FDA Approval of ISEMBYLD™ (apitegromab-mstn"
+        }
+      ],
+      "final_verdict": "NO_TRADE",
+      "final_confidence": 0,
+      "trading_plan": null
+    },
+    {
+      "asset": {
+        "ticker": "HG=F",
+        "display_name": "Koppar",
+        "news_keywords": [
+          "copper price",
+          "copper market",
+          "industrial metals"
+        ],
+        "asset_type": "commodity",
+        "category": "Råvaror"
+      },
+      "tech": {
+        "current_price": 6.84,
+        "rsi_value": 62.77,
+        "sma_20": 6.57,
+        "sma_50": 6.51,
+        "sma_200": 6.06,
+        "sma_50w": 5.92,
+        "atr_value": 0.14,
+        "price_vs_sma": "above",
+        "price_vs_weekly_sma": "above",
+        "sma_alignment": "bullish_stack",
+        "sma_bias": "bullish",
+        "rsi_trend_2d": 9.67,
+        "atr_ratio": 1.46,
+        "volume_ratio": 4.7,
+        "vix_value": 14.85,
+        "vix_level": "low_fear",
+        "near_resistance": false,
+        "near_support": false,
+        "supports": [
+          5.93,
+          5.57,
+          5.27
+        ],
+        "resistances": [],
+        "macd_value": 0.0251,
+        "macd_signal": 0.0124,
+        "macd_histogram": 0.0126,
+        "macd_cross": "bullish_cross",
+        "bb_upper": 6.84,
+        "bb_lower": 6.31,
+        "bb_middle": 6.57,
+        "bb_position": "above_upper",
+        "bb_width": 7.67
+      },
+      "stage2": {
+        "lenses": {
+          "trend": {
+            "score": 8,
+            "direction": "BULL",
+            "analysis": "Koppar exhibits a strong bullish trend with a perfect bullish stack across SMAs and price trading above the weekly SMA50. The RSI is approaching overbought, suggesting potential for a short-term consolidation, but the underlying trend remains robust.",
+            "key_level": 6.84
+          },
+          "reversal": {
+            "score": 7,
+            "direction": "BULL",
+            "analysis": "Koppar is in a strong uptrend with bullish alignment. RSI is approaching overbought, but no clear divergence or reversal patterns are evident yet. The price trading above the upper Bollinger Band suggests potential for a short-term pause or consolidation rather than an immediate reversal.",
+            "key_level": 6.84
+          },
+          "volatility": {
+            "score": 6,
+            "direction": "BULL",
+            "analysis": "Bollinger Bands are widening (7.7% width), suggesting increasing volatility in line with the strong uptrend. ATR ratio of 1.5x indicates above-average volatility expansion.",
+            "key_level": 6.84
+          }
+        },
+        "composite_score": 7.0,
+        "consensus_direction": "BULL",
+        "confidence": 0.7
+      },
+      "stage5": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null
+      },
+      "stage6": null,
+      "stage7": null,
+      "synthesis": null,
+      "headlines": [
+        {
+          "headline": "Copper and Gold Market Outlook 2026: Prices, Supply ...",
+          "source": "www.spglobal.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.spglobal.com/market-intelligence/en/news-insights/research/2026/04/copper-gold-market-outlook-2026-prices-supply-mining-costs",
+          "summary": "LME 3M copper price dropped below $12,000/mt on March 20, 2026.\n The 2026 average LME copper price forecast stands at just above $12,100/t.\n Visible global inventories exceeded 1.3 million tonnes in M"
+        },
+        {
+          "headline": "Copper - Price - Chart - Historical Data - News",
+          "source": "tradingeconomics.com",
+          "datetime": "2026-09-21",
+          "url": "https://tradingeconomics.com/commodity/copper",
+          "summary": "## Copper rose to 6.62 USD/Lbs on September 18, 2026, up 0.43% from the previous day. Over the past month, Copper's price has risen 1.97%, and is up 44.66% compared to the same time last year, accordi"
+        },
+        {
+          "headline": "Copper Prices Outlook | J.P. Morgan Global Research",
+          "source": "www.jpmorgan.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.jpmorgan.com/insights/global-research/commodities/copper-outlook",
+          "summary": "in January. However, they came under pressure in March; the ongoing Iran conflict has dampened demand expectations for industrial commodities due to widespread risk-off sentiment and fears of slowing "
+        },
+        {
+          "headline": "Copper Prices & Market Forecasts",
+          "source": "www.benchmarkminerals.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.benchmarkminerals.com/copper",
+          "summary": "Benchmark’s Copper Service offers a monthly forecast report examining supply and demand of copper by region and producer out to 2050, coupled with fundamental updates, forward-looking cost and price a"
+        },
+        {
+          "headline": "Why Record-High Copper Prices Aren't Forecast to Last",
+          "source": "www.goldmansachs.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.goldmansachs.com/insights/articles/why-record-high-copper-prices-arent-forecast-to-last",
+          "summary": "On a fundamental basis, Goldman Sachs Research estimates that copper’s fair price is around $11,500 per tonne, close to their price forecast of $11,200 per tonne for the fourth quarter of 2026.\n\n“We f"
+        },
+        {
+          "headline": "Copper prices have hit record highs, but smelters face ...",
+          "source": "www.iea.org",
+          "datetime": "2026-09-21",
+          "url": "https://www.iea.org/commentaries/copper-prices-have-hit-record-highs-but-smelters-face-mounting-strategic-pressures",
+          "summary": "The confluence of forces shaping today’s copper market – strong structural demand growth and elevated prices – may be good news for producers. However, today’s situation is unusual in that the crucial"
+        },
+        {
+          "headline": "Copper Long-Term Forecast: 10-Year Outlook & Price Trends | Fastmarkets",
+          "source": "www.fastmarkets.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.fastmarkets.com/metals-and-mining/battery-raw-materials/long-term-forecasts/copper",
+          "summary": "ContactExisting Customer SupportLogin\n\nFastmarkets\n\n# Copper long-term forecast\n\n## Anticipate global market trends and understand supply/demand balances in the copper market\n\nCopper is critical to th"
+        },
+        {
+          "headline": "Copper Futures Price Today",
+          "source": "www.investing.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.investing.com/commodities/copper",
+          "summary": "| Name | Last | Chg. % | Vol. |  |\n ---  --- \n| MSTR | 153.92 | +16.39% | 54.67M |  |\n| SNDK | 1,791.82 | +10.99% | 17.79M |  |\n| LRCX | 288.11 | +6.98% | 19.64M |  |\n| STX | 858.79 | +6.93% | 6.98M |"
+        },
+        {
+          "headline": "Copper Demand and Long-Term Availability",
+          "source": "internationalcopper.org",
+          "datetime": "2026-09-21",
+          "url": "https://internationalcopper.org/sustainable-copper/about-copper/cu-demand-long-term-availability",
+          "summary": "# Copper Demand and Long-Term Availability\n\n# Copper Demand and Long-Term Availability\n\nDemand-Mine-iStock-1188996771\n\nDespite an ever-increasing demand for copper, there is more of the metal availabl"
+        },
+        {
+          "headline": "Copper prices hit a new record high, but is the metals trade ' ...",
+          "source": "www.youtube.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.youtube.com/watch?v=vh3h7bJJCvk",
+          "summary": "### Description\n6,523 views\nPosted: 2026-01-07\nCopper hit a fresh record high, while gold and silver trade near their highs.\nBloomberg Intelligence senior commodity strategist Mike McGlone and Blue Li"
+        }
+      ],
+      "final_verdict": "NO_TRADE",
+      "final_confidence": 0,
+      "trading_plan": null
+    },
+    {
+      "asset": {
+        "ticker": "^FTSE",
+        "display_name": "FTSE 100",
+        "news_keywords": [
+          "FTSE",
+          "UK economy",
+          "London Stock Exchange"
+        ],
+        "asset_type": "index",
+        "category": "Index"
+      },
+      "tech": {
+        "current_price": 10773.31,
+        "rsi_value": 51.81,
+        "sma_20": 10764.99,
+        "sma_50": 10755.18,
+        "sma_200": 10413.42,
+        "sma_50w": 10273.4,
+        "atr_value": 105.02,
+        "price_vs_sma": "above",
+        "price_vs_weekly_sma": "above",
+        "sma_alignment": "bullish_stack",
+        "sma_bias": "bullish",
+        "rsi_trend_2d": -3.59,
+        "atr_ratio": 1.19,
+        "volume_ratio": 0.0,
+        "vix_value": 14.85,
+        "vix_level": "low_fear",
+        "near_resistance": true,
+        "near_support": false,
+        "supports": [
+          10127.6,
+          9670.5,
+          9423.9
+        ],
+        "resistances": [
+          10962.2
+        ],
+        "macd_value": -14.6322,
+        "macd_signal": -10.9371,
+        "macd_histogram": -3.6951,
+        "macd_cross": "none",
+        "bb_upper": 10934.72,
+        "bb_lower": 10595.25,
+        "bb_middle": 10764.99,
+        "bb_position": "in_band",
+        "bb_width": 3.15
+      },
+      "stage2": {
+        "lenses": {
+          "trend": {
+            "score": 8,
+            "direction": "BULL",
+            "analysis": "The FTSE 100 exhibits a strong bullish trend, evidenced by a bullish stack across all SMAs and price trading above the weekly SMA50. The RSI is neutral, suggesting room for further upward momentum.",
+            "key_level": 10962.2
+          },
+          "reversal": {
+            "score": 7,
+            "direction": "NEUTRAL",
+            "analysis": "The FTSE 100 is in a strong uptrend, but the RSI is in the neutral zone, suggesting a lack of immediate reversal pressure. No clear double tops/bottoms or exhaustion volume are evident.",
+            "key_level": 10962.2
+          },
+          "momentum": {
+            "score": 7,
+            "direction": "BULL",
+            "analysis": "The FTSE 100 exhibits strong bullish momentum with a bullish stack of SMAs and price above all key moving averages. While RSI is neutral, the MACD histogram is trending upwards, suggesting potential for further gains.",
+            "key_level": 10962.2
+          },
+          "volatility": {
+            "score": 6,
+            "direction": "BULL",
+            "analysis": "The FTSE 100 shows a strong uptrend with a bullish stack and a relatively narrow Bollinger Band width (3.1%), suggesting potential for continued upward momentum or a breakout. ATR is at 1.2x average, indicating moderate volatility.",
+            "key_level": 10962.2
+          },
+          "risk_reward": {
+            "score": 6,
+            "direction": "BULL",
+            "analysis": "The FTSE 100 is in a strong uptrend with a bullish stack of SMAs. While the RSI is neutral, the proximity to resistance suggests a moderate risk-reward for new long positions.",
+            "key_level": 10962.2
           }
         },
         "composite_score": 6.8,
@@ -1334,74 +1345,74 @@
       "synthesis": null,
       "headlines": [
         {
-          "headline": "Oil (USCrude) Price Forecast for Today, Tomorrow, Next Week, and Next 30 Days",
-          "source": "www.litefinance.org",
-          "datetime": "2026-09-18",
-          "url": "https://www.litefinance.org/blog/analysts-opinions/oil-price-prediction-forecast/daily-and-weekly",
-          "summary": "According to forecasts, WTI crude oil prices may range between $69.92 and $102.18 in September 2026. The main factors affecting prices will be geopolitical tensions, an escalation of the conflict betw"
+          "headline": "FTSE 100 Latest Index News & Analysis",
+          "source": "www.bbc.co.uk",
+          "datetime": "2026-09-21",
+          "url": "https://www.bbc.co.uk/news/topics/c9qdqqkgz27t",
+          "summary": "# FTSE 100\n\n## Latest updates\n\nStock markets are too high and set to fall, says Bank of England deputy\n\nSarah Breeden at a Bank of England meeting\n\nFTSE 100 hits 10,000 mark for first time\n\nThree male"
         },
         {
-          "headline": "Oil Market Report - August 2026 – Analysis",
-          "source": "www.iea.org",
-          "datetime": "2026-09-18",
-          "url": "https://www.iea.org/reports/oil-market-report-august-2026",
-          "summary": "At the same time, our forecast for global oil demand in the second half of 2026 is reduced by roughly 550 kb/d versus last month’s Report, as the continued closure of the Strait of Hormuz disrupts int"
+          "headline": "United Kingdom Stock Market Index (GB100) - Quote - Chart",
+          "source": "tradingeconomics.com",
+          "datetime": "2026-09-21",
+          "url": "https://tradingeconomics.com/united-kingdom/stock-market",
+          "summary": "| Related | Last | Unit | Reference |\n ---  --- |\n| United Kingdom Inflation Rate | 3.10 | percent | Aug 2026 |\n| United Kingdom Interest Rate | 3.75 | percent | Sep 2026 |\n| United Kingdom Unemployme"
         },
         {
-          "headline": "Oil 2025: Analysis and forecast to 2030",
-          "source": "iea.blob.core.windows.net",
-          "datetime": "2026-09-18",
-          "url": "https://iea.blob.core.windows.net/assets/c0087308-f434-4284-b5bb-bfaf745c81c3/Oil2025.pdf",
-          "summary": "oil supply is forecast to climb by 3.1 mb/d by 2030, despite the number of approved projects tailing off after 2027. The Americas dominate the expansion even though the outlook for US and Brazilian pr"
+          "headline": "Investing.com UK - Financial News, Shares, Quotes & Charts",
+          "source": "uk.investing.com",
+          "datetime": "2026-09-21",
+          "url": "https://uk.investing.com",
+          "summary": "| Name | Last | High | Low | Chg. | Chg. % | Time |\n ---  ---  --- \n| #### FTSE 100 | 10,659.13 | 10,815.94 | 10,650.16 | -157.01 | -1.45% | 18/09 |\n| #### FTSE 250 | 24,205.42 | 24,373.32 | 24,187.34"
         },
         {
-          "headline": "Oil Prices Forecast | J.P. Morgan Global Research",
-          "source": "www.jpmorgan.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.jpmorgan.com/insights/global-research/commodities/oil-prices",
-          "summary": "View text Version\n\nA data table shows crude oil price forecasts from the start of 2026 through the end of 2027. Rows are split by new and old forecasts. Notably, the new projection for price per barre"
+          "headline": "Stock Market News | Today's Financial News | Fidelity",
+          "source": "www.fidelity.co.uk",
+          "datetime": "2026-09-21",
+          "url": "https://www.fidelity.co.uk/shares/stock-market-news",
+          "summary": "(Sharecast News) - Next week will see the release of results from the likes of B&Q owner Kingfisher and JD Sports.\n\nFri 18 Sep 2026 14:25\n\n##### FTSE 100 movers: Airtel Africa tumbles; Fresnillo shine"
         },
         {
-          "headline": "Crude Oil Prices Today and Oil Market News",
-          "source": "www.cnbc.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.cnbc.com/oil",
-          "summary": "Asia Economy\n\nJapan's trade deficit widens as oil costs bite, export growth slows\n\nTue, Sep 15th 2026\n\nSquawk Box Asia\n\nWeak China oil imports don’t tell the full demand story: BofA\n\nTue, Sep 15th 202"
+          "headline": "Yahoo Finance UK | Stock market live, quotes, business and finance ...",
+          "source": "uk.finance.yahoo.com",
+          "datetime": "2026-09-21",
+          "url": "https://uk.finance.yahoo.com",
+          "summary": "Stock market live, quotes, business and finance news. FTSE 100 10,731.15 +0.68% S&P 500 7,650.50 +0.17% DOW 8,138.15 +0.91% Labour is considering raising"
         },
         {
-          "headline": "Short-Term Energy Outlook, global oil markets - EIA",
-          "source": "www.eia.gov",
-          "datetime": "2026-09-18",
-          "url": "https://www.eia.gov/outlooks/steo/report/global_oil.php",
-          "summary": "Because of the large drawdown in global inventories triggered by continued disruptions in the Strait of Hormuz, we forecast that oil prices will remain elevated until global oil flows return to normal"
+          "headline": "Stock market news | Today's business and financial news",
+          "source": "www.hl.co.uk",
+          "datetime": "2026-09-21",
+          "url": "https://www.hl.co.uk/shares/stock-market-news",
+          "summary": "Fevertree posts rise in interim profit as UK returns to growth   \n   Thu 10 September 2026 08:07   \n   (Sharecast News) - Fevertree Drinks posted a rise in interim profit and revenue on Thursday as th"
         },
         {
-          "headline": "Crude Oil Prices Today | OilPrice.com",
-          "source": "oilprice.com",
-          "datetime": "2026-09-18",
-          "url": "https://oilprice.com",
-          "summary": "4 days China’s 70% EV Target Deals Another Blow to Oil Demand\n 4 days Oil Prices Could Top $120 as Middle East Conflict Escalates\n 4 days U.S. Diesel Prices Top $6 a Gallon for First Time Ever\n 4 days"
+          "headline": "Market Movers blog: FTSE 100 holds steady ahead of BoE interest ...",
+          "source": "www.investmentweek.co.uk",
+          "datetime": "2026-09-21",
+          "url": "https://www.investmentweek.co.uk/blog/4080428/market-movers-blog",
+          "summary": "+ Sign in\n\n# Market Movers blog: FTSE 100 holds steady ahead of BoE interest rate decision\n\n## Latest news and analysis\n\nInvestment Week\n\nclock  17 September 2026  • 1 min read\n\n#### Share\n\n twitter-i"
         },
         {
-          "headline": "Crude Oil Market Outlook & Monthly Price Forecasts | Argus Media",
-          "source": "www.argusmedia.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.argusmedia.com/en/solutions/products/crude-oil-market-outlook-price-forecasts",
-          "summary": "The price forecast for the key marker crude North Sea Dated is generated using an independent assessment of global supply, demand and stocks. This forecast of global supply-demand is utilised in a pri"
+          "headline": "London Stock Exchange",
+          "source": "www.londonstockexchange.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.londonstockexchange.com",
+          "summary": "Search by Market\n       Bond search\n       ETFs search\n       Access Bond analytics\n\nNews\n    \n\n News \n\n       Today's news\n       Regulatory news (RNS)\n\nReports\n    \n\n Reports \n\n       Issuers and in"
         },
         {
-          "headline": "Short-Term Energy Outlook - EIA",
-          "source": "www.eia.gov",
-          "datetime": "2026-09-18",
-          "url": "https://www.eia.gov/outlooks/steo",
-          "summary": "| Overview | | | | |\n ---  --- \n|  | 2024 | 2025 | 2026projected | 2027projected |\n|  |  |  |  |  |\n ---  --- \n|  | | | | |\n| Brent crude oil  (dollars per barrel) | 81 | 69 | 91 | 74 |\n| Gasoline ret"
+          "headline": "Are UK stocks too cheap to ignore? - Facebook",
+          "source": "www.facebook.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.facebook.com/Reuters/videos/are-uk-stocks-too-cheap-to-ignore/1615889763545728",
+          "summary": "With valuations still relatively low and higher oil prices providing a potential boost to the FTSE, the case for owning UK stocks is looking"
         },
         {
-          "headline": "Oil Market Prices, Data, and Analysis",
-          "source": "www.spglobal.com",
-          "datetime": "2026-09-18",
-          "url": "https://www.spglobal.com/energy/en/commodity/oil",
-          "summary": "Oil prices, market data, news, events and forward-looking intelligence for energy traders, analysts, utilities, and investment professionals."
+          "headline": "Markets",
+          "source": "www.ft.com",
+          "datetime": "2026-09-21",
+          "url": "https://www.ft.com/markets",
+          "summary": "Vapour and smoke billow from industrial flare stacks and chimneys at a refinery, silhouetted against the sky.\n Cyber Security\n\n  Revolut handed nearly 700 customers’ data to scammers\n\n  European payme"
         }
       ],
       "final_verdict": "NO_TRADE",
@@ -1412,13 +1423,13 @@
   "final_picks": [],
   "yesterday_review": null,
   "log": [
-    "**Unitron 8-Stegs Djupanalys** — 17 tillgångar, 10:58",
+    "**Unitron 8-Stegs Djupanalys** — 17 tillgångar, 12:32",
     "",
     "### Steg 0: Datafundament",
     "Hämtar marknadsdata och makroindikatorer...",
-    "VIX: 15.3",
-    "DXY: 100.44",
-    "US 10Y: 4.95%",
+    "VIX: 14.9",
+    "DXY: 100.22",
+    "US 10Y: 5.00%",
     "Data: DAX 40 (1/17)",
     "Data: OMXS30 (2/17)",
     "Data: S&P 500 (3/17)",
@@ -1439,12 +1450,11 @@
     "Steg 0 klart: 17/17 tillgångar redo",
     "",
     "### Steg 8: Gårdagens Utvärdering",
-    "Inga rekommendationer igår — hoppar över",
+    "Inga gårdagsresultat tillgängliga — hoppar över",
     "",
     "### Steg 1: Global Makroankare (Gemini)",
     "Analyserar marknadsregim (Gemini)...",
-    "Marknadsregim: TRANSITION",
-    "The current environment exhibits mixed signals. While the VIX is relatively low, suggesting some risk appetite, the elev",
+    "Marknadsregim-analys misslyckades — använder TRANSITION",
     "",
     "### Steg 2: Flerlins Teknisk Skanning (Groq)",
     "Lins: TREND (17 tillgångar)",
@@ -1452,60 +1462,52 @@
     "Lins: MOMENTUM (17 tillgångar)",
     "Lins: VOLATILITY (17 tillgångar)",
     "Lins: RISK_REWARD (17 tillgångar)",
-    "[~] DAX 40: 4.0/10 BEAR",
-    "[+] OMXS30: 7.7/10 BULL",
-    "[~] S&P 500: 5.3/10 NEUTRAL",
-    "[+] Nasdaq: 8.3/10 BULL",
-    "[~] FTSE 100: 4.2/10 NEUTRAL",
-    "[~] Nikkei 225: 5.0/10 NEUTRAL",
-    "[-] Hang Seng: 3.0/10 BEAR",
-    "[~] Guld: 5.2/10 NEUTRAL",
-    "[~] Silver: 4.8/10 NEUTRAL",
-    "[+] Olja (WTI): 6.8/10 BULL",
-    "[~] Naturgas: 4.2/10 BEAR",
-    "[~] Platina: 4.4/10 NEUTRAL",
+    "[-] DAX 40: 3.8/10 BEAR",
+    "[+] OMXS30: 7.8/10 BULL",
+    "[~] S&P 500: 5.2/10 NEUTRAL",
+    "[+] Nasdaq: 7.0/10 BULL",
+    "[+] FTSE 100: 6.8/10 BULL",
+    "[-] Nikkei 225: 3.8/10 NEUTRAL",
+    "[-] Hang Seng: 3.2/10 BEAR",
+    "[~] Guld: 4.6/10 NEUTRAL",
+    "[~] Silver: 4.7/10 NEUTRAL",
+    "[+] Olja (WTI): 7.3/10 BULL",
+    "[-] Naturgas: 3.7/10 NEUTRAL",
+    "[~] Platina: 4.7/10 NEUTRAL",
     "[+] Koppar: 7.0/10 BULL",
-    "[+] Bitcoin: 7.0/10 BULL",
-    "[+] Ethereum: 6.5/10 BULL",
-    "[+] Solana: 6.8/10 BULL",
-    "[~] XRP: 4.5/10 NEUTRAL",
+    "[+] Bitcoin: 6.3/10 NEUTRAL",
+    "[+] Ethereum: 6.0/10 NEUTRAL",
+    "[+] Solana: 6.3/10 NEUTRAL",
+    "[~] XRP: 5.5/10 NEUTRAL",
     "",
     "### Steg 3-4: Ranking & Premium-Nyheter",
-    "Nasdaq: 8.3/10 BULL",
-    "OMXS30: 7.7/10 BULL",
+    "OMXS30: 7.8/10 BULL",
+    "Olja (WTI): 7.3/10 BULL",
+    "Nasdaq: 7.0/10 BULL",
     "Koppar: 7.0/10 BULL",
-    "Bitcoin: 7.0/10 BULL",
-    "Olja (WTI): 6.8/10 BULL",
-    "Solana: 6.8/10 BULL",
-    "Ethereum: 6.5/10 BULL",
-    "S&P 500: 5.3/10 NEUTRAL",
-    "Guld: 5.2/10 NEUTRAL",
-    "Nikkei 225: 5.0/10 NEUTRAL",
-    "Silver: 4.8/10 NEUTRAL",
-    "XRP: 4.5/10 NEUTRAL",
-    "Platina: 4.4/10 NEUTRAL",
-    "FTSE 100: 4.2/10 NEUTRAL",
-    "Naturgas: 4.2/10 BEAR",
-    "DAX 40: 4.0/10 BEAR",
-    "Hang Seng: 3.0/10 BEAR",
+    "FTSE 100: 6.8/10 BULL",
+    "Bitcoin: 6.3/10 NEUTRAL",
+    "Solana: 6.3/10 NEUTRAL",
+    "Ethereum: 6.0/10 NEUTRAL",
+    "XRP: 5.5/10 NEUTRAL",
+    "S&P 500: 5.2/10 NEUTRAL",
+    "Silver: 4.7/10 NEUTRAL",
+    "Platina: 4.7/10 NEUTRAL",
+    "Guld: 4.6/10 NEUTRAL",
+    "DAX 40: 3.8/10 BEAR",
+    "Nikkei 225: 3.8/10 NEUTRAL",
+    "Naturgas: 3.7/10 NEUTRAL",
+    "Hang Seng: 3.2/10 BEAR",
     "Topp 5 vidare till djupanalys",
     "Hämtar premium-nyheter (Tavily) för 5 finalister...",
-    "Nasdaq: 10 artiklar",
     "OMXS30: 10 artiklar",
-    "Koppar: 10 artiklar",
-    "Bitcoin: 10 artiklar",
     "Olja (WTI): 10 artiklar",
+    "Nasdaq: 10 artiklar",
+    "Koppar: 10 artiklar",
+    "FTSE 100: 10 artiklar",
     "**5 finalister vidare till djupanalys**",
     "",
     "### Steg 5: Högdimensionell Djupanalys (Gemini)",
-    "Modul A: Historiska Analogier — Nasdaq",
-    "  Modul A misslyckades",
-    "Modul B: Intermarknadsanalys — Nasdaq",
-    "  Modul B misslyckades",
-    "Modul C: Utbud/Efterfrågan & Geopolitik — Nasdaq",
-    "  Modul C misslyckades",
-    "Modul D: Scenariostresstest — Nasdaq",
-    "  Modul D misslyckades",
     "Modul A: Historiska Analogier — OMXS30",
     "  Modul A misslyckades",
     "Modul B: Intermarknadsanalys — OMXS30",
@@ -1513,22 +1515,6 @@
     "Modul C: Utbud/Efterfrågan & Geopolitik — OMXS30",
     "  Modul C misslyckades",
     "Modul D: Scenariostresstest — OMXS30",
-    "  Modul D misslyckades",
-    "Modul A: Historiska Analogier — Koppar",
-    "  Modul A misslyckades",
-    "Modul B: Intermarknadsanalys — Koppar",
-    "  Modul B misslyckades",
-    "Modul C: Utbud/Efterfrågan & Geopolitik — Koppar",
-    "  Modul C misslyckades",
-    "Modul D: Scenariostresstest — Koppar",
-    "  Modul D misslyckades",
-    "Modul A: Historiska Analogier — Bitcoin",
-    "  Modul A misslyckades",
-    "Modul B: Intermarknadsanalys — Bitcoin",
-    "  Modul B misslyckades",
-    "Modul C: Utbud/Efterfrågan & Geopolitik — Bitcoin",
-    "  Modul C misslyckades",
-    "Modul D: Scenariostresstest — Bitcoin",
     "  Modul D misslyckades",
     "Modul A: Historiska Analogier — Olja (WTI)",
     "  Modul A misslyckades",
@@ -1538,42 +1524,66 @@
     "  Modul C misslyckades",
     "Modul D: Scenariostresstest — Olja (WTI)",
     "  Modul D misslyckades",
+    "Modul A: Historiska Analogier — Nasdaq",
+    "  Modul A misslyckades",
+    "Modul B: Intermarknadsanalys — Nasdaq",
+    "  Modul B misslyckades",
+    "Modul C: Utbud/Efterfrågan & Geopolitik — Nasdaq",
+    "  Modul C misslyckades",
+    "Modul D: Scenariostresstest — Nasdaq",
+    "  Modul D misslyckades",
+    "Modul A: Historiska Analogier — Koppar",
+    "  Modul A misslyckades",
+    "Modul B: Intermarknadsanalys — Koppar",
+    "  Modul B misslyckades",
+    "Modul C: Utbud/Efterfrågan & Geopolitik — Koppar",
+    "  Modul C misslyckades",
+    "Modul D: Scenariostresstest — Koppar",
+    "  Modul D misslyckades",
+    "Modul A: Historiska Analogier — FTSE 100",
+    "  Modul A misslyckades",
+    "Modul B: Intermarknadsanalys — FTSE 100",
+    "  Modul B misslyckades",
+    "Modul C: Utbud/Efterfrågan & Geopolitik — FTSE 100",
+    "  Modul C misslyckades",
+    "Modul D: Scenariostresstest — FTSE 100",
+    "  Modul D misslyckades",
     "",
     "### Steg 6: Djävulens Advokat (Gemini)",
-    "Djävulens Advokat: Nasdaq",
-    "Nasdaq: Devil's Advocate misslyckades",
     "Djävulens Advokat: OMXS30",
     "OMXS30: Devil's Advocate misslyckades",
-    "Djävulens Advokat: Koppar",
-    "Koppar: Devil's Advocate misslyckades",
-    "Djävulens Advokat: Bitcoin",
-    "Bitcoin: Devil's Advocate misslyckades",
     "Djävulens Advokat: Olja (WTI)",
     "Olja (WTI): Devil's Advocate misslyckades",
+    "Djävulens Advokat: Nasdaq",
+    "Nasdaq: Devil's Advocate misslyckades",
+    "Djävulens Advokat: Koppar",
+    "Koppar: Devil's Advocate misslyckades",
+    "Djävulens Advokat: FTSE 100",
+    "FTSE 100: Devil's Advocate misslyckades",
     "",
     "### Steg 7: Korsvalidering (Groq)",
-    "Korsvalidering: Nasdaq",
-    "Nasdaq: Korsvalidering misslyckades",
     "Korsvalidering: OMXS30",
     "OMXS30: Korsvalidering misslyckades",
-    "Korsvalidering: Koppar",
-    "Koppar: Korsvalidering misslyckades",
-    "Korsvalidering: Bitcoin",
-    "Bitcoin: Korsvalidering misslyckades",
     "Korsvalidering: Olja (WTI)",
     "Olja (WTI): Korsvalidering misslyckades",
+    "Korsvalidering: Nasdaq",
+    "Nasdaq: Korsvalidering misslyckades",
+    "Korsvalidering: Koppar",
+    "Koppar: Korsvalidering misslyckades",
+    "Korsvalidering: FTSE 100",
+    "FTSE 100: Korsvalidering misslyckades",
     "",
     "### Slutgiltig Syntes & Handelsplan",
-    "Slutgiltig syntes: Nasdaq",
-    "Nasdaq: Syntes misslyckades",
     "Slutgiltig syntes: OMXS30",
     "OMXS30: Syntes misslyckades",
-    "Slutgiltig syntes: Koppar",
-    "Koppar: Syntes misslyckades",
-    "Slutgiltig syntes: Bitcoin",
-    "Bitcoin: Syntes misslyckades",
     "Slutgiltig syntes: Olja (WTI)",
     "Olja (WTI): Syntes misslyckades",
+    "Slutgiltig syntes: Nasdaq",
+    "Nasdaq: Syntes misslyckades",
+    "Slutgiltig syntes: Koppar",
+    "Koppar: Syntes misslyckades",
+    "Slutgiltig syntes: FTSE 100",
+    "FTSE 100: Syntes misslyckades",
     "",
     "**Analys klar!** 0 handelsrekommendationer"
   ],
